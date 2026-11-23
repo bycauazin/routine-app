@@ -11,6 +11,7 @@ import { FloatingActions, PublicFooter, PublicHeader, StartButton } from "./land
 import { btnGhost, useHashScroll } from "./landing/public-links";
 import { CompletionCard, HoursCard, ScoreCard, StreaksCard } from "./landing/report-mocks";
 import { SnapCursor } from "./landing/snap-cursor";
+import { StreakRun } from "./landing/streak-run";
 import "./landing/landing.css";
 
 /** Adds `is-visible` to every [data-reveal] inside the page as it scrolls into view. */
@@ -53,6 +54,12 @@ function Hero() {
       {/* the app on a computer, very blurred and faded, behind everything (gone before it reaches the text) */}
       <div className="hero-shot" aria-hidden>
         <DesktopAppShot />
+      </div>
+      <div className="hero-shot-2" aria-hidden>
+        <TodayMock />
+      </div>
+      <div className="hero-shot-3" aria-hidden>
+        <StreaksCard />
       </div>
       {/* the week grid lights up under the pointer, and fades out before it reaches the text */}
       <LiveSheet />
@@ -326,9 +333,13 @@ export function LandingPage() {
       <PublicHeader />
       <main>
         <Hero />
+        <StreakRun />
         <HowItWorks />
+        <StreakRun />
         <Kinds />
+        <StreakRun />
         <Reports />
+        <StreakRun />
         <YourData />
         <FinalCall />
       </main>
