@@ -23,7 +23,7 @@ export function StartButton({ className, label, compact }) {
   const { status } = useAuth();
   const signedIn = status === "authenticated";
   return (
-    <GridLink to={signedIn ? "/hoje" : "/criar-conta"} className={cn(btnPrimary, compact ? "h-11 text-[14px] sm:h-12 sm:text-[14.5px]" : "h-12 text-[14.5px]", className)}>
+    <GridLink to={signedIn ? "/hoje" : "/criar-conta"} className={cn(btnPrimary, compact ? "h-11 px-4 text-[14px] sm:h-12 sm:px-5 sm:text-[14.5px]" : "h-12 text-[14.5px]", className)}>
       {signedIn ? "Abrir o Routine" : (label ?? "Criar minha conta")}
       <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
     </GridLink>

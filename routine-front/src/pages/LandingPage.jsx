@@ -6,7 +6,7 @@ import { CATEGORY_TINT } from "@/lib/categories";
 import { cn } from "@/lib/cn";
 import { useTheme } from "@/lib/theme";
 import { LiveSheet } from "./landing/live-sheet";
-import { DesktopAppShot, TodayMock, WeekGrid } from "./landing/mocks";
+import { DayCard, DesktopAppShot, TodayMock, WeekGrid } from "./landing/mocks";
 import { FloatingActions, PublicFooter, PublicHeader, StartButton } from "./landing/public-chrome";
 import { btnGhost, useHashScroll } from "./landing/public-links";
 import { CompletionCard, HoursCard, ScoreCard, StreaksCard } from "./landing/report-mocks";
@@ -41,60 +41,71 @@ function useReveal() {
 
 const H2 = "text-[30px] leading-[1.08] font-[660] tracking-[-0.03em] sm:text-[40px]";
 
-/** The three main screens, side by side under the headline (a swipe row on phones). */
+/** The three main screens, compact, under the headline (a swipe row on phones). */
 const SCREENS = [
-  { label: "Hoje", text: "o dia em ordem de horário", view: <TodayMock className="mx-auto" /> },
-  { label: "Semana", text: "a semana em grade", view: <WeekGrid className="shadow-lg" /> },
-  { label: "Relatórios", text: "como foi a semana", view: <CompletionCard className="shadow-lg" /> },
+  { label: "Hoje", text: "o dia em ordem de horário", view: <DayCard className="h-full shadow-lg" /> },
+  { label: "Semana", text: "a semana em grade", view: <WeekGrid compact className="h-full shadow-lg" /> },
+  { label: "Relatórios", text: "como foi a semana", view: <CompletionCard className="h-full shadow-lg" /> },
 ];
 
+/**
+ * The opening: a framed panel (the "telinha") that fits the screen, so the
+ * whole section is seen without scrolling. Inside it: the app screens very
+ * blurred in the background, the live week grid, the headline and, below it,
+ * the three main screens.
+ */
 function Hero() {
   return (
-    <section className="relative overflow-hidden border-b border-rule" aria-labelledby="hero-title">
-      {/* the app on a computer, very blurred and faded, behind everything (gone before it reaches the text) */}
-      <div className="hero-shot" aria-hidden>
-        <DesktopAppShot />
-      </div>
-      <div className="hero-shot-2" aria-hidden>
-        <TodayMock />
-      </div>
-      <div className="hero-shot-3" aria-hidden>
-        <StreaksCard />
-      </div>
-      {/* the week grid lights up under the pointer, and fades out before it reaches the text */}
-      <LiveSheet />
-      <div className="relative mx-auto max-w-[1180px] px-5 pt-32 pb-14 sm:px-8 md:pt-40 md:pb-20">
-        <div className="max-w-[860px]">
-          <h1 id="hero-title" data-calm className="w-fit text-[44px] leading-[1.02] font-[700] tracking-[-0.04em] sm:text-[64px] lg:text-[76px]">
-            <span className="rise-line" style={{ "--d": "60ms" }}>
-              Sua semana inteira,
-            </span>
-            <span className="rise-line" style={{ "--d": "180ms" }}>
-              <span className="mark-pink">um dia de cada vez.</span>
-            </span>
-          </h1>
-          <p data-calm className="mt-6 w-fit max-w-[600px] animate-[fade-up_700ms_ease_360ms_backwards] text-[17px] leading-relaxed text-muted sm:text-[18px]">
-            Cadastre uma vez o trabalho, as aulas, o treino e os hábitos. O Routine monta a lista de cada dia em ordem de horário, você marca o que fez e vê nos
-            relatórios como foi a semana.
-          </p>
-          <div data-calm className="mt-8 flex w-fit flex-col gap-3 animate-[fade-up_700ms_ease_460ms_backwards] sm:flex-row">
-            <StartButton compact />
-            <GridLink to="/login" className={cn(btnGhost, "h-11 bg-paper text-[14px] sm:h-12 sm:text-[14.5px]")}>
-              Ver a demonstração
-            </GridLink>
-          </div>
+    <section className="px-3 pt-[72px] pb-3 sm:px-5 sm:pt-[76px]" aria-labelledby="hero-title">
+      <div className="hero-panel relative isolate flex min-h-[calc(100dvh-84px)] flex-col overflow-hidden rounded-[28px] border border-rule-strong bg-bg">
+        {/* the app on a computer and on a phone, very blurred and faded, behind everything */}
+        <div className="hero-shot" aria-hidden>
+          <DesktopAppShot />
         </div>
+        <div className="hero-shot-2" aria-hidden>
+          <TodayMock />
+        </div>
+        <div className="hero-shot-3" aria-hidden>
+          <StreaksCard />
+        </div>
+        {/* the week grid lights up under the pointer (blurred behind the text) */}
+        <LiveSheet />
+        <div className="relative mx-auto flex w-full max-w-[1140px] flex-1 flex-col justify-center gap-6 px-5 py-6 sm:px-8 lg:gap-8">
+          <div className="max-w-[820px]">
+            <h1 id="hero-title" data-calm className="w-fit text-[34px] leading-[1.04] font-[700] tracking-[-0.04em] sm:text-[52px] lg:text-[62px]">
+              <span className="rise-line" style={{ "--d": "60ms" }}>
+                Sua semana inteira,
+              </span>
+              <span className="rise-line" style={{ "--d": "180ms" }}>
+                <span className="mark-pink">um dia de cada vez.</span>
+              </span>
+            </h1>
+            <p data-calm className="mt-4 w-fit max-w-[580px] animate-[fade-up_700ms_ease_360ms_backwards] text-[15.5px] leading-relaxed text-muted sm:mt-5 sm:text-[17.5px]">
+              <span className="sm:hidden">Cadastre a semana uma vez. O Routine monta cada dia em ordem de horário e mostra como foi.</span>
+              <span className="hidden sm:inline">
+                Cadastre uma vez o trabalho, as aulas, o treino e os hábitos. O Routine monta a lista de cada dia em ordem de horário, você marca o que fez e vê nos
+                relatórios como foi a semana.
+              </span>
+            </p>
+            <div data-calm className="mt-6 flex w-fit flex-wrap gap-2.5 animate-[fade-up_700ms_ease_460ms_backwards] sm:mt-7 sm:gap-3">
+              <StartButton compact />
+              <GridLink to="/login" className={cn(btnGhost, "h-11 bg-paper px-4 text-[14px] sm:h-12 sm:px-5 sm:text-[14.5px]")}>
+                Ver a demonstração
+              </GridLink>
+            </div>
+          </div>
 
-        <div className="-mx-5 mt-14 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 sm:-mx-8 sm:px-8 lg:mx-0 lg:grid lg:snap-none lg:grid-cols-[320px_minmax(0,1.45fr)_minmax(0,1fr)] lg:items-end lg:gap-6 lg:overflow-visible lg:px-0">
-          {SCREENS.map((s, i) => (
-            <figure key={s.label} data-calm className="m-0 flex w-[85%] max-w-[380px] shrink-0 snap-start flex-col gap-3 sm:w-[60%] lg:w-auto lg:max-w-none" style={{ animation: `fade-up 700ms ease ${540 + i * 120}ms backwards` }}>
-              <figcaption className="flex items-baseline gap-2 text-[13px]">
-                <span className="rounded-[6px] bg-ink px-2 py-0.5 font-[650] text-bg">{s.label}</span>
-                <span className="text-muted">{s.text}</span>
-              </figcaption>
-              {s.view}
-            </figure>
-          ))}
+          <div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-1 sm:-mx-8 sm:px-8 lg:mx-0 lg:grid lg:snap-none lg:grid-cols-3 lg:gap-5 lg:overflow-visible lg:px-0">
+            {SCREENS.map((s, i) => (
+              <figure key={s.label} data-calm className="m-0 flex w-[82%] max-w-[360px] shrink-0 snap-start flex-col gap-2.5 sm:w-[46%] lg:w-auto lg:max-w-none" style={{ animation: `fade-up 700ms ease ${520 + i * 110}ms backwards` }}>
+                <figcaption className="flex items-baseline gap-2 text-[13px]">
+                  <span className="rounded-[6px] bg-ink px-2 py-0.5 font-[650] text-bg">{s.label}</span>
+                  <span className="text-muted">{s.text}</span>
+                </figcaption>
+                <div className="flex-1">{s.view}</div>
+              </figure>
+            ))}
+          </div>
         </div>
       </div>
     </section>

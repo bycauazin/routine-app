@@ -112,13 +112,14 @@ const BLOCKS = [
   [5, 3, 2, "class", "Aula"],
 ];
 
-/** The Semana screen: days in columns, hours in rows, one color per kind of block. */
-export function WeekGrid({ className }) {
+/** The Semana screen: days in columns, hours in rows, one color per kind of block. `compact`: short rows, colors only. */
+export function WeekGrid({ className, compact = false }) {
+  const rowH = compact ? 9 : 22;
   return (
-    <div className={cn("overflow-x-auto rounded-[20px] border border-rule bg-paper p-3 sm:p-4", className)}>
+    <div className={cn("overflow-x-auto rounded-[20px] border border-rule bg-paper", compact ? "p-3" : "p-3 sm:p-4", className)}>
       <div
-        className="grid min-w-[380px] gap-[3px] text-[11px] tabular-nums"
-        style={{ gridTemplateColumns: "34px repeat(7, minmax(0, 1fr))", gridTemplateRows: `22px repeat(${HOURS.length}, 22px)` }}
+        className={cn("grid gap-[3px] text-[11px] tabular-nums", compact ? "min-w-0" : "min-w-[380px]")}
+        style={{ gridTemplateColumns: `${compact ? 28 : 34}px repeat(7, minmax(0, 1fr))`, gridTemplateRows: `20px repeat(${HOURS.length}, ${rowH}px)` }}
         role="img"
         aria-label="Uma semana de rotina em grade: trabalho de segunda a sexta, estudo, aulas, treino e refeições, com o fim de semana livre"
       >
@@ -127,18 +128,20 @@ export function WeekGrid({ className }) {
             {d}
           </span>
         ))}
-        {HOURS.map((h, i) => (
-          <span key={h} className="self-center pr-1 text-right text-faint" style={{ gridColumn: 1, gridRow: i + 2 }}>
-            {h}h
-          </span>
-        ))}
+        {HOURS.map((h, i) =>
+          compact && i % 3 ? null : (
+            <span key={h} className="self-start pr-1 text-right text-[10px] leading-none text-faint" style={{ gridColumn: 1, gridRow: i + 2 }}>
+              {h}h
+            </span>
+          ),
+        )}
         {BLOCKS.map(([day, start, span, cat, label]) => (
           <span
             key={`${day}-${start}`}
-            className={cn("flex items-center overflow-hidden rounded-[5px] px-1.5 font-[540] text-ink", CAT[cat])}
+            className={cn("flex items-center overflow-hidden rounded-[4px] px-1.5 font-[540] text-ink", CAT[cat])}
             style={{ gridColumn: day + 2, gridRow: `${start + 2} / span ${span}` }}
           >
-            <span className="truncate">{label}</span>
+            {!compact && <span className="truncate">{label}</span>}
           </span>
         ))}
       </div>
@@ -146,6 +149,39 @@ export function WeekGrid({ className }) {
   );
 }
 
+const DAY_CARD = [
+  ["07:00", "Acordar", "personal", true],
+  ["08:00", "Condução", "commute", true],
+  ["09:00", "Trabalho", "work", false, true],
+  ["18:30", "Aula · Pedro", "class"],
+];
+
+/** The Hoje screen, compact: the progress and four items of the day. */
+export function DayCard({ className }) {
+  return (
+    <div className={cn("flex flex-col gap-2.5 rounded-[20px] border border-rule bg-paper p-4", className)} role="img" aria-label="Tela Hoje: a lista do dia em ordem de horário, com os itens feitos marcados">
+      <div className="flex items-baseline justify-between">
+        <p className="text-[15px] font-[680]">Segunda, 23 nov</p>
+        <p className="text-[12px] text-muted tabular-nums">2 de 7</p>
+      </div>
+      <div className="h-1.5 overflow-hidden rounded-full bg-sunk">
+        <div className="h-full w-[30%] rounded-full bg-accent-text" />
+      </div>
+      <ul className="flex flex-col gap-0.5">
+        {DAY_CARD.map(([time, name, cat, done, now]) => (
+          <li key={time} className={cn("grid grid-cols-[42px_1fr_24px] items-center gap-2 rounded-[10px] px-2 py-1.5 text-[13px]", now && "bg-selected")}>
+            <span className="text-[12px] text-muted tabular-nums">{time}</span>
+            <span className="flex min-w-0 items-center gap-2">
+              <span className={cn("h-5 w-1 shrink-0 rounded-full", CAT[cat])} />
+              <span className={cn("truncate font-[560]", done && "text-muted line-through decoration-rule-strong")}>{name}</span>
+            </span>
+            <Check done={done} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 const DESK_DAY = [
   ["07:00", "Acordar", "personal", true],
