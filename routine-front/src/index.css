@@ -69,6 +69,14 @@
   --cat-class: #ecdff6;
   --cat-personal: #fbe0e9;
 
+  /* Chart colors of the categories (validated with the dataviz checks, light on
+     creme/white, dark on navy). Fixed order: work, classes, workout, study.
+     Always with direct labels: the orange/green pair needs them for color-blind readers. */
+  --chart-work: #4f78b8;
+  --chart-class: #e08a3c;
+  --chart-workout: #2f9e72;
+  --chart-study: #a35fc9;
+
   /* Third-party brand (WhatsApp button on the public pages). */
   --whatsapp: #25d366;
   --whatsapp-ink: #062d18;
@@ -119,6 +127,11 @@
   --cat-class: #3d3159;
   --cat-personal: #4b2c3f;
 
+  --chart-work: #5684cf;
+  --chart-class: #c97a37;
+  --chart-workout: #2e9a70;
+  --chart-study: #9e69cb;
+
   --overlay: rgb(8 14 24 / 0.66);
   --shadow: none;
   --shadow-lg: 0 24px 60px -24px rgb(0 0 0 / 0.8);
@@ -164,6 +177,10 @@
   --color-cat-workout: var(--cat-workout);
   --color-cat-class: var(--cat-class);
   --color-cat-personal: var(--cat-personal);
+  --color-chart-work: var(--chart-work);
+  --color-chart-class: var(--chart-class);
+  --color-chart-workout: var(--chart-workout);
+  --color-chart-study: var(--chart-study);
   --color-whatsapp: var(--whatsapp);
   --color-whatsapp-ink: var(--whatsapp-ink);
 

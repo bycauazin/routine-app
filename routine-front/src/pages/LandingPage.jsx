@@ -1,13 +1,13 @@
-import { ArrowRight, CalendarHeart, Download, GraduationCap, KeyRound, ListChecks, Repeat, ShieldCheck, Smartphone, Sparkles, Star, Utensils } from "lucide-react";
+import { ArrowRight, BarChart3, CalendarHeart, Download, GraduationCap, KeyRound, ListChecks, Repeat, ShieldCheck, Smartphone, Sparkles, Star, Utensils } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { GridLink } from "@/components/layout/GridLink";
 import { cn } from "@/lib/cn";
 import { useTheme } from "@/lib/theme";
-import { CATEGORY_LABEL, CATEGORY_TINT } from "@/lib/categories";
 import { LiveSheet } from "./landing/live-sheet";
 import { TodayMock, WeekGrid } from "./landing/mocks";
 import { FloatingActions, PublicFooter, PublicHeader, StartButton } from "./landing/public-chrome";
 import { btnGhost, useHashScroll } from "./landing/public-links";
+import { CompletionCard, HoursCard, ScoreCard, StreaksCard } from "./landing/report-mocks";
 import { SnapCursor } from "./landing/snap-cursor";
 import "./landing/landing.css";
 
@@ -38,23 +38,30 @@ function useReveal() {
 
 /** onInk: the title sits on a band painted with the 30% color (navy in light, creme in dark). */
 const SectionTitle = ({ kicker, children, className, onInk }) => (
-  <div className={cn("max-w-[640px]", className)}>
+  <div className={cn("max-w-[680px]", className)}>
     <p className={cn("mb-3 text-[13px] font-[620]", onInk ? "text-accent-on-ink" : "text-accent-text")}>{kicker}</p>
     <h2 className="text-[32px] leading-[1.05] font-[640] tracking-[-0.03em] sm:text-[44px]">{children}</h2>
   </div>
 );
 
+/** The three main screens, shown side by side under the headline (a swipe row on phones). */
+const SCREENS = [
+  { label: "Hoje", text: "o dia em ordem de horário", view: <TodayMock className="mx-auto" /> },
+  { label: "Semana", text: "a semana em grade", view: <WeekGrid className="shadow-lg" /> },
+  { label: "Relatórios", text: "como foi a semana", view: <CompletionCard className="shadow-lg" /> },
+];
+
 function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-rule" aria-labelledby="hero-title">
-      {/* "Planilha viva": the spreadsheet grid lights up under the pointer, never behind [data-calm] */}
+      {/* the week grid in the background lights up under the pointer (blurred behind [data-calm]) */}
       <LiveSheet />
-      <div className="relative mx-auto grid max-w-[1180px] items-center gap-12 px-5 pt-28 pb-16 sm:px-8 md:pt-36 lg:grid-cols-[1.15fr_1fr] lg:pb-24">
-        <div>
+      <div className="relative mx-auto max-w-[1180px] px-5 pt-28 pb-14 sm:px-8 md:pt-36 md:pb-20">
+        <div className="max-w-[860px]">
           <p data-calm className="mb-6 inline-flex items-center gap-2 rounded-full border border-rule bg-paper px-3.5 py-1.5 text-[12.5px] font-[560] text-muted">
             <span className="size-1.5 rounded-full bg-accent-text" aria-hidden /> Controle de rotina · bycauazin
           </p>
-          <h1 id="hero-title" data-calm className="text-[44px] leading-[1.02] font-[680] tracking-[-0.04em] sm:text-[62px] lg:text-[70px]">
+          <h1 id="hero-title" data-calm className="w-fit text-[44px] leading-[1.02] font-[700] tracking-[-0.04em] sm:text-[64px] lg:text-[76px]">
             <span className="rise-line" style={{ "--d": "80ms" }}>
               Sua semana inteira,
             </span>
@@ -62,9 +69,9 @@ function Hero() {
               <span className="mark-pink">um dia de cada vez.</span>
             </span>
           </h1>
-          <p data-calm className="mt-6 w-fit max-w-[500px] animate-[fade-up_700ms_ease_380ms_backwards] text-[17px] leading-relaxed text-muted">
-            Configure uma vez o trabalho, as aulas, o treino e os hábitos. Todo dia o Routine monta a sua lista em ordem de horário, com um check para cada
-            coisa feita.
+          <p data-calm className="mt-6 w-fit max-w-[600px] animate-[fade-up_700ms_ease_380ms_backwards] text-[17px] leading-relaxed text-muted sm:text-[18px]">
+            Cadastre uma vez o trabalho, as aulas, o treino e os hábitos. O Routine monta a lista de cada dia em ordem de horário, você marca o que fez e vê nos
+            relatórios como foi a semana.
           </p>
           <div data-calm className="mt-8 flex w-fit flex-col gap-3 animate-[fade-up_700ms_ease_480ms_backwards] sm:flex-row">
             <StartButton compact />
@@ -73,75 +80,27 @@ function Hero() {
             </GridLink>
           </div>
         </div>
-        <div className="flex justify-center lg:justify-end">
-          <TodayMock className="float-a" />
+
+        <div className="-mx-5 mt-14 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 sm:-mx-8 sm:px-8 lg:mx-0 lg:grid lg:snap-none lg:grid-cols-[320px_minmax(0,1.45fr)_minmax(0,1fr)] lg:items-end lg:gap-6 lg:overflow-visible lg:px-0">
+          {SCREENS.map((s, i) => (
+            <figure key={s.label} data-calm className="m-0 flex w-[85%] max-w-[380px] shrink-0 snap-start flex-col gap-3 sm:w-[60%] lg:w-auto lg:max-w-none" style={{ animation: `fade-up 700ms ease ${560 + i * 120}ms backwards` }}>
+              <figcaption className="flex items-baseline gap-2 text-[13px]">
+                <span className="rounded-full bg-ink px-2.5 py-0.5 font-[650] text-bg">{s.label}</span>
+                <span className="text-muted">{s.text}</span>
+              </figcaption>
+              {s.view}
+            </figure>
+          ))}
         </div>
       </div>
     </section>
   );
 }
 
-function FromSheet() {
-  return (
-    <section id="planilha" className="mx-auto grid max-w-[1180px] items-center gap-10 px-5 py-16 sm:px-8 md:py-24 lg:grid-cols-[1fr_1.25fr]">
-      <div data-reveal>
-        <SectionTitle kicker="Da planilha para o bolso">Começou numa planilha.</SectionTitle>
-        <p className="mt-5 max-w-[480px] text-[16px] leading-relaxed text-muted">
-          Dias nas colunas, horários nas linhas e cada bloco com uma cor: trabalho, condução, estudo, aula, treino. Funcionava, mas não dizia o que já
-          tinha sido feito, nem lembrava do Duolingo.
-        </p>
-        <p className="mt-4 max-w-[480px] text-[16px] leading-relaxed text-muted">
-          O Routine guarda a mesma semana e transforma cada dia numa lista para marcar. O fim de semana sem nada continua livre, sem contar como falha.
-        </p>
-        <ul className="mt-6 flex flex-wrap gap-2" aria-label="Cores dos blocos">
-          {["work", "commute", "study", "class", "workout", "meal"].map((cat) => (
-            <li key={cat} className={cn("rounded-full px-3 py-1 text-[12.5px] font-[540] text-ink", CATEGORY_TINT[cat])}>
-              {CATEGORY_LABEL[cat]}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div data-reveal style={{ "--reveal-delay": "120ms" }} className="min-w-0">
-        <WeekGrid />
-      </div>
-    </section>
-  );
-}
-
-const FEATURES = [
-  { icon: Repeat, title: "Rotina fixa e avulsa", text: "Blocos que se repetem nos dias certos da semana, e tarefas que são só de hoje. O que não foi feito fica como atrasado." },
-  { icon: Sparkles, title: "Hábitos com sequência", text: "Estudar 10 minutos, ler 2 páginas, o Duolingo. Marque quanto fez e acompanhe quantos dias seguidos." },
-  { icon: GraduationCap, title: "Aulas e alunos", text: "Cada aluno com seu horário fixo. Atrasou meia hora ou passou para amanhã? Muda só aquela aula." },
-  { icon: CalendarHeart, title: "Feriados e férias", text: "Marque o dia e o que não acontece nele sai da conta, sem quebrar a sequência dos hábitos." },
-  { icon: Star, title: "Nota do dia", text: "Quanto da rotina foi cumprido no dia, na semana e no mês, com os hábitos pesando mais que os blocos." },
-  { icon: Utensils, title: "Refeições", text: "O que comer em cada horário, do café ao lanche da noite, e um check quando comer." },
-];
-
-function Features() {
-  return (
-    <section id="recursos" className="lazy-section bg-ink text-bg">
-      <div className="mx-auto max-w-[1180px] px-5 py-16 sm:px-8 md:py-24">
-        <SectionTitle kicker="Recursos" onInk>Tudo o que a planilha fazia, e o que ela não fazia.</SectionTitle>
-        <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f, i) => (
-            <li key={f.title} data-reveal style={{ "--reveal-delay": `${(i % 3) * 80}ms` }} className="flex flex-col gap-3 rounded-[14px] border border-bg/15 bg-bg/[0.06] p-5">
-              <span className="grid size-10 place-items-center rounded-full bg-accent text-accent-ink">
-                <f.icon className="size-[18px]" aria-hidden />
-              </span>
-              <h3 className="text-[16.5px] font-[640]">{f.title}</h3>
-              <p className="text-[14px] leading-relaxed text-bg/75">{f.text}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
 const STEPS = [
-  { icon: Repeat, title: "Monte a semana", text: "Cadastre os blocos fixos com dia e horário, os hábitos e os alunos. Uma vez só." },
-  { icon: ListChecks, title: "Abra o Hoje", text: "O dia já vem pronto, em ordem de horário. Marque o que fez, atrase ou remarque o que mudou." },
-  { icon: Star, title: "Veja como foi", text: "A nota do dia, a semana em grade e a sequência de cada hábito mostram onde a rotina escapa." },
+  { icon: Repeat, title: "Monte a semana", text: "Cadastre os blocos fixos com dia e horário (trabalho, condução, treino), os hábitos e os alunos. Uma vez só." },
+  { icon: ListChecks, title: "Use o Hoje", text: "O dia já vem pronto, em ordem de horário. Marque o que fez, atrase ou remarque o que mudou e anote o que é só de hoje." },
+  { icon: BarChart3, title: "Acompanhe", text: "A nota do dia, a semana em grade, a sequência de cada hábito e as horas por categoria mostram onde a rotina escapa." },
 ];
 
 function HowItWorks() {
@@ -159,6 +118,70 @@ function HowItWorks() {
           </li>
         ))}
       </ol>
+    </section>
+  );
+}
+
+const FEATURES = [
+  { icon: Repeat, title: "Rotina fixa e avulsa", text: "Blocos que se repetem nos dias certos da semana, e tarefas que são só de hoje. O que não foi feito fica como atrasado." },
+  { icon: Sparkles, title: "Hábitos com sequência", text: "Estudar 10 minutos, ler 2 páginas, o Duolingo. Marque quanto fez e acompanhe quantos dias seguidos." },
+  { icon: GraduationCap, title: "Aulas e alunos", text: "Cada aluno com seu horário fixo. Atrasou meia hora ou passou para amanhã? Muda só aquela aula." },
+  { icon: CalendarHeart, title: "Feriados e férias", text: "Marque o dia e o que não acontece nele sai da conta, sem quebrar a sequência dos hábitos." },
+  { icon: Star, title: "Nota do dia", text: "Quanto da rotina foi cumprido no dia, na semana e no mês, com os hábitos pesando mais que os blocos." },
+  { icon: Utensils, title: "Refeições", text: "O que comer em cada horário, do café ao lanche da noite, e um check quando comer." },
+];
+
+function Features() {
+  return (
+    <section id="recursos" className="lazy-section bg-ink text-bg">
+      <div className="mx-auto max-w-[1180px] px-5 py-16 sm:px-8 md:py-24">
+        <SectionTitle kicker="Recursos" onInk>
+          Tudo da sua rotina, num lugar só.
+        </SectionTitle>
+        <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((f, i) => (
+            <li key={f.title} data-reveal style={{ "--reveal-delay": `${(i % 3) * 80}ms` }} className="flex flex-col gap-3 rounded-[14px] border border-bg/15 bg-bg/[0.06] p-5">
+              <span className="grid size-10 place-items-center rounded-full bg-accent text-accent-ink">
+                <f.icon className="size-[18px]" aria-hidden />
+              </span>
+              <h3 className="text-[16.5px] font-[640]">{f.title}</h3>
+              <p className="text-[14px] leading-relaxed text-bg/75">{f.text}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+const REPORTS = [
+  { view: CompletionCard, title: "Rotina cumprida", text: "A porcentagem do que foi feito no dia, na semana e no mês, e qual dia foi melhor ou pior." },
+  { view: ScoreCard, title: "Nota do dia", text: "Uma nota de 0 a 10 por dia, semana e mês, com hábitos e compromissos pesando mais." },
+  { view: StreaksCard, title: "Sequências", text: "Quantos dias seguidos cada hábito foi feito, e o recorde. Feriado e folga não quebram." },
+  { view: HoursCard, title: "Horas por categoria", text: "Quanto da semana foi trabalho, aula, treino e estudo, para ver para onde o tempo vai." },
+];
+
+function Reports() {
+  return (
+    <section id="relatorios" className="lazy-section mx-auto max-w-[1180px] px-5 py-16 sm:px-8 md:py-24">
+      <SectionTitle kicker="Relatórios">Veja onde a rotina funciona e onde ela escapa.</SectionTitle>
+      <p className="mt-5 max-w-[600px] text-[16px] leading-relaxed text-muted">
+        Tudo é calculado a partir do que você marca no dia a dia, sem preencher nada a mais. Os números abaixo são de exemplo.
+      </p>
+      <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {REPORTS.map((r, i) => (
+          <li key={r.title} data-reveal style={{ "--reveal-delay": `${i * 80}ms` }} className="flex flex-col gap-4">
+            <r.view className="h-full min-h-[236px]" />
+            <div>
+              <h3 className="text-[16px] font-[640]">{r.title}</h3>
+              <p className="mt-1 text-[14px] leading-relaxed text-muted">{r.text}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-8 text-[14px] text-muted">
+        Também: aulas por aluno no mês (dadas, remarcadas e canceladas) e a semana em grade com o que foi feito em cada bloco.
+      </p>
     </section>
   );
 }
@@ -199,10 +222,8 @@ function FinalCall() {
   return (
     <section className="px-3 py-6 sm:px-5">
       <div data-reveal className="mx-auto flex max-w-[1180px] flex-col items-center rounded-[32px] bg-ink px-5 py-16 text-center text-bg sm:py-24">
-        <h2 className="max-w-[640px] text-[34px] leading-[1.04] font-[660] tracking-[-0.03em] sm:text-[52px]">Comece pela semana que você já tem.</h2>
-        <p className="mt-5 max-w-[460px] text-[16px] leading-relaxed opacity-80">
-          O Routine está sendo construído em etapas. A conta já funciona, e cada parte da rotina chega assim que fica pronta.
-        </p>
+        <h2 className="max-w-[640px] text-[34px] leading-[1.04] font-[660] tracking-[-0.03em] sm:text-[52px]">Monte a sua semana e comece hoje.</h2>
+        <p className="mt-5 max-w-[460px] text-[16px] leading-relaxed opacity-80">Crie a conta, cadastre os horários fixos e os hábitos, e o seu dia já aparece pronto para marcar.</p>
         <div className="mt-8 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
           <StartButton className="w-full sm:w-auto" />
           <GridLink
@@ -227,9 +248,9 @@ export function LandingPage() {
       <PublicHeader />
       <main>
         <Hero />
-        <FromSheet />
-        <Features />
         <HowItWorks />
+        <Features />
+        <Reports />
         <Security />
         <FinalCall />
       </main>

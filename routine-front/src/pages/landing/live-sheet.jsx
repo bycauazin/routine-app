@@ -5,12 +5,15 @@ const CW = 52; // cell width, like a spreadsheet column
 const CH = 26; // cell height, one hour row
 const RADIUS = { phone: 110, wide: 150 };
 const CATS = ["--cat-work", "--cat-commute", "--cat-study", "--cat-meal", "--cat-workout", "--cat-class", "--cat-personal"];
+const DAYS = ["seg", "ter", "qua", "qui", "sex", "sáb", "dom"];
+/** The soft layer (cells behind text) is drawn at this fraction of the size: the blur hides it and it costs less. */
+const SOFT_SCALE = 0.5;
 
 /** The week as it lived in the spreadsheet: weekday columns, hour rows → category index. */
 const DAY_ROWS = [6, 1, 0, 0, 0, 0, 3, 0, 0, 0, 0, 2, 2, 1, 4, 4, 5, 6];
 function catFor(c, r) {
-  const day = c % 8;
-  const hour = r % DAY_ROWS.length;
+  const day = (c - 1 + 70) % 7;
+  const hour = (r - 1 + DAY_ROWS.length * 10) % DAY_ROWS.length;
   if (day >= 5) return day === 5 && (hour === 3 || hour === 4) ? 5 : 6;
   if (hour === 11 && (day === 1 || day === 3)) return 5;
   if (hour === 12 && (day === 1 || day === 3)) return 4;
@@ -18,26 +21,31 @@ function catFor(c, r) {
 }
 
 /**
- * "Planilha viva": the faint grid of the weekly spreadsheet; the cells the
- * pointer passes over fill with the category colors and fade out. With no
- * pointer for a while, a ghost pointer wanders.
+ * "Planilha viva": the grid of the weekly spreadsheet; the cells the pointer
+ * passes over fill with the category colors and fade out. With no pointer for
+ * a while, a ghost pointer wanders. `labels` adds the spreadsheet edges: day
+ * names on the first row and hours on the first column.
  *
- * Calm zones: nothing ever paints behind elements marked [data-calm]
- * (titles, text, buttons, the fixed header over the hero), so reading is
- * never disturbed.
+ * Behind text: cells under elements marked [data-calm] (titles, text,
+ * buttons, the fixed header) still light up, but on a second canvas that is
+ * blurred and fainter, so the motion stays and the reading is not disturbed.
  *
- * Performance (lessons from the Finance hero): the grid lines are drawn once
- * into an offscreen canvas, only cells near the pointer are tested, the loop
- * starts after the page has loaded and the browser is idle, and it pauses
- * off-screen and in a hidden tab. Reduced motion: just the still grid.
+ * Performance (lessons from the Finance hero): lines and labels are drawn once
+ * into an offscreen canvas, only cells near the pointer are tested, the soft
+ * layer is half size (the CSS blur runs on the GPU), the loop starts after the
+ * page has loaded and the browser is idle, and it pauses off-screen and in a
+ * hidden tab. Reduced motion: just the still grid.
  */
-export function LiveSheet({ className }) {
+export function LiveSheet({ className, labels = false }) {
   const ref = useRef(null);
+  const softRef = useRef(null);
 
   useEffect(() => {
     const canvas = ref.current;
+    const softCanvas = softRef.current;
     const ctx = canvas?.getContext("2d");
-    if (!ctx) return undefined;
+    const soft = softCanvas?.getContext("2d");
+    if (!ctx || !soft) return undefined;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const lines = document.createElement("canvas");
 
@@ -48,18 +56,24 @@ export function LiveSheet({ className }) {
     let rows = 0;
     let heat = new Float32Array(0);
     let calm = new Uint8Array(0);
-    let colors = { rule: "", accent: "", cats: [] };
+    let colors = { rule: "", sunk: "", muted: "", accent: "", cats: [] };
     const ptr = { x: -999, y: -999, tx: -999, ty: -999, last: -1e9, inside: false };
     let visible = true;
     let started = false;
     let raf = 0;
     let prev = performance.now();
+    const first = labels ? 1 : 0; // first data row/column (the labels take row 0 and column 0)
 
     const drawLines = () => {
       lines.width = canvas.width;
       lines.height = canvas.height;
       const l = lines.getContext("2d");
       l.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (labels) {
+        l.fillStyle = colors.sunk;
+        l.fillRect(0, 0, w, CH);
+        l.fillRect(0, 0, CW, h);
+      }
       l.strokeStyle = colors.rule;
       l.lineWidth = 1;
       l.beginPath();
@@ -72,18 +86,27 @@ export function LiveSheet({ className }) {
         l.lineTo(w, r * CH + 0.5);
       }
       l.stroke();
+      if (labels) {
+        l.fillStyle = colors.muted;
+        l.font = "600 11px 'Inter Variable', system-ui, sans-serif";
+        l.textAlign = "center";
+        l.textBaseline = "middle";
+        for (let c = 1; c < cols; c++) l.fillText(DAYS[(c - 1) % 7], c * CW + CW / 2, CH / 2 + 0.5);
+        for (let r = 1; r < rows; r++) l.fillText(`${String(((r - 1) % 18) + 6).padStart(2, "0")}h`, CW / 2, r * CH + CH / 2 + 0.5);
+      }
     };
 
     const readColors = () => {
       const s = getComputedStyle(document.documentElement);
-      colors = { rule: s.getPropertyValue("--rule").trim(), accent: s.getPropertyValue("--accent-text").trim(), cats: CATS.map((n) => s.getPropertyValue(n).trim()) };
+      const v = (n) => s.getPropertyValue(n).trim();
+      colors = { rule: v("--rule"), sunk: v("--sunk"), muted: v("--muted"), accent: v("--accent-text"), cats: CATS.map(v) };
       drawLines();
       paint(0);
     };
 
     const measureCalm = () => {
       const box = canvas.getBoundingClientRect();
-      const pad = 12;
+      const pad = 10;
       const zones = [...document.querySelectorAll("[data-calm]")].map((el) => {
         const r = el.getBoundingClientRect();
         return [r.left - box.left - pad, r.top - box.top - pad, r.right - box.left + pad, r.bottom - box.top + pad];
@@ -106,6 +129,9 @@ export function LiveSheet({ className }) {
       canvas.width = Math.max(1, Math.round(w * dpr));
       canvas.height = Math.max(1, Math.round(h * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      softCanvas.width = Math.max(1, Math.round(w * SOFT_SCALE));
+      softCanvas.height = Math.max(1, Math.round(h * SOFT_SCALE));
+      soft.setTransform(SOFT_SCALE, 0, 0, SOFT_SCALE, 0, 0);
       cols = Math.ceil(w / CW) + 1;
       rows = Math.ceil(h / CH) + 1;
       heat = new Float32Array(cols * rows);
@@ -113,19 +139,25 @@ export function LiveSheet({ className }) {
       readColors();
     };
 
+    const cellPath = (g, c, r) => {
+      g.beginPath();
+      if (g.roundRect) g.roundRect(c * CW + 2, r * CH + 2, CW - 3, CH - 3, 5);
+      else g.rect(c * CW + 2, r * CH + 2, CW - 3, CH - 3);
+    };
+
     function paint(dt) {
       ctx.clearRect(0, 0, w, h);
+      soft.clearRect(0, 0, w, h);
       ctx.drawImage(lines, 0, 0, w, h);
       if (!dt) return;
       const R = w < 640 ? RADIUS.phone : RADIUS.wide;
-      const c0 = Math.max(0, Math.floor((ptr.x - R) / CW));
+      const c0 = Math.max(first, Math.floor((ptr.x - R) / CW));
       const c1 = Math.min(cols - 1, Math.ceil((ptr.x + R) / CW));
-      const r0 = Math.max(0, Math.floor((ptr.y - R) / CH));
+      const r0 = Math.max(first, Math.floor((ptr.y - R) / CH));
       const r1 = Math.min(rows - 1, Math.ceil((ptr.y + R) / CH));
       for (let r = r0; r <= r1; r++) {
         for (let c = c0; c <= c1; c++) {
           const i = r * cols + c;
-          if (calm[i]) continue;
           const v = 1 - Math.hypot(c * CW + CW / 2 - ptr.x, r * CH + CH / 2 - ptr.y) / R;
           if (v > heat[i]) heat[i] = v;
         }
@@ -140,11 +172,18 @@ export function LiveSheet({ className }) {
         heat[i] = Math.max(0, v - decay * (0.35 + v * 0.4));
         const c = i % cols;
         const r = (i - c) / cols;
+        const color = colors.cats[catFor(c, r)];
+        if (calm[i]) {
+          // behind text: on the blurred layer, fainter, no outline
+          soft.globalAlpha = Math.min(1, v * 1.6) * 0.75;
+          soft.fillStyle = color;
+          cellPath(soft, c, r);
+          soft.fill();
+          continue;
+        }
         ctx.globalAlpha = Math.min(1, v * 1.6);
-        ctx.fillStyle = colors.cats[catFor(c, r)];
-        ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(c * CW + 2, r * CH + 2, CW - 3, CH - 3, 5);
-        else ctx.rect(c * CW + 2, r * CH + 2, CW - 3, CH - 3);
+        ctx.fillStyle = color;
+        cellPath(ctx, c, r);
         ctx.fill();
         if (v > 0.7) {
           ctx.globalAlpha = (v - 0.7) * 3;
@@ -154,6 +193,7 @@ export function LiveSheet({ className }) {
         }
       }
       ctx.globalAlpha = 1;
+      soft.globalAlpha = 1;
     }
 
     const frame = (t) => {
@@ -164,7 +204,7 @@ export function LiveSheet({ className }) {
       const idle = !ptr.inside || t - ptr.last > 2500;
       if (idle) {
         const s = t / 1000;
-        ptr.tx = w * (0.62 + 0.28 * Math.sin(s * 0.37));
+        ptr.tx = w * (0.55 + 0.35 * Math.sin(s * 0.37));
         ptr.ty = h * (0.5 + 0.34 * Math.sin(s * 0.53 + 1.3));
       }
       const ease = idle ? 0.04 : 0.35;
@@ -192,9 +232,12 @@ export function LiveSheet({ className }) {
     io.observe(canvas);
     const mo = new MutationObserver(() => requestAnimationFrame(readColors));
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    // Text moves while it rises in and when fonts arrive: measure the calm zones again then.
+    // Text moves while it rises in and when fonts arrive: measure the zones behind text again then.
     const remeasure = window.setTimeout(measureCalm, 1200);
-    document.fonts?.ready.then(measureCalm);
+    document.fonts?.ready.then(() => {
+      measureCalm();
+      drawLines();
+    });
 
     const start = () => {
       if (started || reduced) return;
@@ -216,7 +259,13 @@ export function LiveSheet({ className }) {
       io.disconnect();
       mo.disconnect();
     };
-  }, []);
+  }, [labels]);
 
-  return <canvas ref={ref} className={cn("pointer-events-none absolute inset-0 h-full w-full", className)} aria-hidden />;
+  return (
+    <>
+      <canvas ref={ref} className={cn("pointer-events-none absolute inset-0 h-full w-full", className)} aria-hidden />
+      {/* cells behind text: blurred and fainter (drawn at half size, stretched) */}
+      <canvas ref={softRef} className={cn("pointer-events-none absolute inset-0 h-full w-full opacity-70 blur-[7px]", className)} aria-hidden />
+    </>
+  );
 }

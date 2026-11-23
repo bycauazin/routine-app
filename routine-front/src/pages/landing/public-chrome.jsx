@@ -8,9 +8,9 @@ import { cn } from "@/lib/cn";
 import { btnPrimary, PORTFOLIO, SOCIALS, WHATSAPP, YEAR } from "./public-links";
 
 const SECTIONS = [
-  ["/#planilha", "Da planilha"],
-  ["/#recursos", "Recursos"],
   ["/#como-funciona", "Como funciona"],
+  ["/#recursos", "Recursos"],
+  ["/#relatorios", "Relatórios"],
   ["/#seguranca", "Segurança"],
   ["/contato", "Contato"],
 ];
@@ -113,7 +113,7 @@ export function PublicFooter() {
           <Link to="/" className="flex items-center gap-2.5 text-[16px] font-[680]">
             <Logo /> Routine
           </Link>
-          <p className="mt-3 max-w-xs text-[13.5px] leading-relaxed text-muted">A semana que vivia numa planilha, agora no celular: o que fazer hoje, a que horas, e o que já foi feito.</p>
+          <p className="mt-3 max-w-xs text-[13.5px] leading-relaxed text-muted">A sua rotina organizada dia a dia: o que fazer, a que horas, o que já foi feito e como foi a semana.</p>
         </div>
         <div className="hidden flex-col gap-2 text-[13.5px] sm:flex">
           <p className="mb-1 text-[12px] font-[600] text-faint">Produto</p>

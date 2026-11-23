@@ -108,12 +108,12 @@ const BLOCKS = [
   [5, 3, 2, "class", "Aula"],
 ];
 
-/** The week as it lived in the spreadsheet: days in columns, hours in rows, one color per kind of block. */
+/** The Semana screen: days in columns, hours in rows, one color per kind of block. */
 export function WeekGrid({ className }) {
   return (
     <div className={cn("overflow-x-auto rounded-[20px] border border-rule bg-paper p-3 sm:p-4", className)}>
       <div
-        className="grid min-w-[460px] gap-[3px] text-[11px] tabular-nums"
+        className="grid min-w-[380px] gap-[3px] text-[11px] tabular-nums"
         style={{ gridTemplateColumns: "34px repeat(7, minmax(0, 1fr))", gridTemplateRows: `22px repeat(${HOURS.length}, 22px)` }}
         role="img"
         aria-label="Uma semana de rotina em grade: trabalho de segunda a sexta, estudo, aulas, treino e refeições, com o fim de semana livre"
