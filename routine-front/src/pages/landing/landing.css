@@ -193,12 +193,13 @@
 .streak-row {
   position: absolute;
   top: -8px;
-  left: max(20px, calc((100% - 1180px) / 2 + 32px));
-  right: max(20px, calc((100% - 1180px) / 2 + 32px));
+  left: max(16px, env(safe-area-inset-left, 0px));
+  right: max(16px, env(safe-area-inset-right, 0px));
   display: flex;
   align-items: center;
-  gap: clamp(10px, 2.4vw, 30px);
-  animation: streak-out 600ms ease calc(var(--n) * 110ms + 2000ms) forwards;
+  justify-content: space-between;
+  gap: 8px;
+  animation: streak-out 600ms ease calc(var(--n) * var(--step) + 1800ms) forwards;
 }
 .streak-day {
   width: 15px;
@@ -207,7 +208,7 @@
   border-radius: 4px;
   border: 1px solid var(--rule-strong);
   background: var(--sunk);
-  animation: streak-fill 260ms cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--i) * 110ms) forwards;
+  animation: streak-fill 260ms cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--i) * var(--step)) forwards;
 }
 .streak-badge {
   display: inline-flex;
@@ -224,7 +225,7 @@
   white-space: nowrap;
   opacity: 0;
   transform: scale(0.6);
-  animation: streak-badge 380ms cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--i) * 110ms) forwards;
+  animation: streak-badge 380ms cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--i) * var(--step)) forwards;
 }
 @keyframes streak-fill {
   to {

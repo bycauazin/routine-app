@@ -1,12 +1,15 @@
 import { Flame } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-/** Squares of the streak line: one per day, as many as fit (7 to 14). */
-const daysFor = (width) => Math.min(14, Math.max(7, Math.floor((width - 200) / 44)));
+/** Squares of the streak line: one per day, as many as fit across the whole page (the badge takes ~170px). */
+const daysFor = (width) => Math.max(7, Math.floor((width - 32 - 170) / 33));
+/** Time between two squares: the whole line fills in about 1.7s, whatever its length. */
+const stepFor = (days) => Math.min(110, Math.round(1700 / days));
 
 /**
  * "Sequência", between two sections: when the line reaches the upper part of
- * the screen, day squares fill in from left to right like a habit streak and
+ * the screen, day squares fill in across the whole page, from one side to the
+ * other, like a habit streak, and
  * end with the "N dias seguidos" badge, then fade. Plays again each time you
  * come back to it; off with reduced motion. Decorative (aria-hidden).
  */
@@ -35,7 +38,7 @@ export function StreakRun() {
   return (
     <div ref={ref} className="streak-run" aria-hidden>
       {run > 0 && (
-        <div key={run} className="streak-row" style={{ "--n": days }}>
+        <div key={run} className="streak-row" style={{ "--n": days, "--step": `${stepFor(days)}ms` }}>
           {Array.from({ length: days }, (_, i) => (
             <span key={i} className="streak-day" style={{ "--i": i }} />
           ))}
