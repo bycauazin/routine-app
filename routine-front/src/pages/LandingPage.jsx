@@ -5,11 +5,11 @@ import { GridLink } from "@/components/layout/GridLink";
 import { CATEGORY_TINT } from "@/lib/categories";
 import { cn } from "@/lib/cn";
 import { useTheme } from "@/lib/theme";
-import { LiveSheet } from "./landing/live-sheet";
 import { DayCard, DesktopAppShot, TodayMock, WeekGrid } from "./landing/mocks";
 import { FloatingActions, PublicFooter, PublicHeader, StartButton } from "./landing/public-chrome";
 import { btnGhost, useHashScroll } from "./landing/public-links";
 import { CompletionCard, HoursCard, ScoreCard, StreaksCard } from "./landing/report-mocks";
+import { SkyDay } from "./landing/sky-day";
 import { SnapCursor } from "./landing/snap-cursor";
 import { StreakRun } from "./landing/streak-run";
 import "./landing/landing.css";
@@ -51,7 +51,7 @@ const SCREENS = [
 /**
  * The opening: a framed panel (the "telinha") that fits the screen, so the
  * whole section is seen without scrolling. Inside it: the app screens very
- * blurred in the background, the live week grid, the headline and, below it,
+ * blurred in the background, the sky of the day, the headline and, below it,
  * the three main screens.
  */
 function Hero() {
@@ -68,8 +68,8 @@ function Hero() {
         <div className="hero-shot-3" aria-hidden>
           <StreaksCard />
         </div>
-        {/* the week grid lights up under the pointer (blurred behind the text) */}
-        <LiveSheet />
+        {/* "Céu do dia": the light follows the hour under the pointer, from dawn to night */}
+        <SkyDay />
         <div className="relative mx-auto flex w-full max-w-[1140px] flex-1 flex-col justify-center gap-6 px-5 py-6 sm:px-8 lg:gap-8">
           <div className="max-w-[820px]">
             <h1 id="hero-title" data-calm className="w-fit text-[34px] leading-[1.04] font-[700] tracking-[-0.04em] sm:text-[52px] lg:text-[62px]">

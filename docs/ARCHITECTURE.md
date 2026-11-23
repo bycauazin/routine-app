@@ -121,7 +121,14 @@ Fica todo em `routine-front/src/index.css`, em tokens CSS expostos ao Tailwind 4
 
 Escolhidas numa página de comparação com 6 opções por grupo:
 
-- **Planilha viva** (`pages/landing/live-sheet.jsx`): a grade da planilha no fundo; as células perto do mouse se
+- **Céu do dia** (`pages/landing/sky-day.jsx`), na abertura da landing: a luz do painel segue a hora em que o mouse
+  está, do amanhecer (esquerda) à noite (direita); o sol percorre um arco alto à direita, longe do texto, e vira lua
+  depois das 19:30; embaixo, os blocos do dia formam uma cidade cujas janelas acendem à noite. Sem mouse, o dia passa
+  sozinho. Cores em tokens `--sky-*` (claro e escuro). No celular, só a cor do céu e a cidade. A abertura é um painel
+  que cabe numa tela só, com telas do app bem desfocadas atrás.
+- **Sequência** (`pages/landing/streak-run.jsx`), na linha entre as seções: quadradinhos de dias se preenchem de uma
+  ponta à outra da página e terminam no selo "N dias seguidos".
+- **Planilha viva** (`pages/landing/live-sheet.jsx`), no contato e nas telas de entrar e criar conta: a grade da planilha no fundo; as células perto do mouse se
   pintam com as cores das categorias e se apagam. **Atrás de elementos `[data-calm]`** (título, textos, botões, o
   menu fixo) as células continuam acendendo, mas numa camada desfocada e mais fraca, para não atrapalhar a
   leitura. Sem mouse por um tempo, um ponteiro "fantasma" passeia. Começa só depois que a página

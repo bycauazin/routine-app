@@ -77,6 +77,16 @@
   --chart-workout: #2f9e72;
   --chart-study: #a35fc9;
 
+  /* "Céu do dia" (landing hero): the light of the hours 07, 10, 13, 17, 19, 21 and 23, and the moon. */
+  --sky-07: #fde8de;
+  --sky-10: #eef4fa;
+  --sky-13: #f4f8fb;
+  --sky-17: #fbe7d3;
+  --sky-19: #f6d9e2;
+  --sky-21: #dfe3f3;
+  --sky-23: #d3d8ec;
+  --sky-moon: #fffaf2;
+
   /* Third-party brand (WhatsApp button on the public pages). */
   --whatsapp: #25d366;
   --whatsapp-ink: #062d18;
@@ -126,6 +136,15 @@
   --cat-workout: #22473a;
   --cat-class: #3d3159;
   --cat-personal: #4b2c3f;
+
+  --sky-07: #2c2c4c;
+  --sky-10: #1d3653;
+  --sky-13: #223d5c;
+  --sky-17: #3a3048;
+  --sky-19: #33284a;
+  --sky-21: #172540;
+  --sky-23: #121c30;
+  --sky-moon: #faf3e8;
 
   --chart-work: #5684cf;
   --chart-class: #c97a37;
