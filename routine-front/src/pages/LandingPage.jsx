@@ -34,9 +34,10 @@ function useReveal() {
   return ref;
 }
 
-const SectionTitle = ({ kicker, children, className }) => (
+/** onInk: the title sits on a band painted with the 30% color (navy in light, creme in dark). */
+const SectionTitle = ({ kicker, children, className, onInk }) => (
   <div className={cn("max-w-[640px]", className)}>
-    <p className="mb-3 text-[13px] font-[620] text-accent-text">{kicker}</p>
+    <p className={cn("mb-3 text-[13px] font-[620]", onInk ? "text-accent-on-ink" : "text-accent-text")}>{kicker}</p>
     <h2 className="text-[32px] leading-[1.05] font-[640] tracking-[-0.03em] sm:text-[44px]">{children}</h2>
   </div>
 );
@@ -116,17 +117,17 @@ const FEATURES = [
 
 function Features() {
   return (
-    <section id="recursos" className="lazy-section border-y border-rule bg-sunk/60">
+    <section id="recursos" className="lazy-section bg-ink text-bg">
       <div className="mx-auto max-w-[1180px] px-5 py-16 sm:px-8 md:py-24">
-        <SectionTitle kicker="Recursos">Tudo o que a planilha fazia, e o que ela não fazia.</SectionTitle>
+        <SectionTitle kicker="Recursos" onInk>Tudo o que a planilha fazia, e o que ela não fazia.</SectionTitle>
         <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f, i) => (
-            <li key={f.title} data-reveal style={{ "--reveal-delay": `${(i % 3) * 80}ms` }} className="sheet flex flex-col gap-3 p-5">
-              <span className="grid size-10 place-items-center rounded-full bg-selected text-accent-text">
+            <li key={f.title} data-reveal style={{ "--reveal-delay": `${(i % 3) * 80}ms` }} className="flex flex-col gap-3 rounded-[14px] border border-bg/15 bg-bg/[0.06] p-5">
+              <span className="grid size-10 place-items-center rounded-full bg-accent text-accent-ink">
                 <f.icon className="size-[18px]" aria-hidden />
               </span>
               <h3 className="text-[16.5px] font-[640]">{f.title}</h3>
-              <p className="text-[14px] leading-relaxed text-muted">{f.text}</p>
+              <p className="text-[14px] leading-relaxed text-bg/75">{f.text}</p>
             </li>
           ))}
         </ul>
@@ -176,7 +177,9 @@ function Security() {
         <ul className="mt-10 grid gap-x-8 gap-y-6 sm:grid-cols-2">
           {SECURITY.map((s, i) => (
             <li key={s.title} data-reveal style={{ "--reveal-delay": `${(i % 2) * 80}ms` }} className="flex gap-4">
-              <s.icon className="mt-0.5 size-5 shrink-0 text-accent-text" aria-hidden />
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-ink text-bg">
+                <s.icon className="size-[17px]" aria-hidden />
+              </span>
               <div>
                 <h3 className="text-[16px] font-[640]">{s.title}</h3>
                 <p className="mt-1 text-[14px] leading-relaxed text-muted">{s.text}</p>

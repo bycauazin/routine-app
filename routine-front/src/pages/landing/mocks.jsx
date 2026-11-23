@@ -34,7 +34,7 @@ const DAY = [
 /** The Hoje screen inside a phone. */
 export function TodayMock({ className }) {
   return (
-    <div className={cn("w-full max-w-[340px] rounded-[38px] border border-rule-strong bg-paper p-2.5 shadow-lg", className)} role="img" aria-label="Tela Hoje do Routine: a linha do tempo do dia com os itens feitos marcados">
+    <div className={cn("w-full max-w-[340px] rounded-[38px] bg-ink p-2.5 shadow-lg", className)} role="img" aria-label="Tela Hoje do Routine: a linha do tempo do dia com os itens feitos marcados">
       <div className="flex flex-col gap-3.5 overflow-hidden rounded-[30px] bg-bg px-4 pt-5 pb-4 tabular-nums">
         <div className="flex items-start justify-between gap-2">
           <div>

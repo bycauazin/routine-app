@@ -45,6 +45,8 @@
   --accent-active: #e88daf;
   --accent-ink: #253b57;
   --accent-text: #b8336a;
+  /* pink on a band painted with --ink (navy in light, creme in dark) */
+  --accent-on-ink: #f4a6c1;
   --accent-soft: rgb(244 166 193 / 0.22);
   --selected: #fce4ec;
   --highlight: rgb(244 166 193 / 0.4);
@@ -95,6 +97,7 @@
   --accent-active: #f09bb9;
   --accent-ink: #16253a;
   --accent-text: #f4a6c1;
+  --accent-on-ink: #b8336a;
   --accent-soft: rgb(244 166 193 / 0.14);
   --selected: rgb(244 166 193 / 0.16);
   --highlight: rgb(244 166 193 / 0.3);
@@ -141,6 +144,7 @@
   --color-accent-active: var(--accent-active);
   --color-accent-ink: var(--accent-ink);
   --color-accent-text: var(--accent-text);
+  --color-accent-on-ink: var(--accent-on-ink);
   --color-accent-soft: var(--accent-soft);
   --color-selected: var(--selected);
   --color-highlight: var(--highlight);
