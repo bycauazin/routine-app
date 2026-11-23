@@ -195,13 +195,17 @@ const DESK_DAY = [
 ];
 
 /**
- * The Routine app on a computer (top bar, the day, the week and a report),
- * used only as the blurred picture behind the hero. Decorative: hidden from
- * screen readers.
+ * The Routine app on a computer (top bar, the day, the week and a report).
+ * Fixed 1120px wide as the blurred picture behind the hero (decorative,
+ * hidden from screen readers); `fluid` fits the width of its column and is
+ * described for screen readers.
  */
-export function DesktopAppShot({ className }) {
+export function DesktopAppShot({ className, fluid = false }) {
   return (
-    <div className={cn("w-[1120px] overflow-hidden rounded-[22px] border border-rule-strong bg-bg shadow-lg", className)} aria-hidden>
+    <div
+      className={cn("overflow-hidden rounded-[22px] bg-bg shadow-lg", fluid ? "w-full border-2 border-ink" : "w-[1120px] border border-rule-strong", className)}
+      {...(fluid ? { role: "img", "aria-label": "O Routine no computador: a lista do dia, a semana em grade e os números da semana" } : { "aria-hidden": true })}
+    >
       <div className="flex h-12 items-center gap-6 border-b border-rule bg-paper px-5 text-[13px]">
         <span className="flex items-center gap-2 font-[700]">
           <span className="size-6 rounded-[7px] bg-ink" /> Routine
@@ -212,7 +216,7 @@ export function DesktopAppShot({ className }) {
         <span className="text-muted">Configurações</span>
         <span className="ml-auto size-7 rounded-full bg-accent" />
       </div>
-      <div className="grid grid-cols-[360px_minmax(0,1fr)] gap-5 p-5">
+      <div className={cn("grid gap-5 p-5", fluid ? "md:grid-cols-[minmax(0,300px)_minmax(0,1fr)]" : "grid-cols-[360px_minmax(0,1fr)]")}>
         <div className="flex flex-col gap-1 rounded-[16px] border border-rule bg-paper p-3">
           <p className="px-2 pt-1 text-[12px] text-muted">Hoje</p>
           <p className="px-2 pb-2 text-[20px] font-[700]">Segunda, 23 nov</p>

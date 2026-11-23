@@ -23,7 +23,7 @@ const WEEK = [
 export function CompletionCard({ className }) {
   const best = Math.max(...WEEK.map(([, v]) => v));
   return (
-    <div className={cn("flex flex-col gap-4 rounded-[18px] border border-rule bg-paper p-5", className)} role="img" aria-label="Exemplo: 82% da rotina cumprida na semana, 6 pontos a mais que a semana passada; o melhor dia foi domingo, com 100%">
+    <div className={cn("flex flex-col gap-4 rounded-[18px] border border-ink/25 bg-paper p-5", className)} role="img" aria-label="Exemplo: 82% da rotina cumprida na semana, 6 pontos a mais que a semana passada; o melhor dia foi domingo, com 100%">
       <div>
         <p className="text-[12.5px] font-[560] text-muted">Rotina cumprida · semana</p>
         <p className="mt-1 flex items-baseline gap-2 tabular-nums">
@@ -52,7 +52,7 @@ export function ScoreCard({ className }) {
   const score = 8.4;
   const circumference = 2 * Math.PI * 34;
   return (
-    <div className={cn("flex flex-col gap-4 rounded-[18px] border border-rule bg-paper p-5", className)} role="img" aria-label="Exemplo: nota 8,4 de 10 hoje; 7,9 na semana e 7,6 no mês">
+    <div className={cn("flex flex-col gap-4 rounded-[18px] border border-ink/25 bg-paper p-5", className)} role="img" aria-label="Exemplo: nota 8,4 de 10 hoje; 7,9 na semana e 7,6 no mês">
       <p className="text-[12.5px] font-[560] text-muted">Nota do dia</p>
       <div className="flex items-center gap-5">
         <svg viewBox="0 0 80 80" className="size-[88px] shrink-0 -rotate-90" aria-hidden>
@@ -79,7 +79,7 @@ const STREAKS = [
 
 export function StreaksCard({ className }) {
   return (
-    <div className={cn("flex flex-col gap-3 rounded-[18px] border border-rule bg-paper p-5", className)} role="img" aria-label="Exemplo: sequências dos hábitos — Duolingo 12 dias seguidos, Ler 2 páginas 5 dias, Estudar 10 minutos 3 dias">
+    <div className={cn("flex flex-col gap-3 rounded-[18px] border border-ink/25 bg-paper p-5", className)} role="img" aria-label="Exemplo: sequências dos hábitos — Duolingo 12 dias seguidos, Ler 2 páginas 5 dias, Estudar 10 minutos 3 dias">
       <p className="text-[12.5px] font-[560] text-muted">Sequências · últimos 14 dias</p>
       {STREAKS.map(([name, days, pattern]) => (
         <div key={name} className="flex flex-col gap-1.5">
@@ -111,7 +111,7 @@ const HOURS = [
 export function HoursCard({ className }) {
   const total = HOURS.reduce((sum, [, h]) => sum + h, 0);
   return (
-    <div className={cn("flex flex-col gap-4 rounded-[18px] border border-rule bg-paper p-5", className)} role="img" aria-label={`Exemplo: horas por categoria na semana — ${HOURS.map(([n, h]) => `${n} ${h}h`).join(", ")}`}>
+    <div className={cn("flex flex-col gap-4 rounded-[18px] border border-ink/25 bg-paper p-5", className)} role="img" aria-label={`Exemplo: horas por categoria na semana — ${HOURS.map(([n, h]) => `${n} ${h}h`).join(", ")}`}>
       <div className="flex items-baseline justify-between">
         <p className="text-[12.5px] font-[560] text-muted">Horas por categoria · semana</p>
         <p className="text-[12.5px] font-[600] text-ink tabular-nums">{total}h</p>

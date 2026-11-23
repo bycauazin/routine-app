@@ -31,13 +31,12 @@ function hourNow() {
 }
 
 /**
- * "Céu do dia": the hero's light follows the hour under the pointer, from
- * dawn (left) to night (right). The sun travels an arc and turns into the
- * moon after dark; at the bottom the blocks of a day stand like a skyline,
- * and their windows light up once it is night. With no pointer for a while,
- * the day goes by on its own.
- *
- * The sky is translucent, so the blurred app screens behind it still show.
+ * "Céu do dia", a window on the right of the hero: its light follows the hour
+ * of the pointer over the hero, from dawn (left edge) to night (right edge).
+ * The sun travels an arc and turns into the moon after dark; at the bottom the
+ * blocks of a day stand like a skyline with navy windows (creme in the dark
+ * theme), the block of "now" in pink. With no pointer for a while, the day
+ * goes by on its own.
  * Performance: a few shapes per frame, the loop starts after the page has
  * loaded, and it pauses off-screen and in a hidden tab. Reduced motion: a
  * still picture of the current hour.
@@ -53,7 +52,7 @@ export function SkyDay({ className }) {
 
     let w = 0;
     let h = 0;
-    let c = { stops: [], moon: [0, 0, 0], pink: "", deep: "", ink: "", rule: "", ruleStrong: "", cats: [] };
+    let c = { stops: [], moon: [0, 0, 0], page: [0, 0, 0], pink: "", deep: "", ink: "", rule: "", edge: "", cats: [] };
     let hour = Math.min(22.9, Math.max(7, hourNow()));
     const ptr = { x: -1, last: -1e9 };
     let visible = true;
@@ -66,10 +65,12 @@ export function SkyDay({ className }) {
       c = {
         stops: STOPS.map((hh) => toRgb(v(`--sky-${String(hh).padStart(2, "0")}`))),
         moon: toRgb(v("--sky-moon")),
+        page: toRgb(v("--bg")),
         pink: v("--accent"),
         deep: v("--accent-text"),
         ink: v("--ink"),
         rule: v("--rule-strong"),
+        edge: v("--sky-edge"),
         cats: CATS.map(v),
       };
     };
@@ -104,79 +105,75 @@ export function SkyDay({ className }) {
       const sky = skyAt(hr);
       ctx.clearRect(0, 0, w, h);
 
-      // the sky: the hour's light at the top, fading into the page at the bottom (translucent)
+      // the sky: the hour's light at the top, blending into the page color toward the skyline (solid, so the frame never shows through)
       const g = ctx.createLinearGradient(0, 0, 0, h);
-      g.addColorStop(0, `rgba(${sky.join(",")},0.92)`);
-      g.addColorStop(0.75, `rgba(${sky.join(",")},0.35)`);
-      g.addColorStop(1, `rgba(${sky.join(",")},0)`);
+      g.addColorStop(0, `rgb(${sky.join(",")})`);
+      g.addColorStop(1, `rgb(${mix(sky, c.page, 0.5).join(",")})`);
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, w, h);
 
-      // the sun's arc: high on the right, clear of the text and above the cards (phones: the sky and the skyline only)
-      const narrow = w < 768;
-      if (!narrow) {
-        const cx = w * 0.76;
-        const cy = h * 0.5;
-        const rx = w * 0.2;
-        const ry = h * 0.38;
-        const a = Math.PI + ((hr - 7) / 16) * Math.PI;
-        ctx.setLineDash([3, 7]);
-        ctx.strokeStyle = c.rule;
-        ctx.globalAlpha = 0.7;
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.ellipse(cx, cy, rx, ry, 0, Math.PI, Math.PI * 2);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.globalAlpha = 1;
+      // the sun's arc, centered in the window, above the skyline
+      const cx = w * 0.5;
+      const cy = h * 0.66;
+      const rx = w * 0.38;
+      const ry = h * 0.5;
+      const a = Math.PI + ((hr - 7) / 16) * Math.PI;
+      ctx.setLineDash([3, 7]);
+      ctx.strokeStyle = c.ink;
+      ctx.globalAlpha = 0.28;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, Math.PI, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 1;
 
-        // the sun, or the moon after dark
-        const sx = cx + Math.cos(a) * rx;
-        const sy = cy + Math.sin(a) * ry;
-        const glow = night ? c.moon : toRgb(c.pink);
-        const halo = ctx.createRadialGradient(sx, sy, 0, sx, sy, 100);
-        halo.addColorStop(0, `rgba(${glow.join(",")},0.75)`);
-        halo.addColorStop(1, `rgba(${glow.join(",")},0)`);
-        ctx.fillStyle = halo;
+      // the sun, or the moon after dark
+      const sx = cx + Math.cos(a) * rx;
+      const sy = cy + Math.sin(a) * ry;
+      const glow = night ? c.moon : toRgb(c.pink);
+      const halo = ctx.createRadialGradient(sx, sy, 0, sx, sy, 90);
+      halo.addColorStop(0, `rgba(${glow.join(",")},0.75)`);
+      halo.addColorStop(1, `rgba(${glow.join(",")},0)`);
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 90, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(sx, sy, 22, 0, Math.PI * 2);
+      ctx.fillStyle = night ? `rgb(${c.moon.join(",")})` : c.pink;
+      ctx.fill();
+      if (night) {
         ctx.beginPath();
-        ctx.arc(sx, sy, 100, 0, Math.PI * 2);
+        ctx.arc(sx + 9, sy - 6, 19, 0, Math.PI * 2);
+        ctx.fillStyle = `rgb(${sky.join(",")})`;
         ctx.fill();
-        ctx.beginPath();
-        ctx.arc(sx, sy, 24, 0, Math.PI * 2);
-        ctx.fillStyle = night ? `rgb(${c.moon.join(",")})` : c.pink;
-        ctx.fill();
-        if (night) {
-          ctx.beginPath();
-          ctx.arc(sx + 10, sy - 7, 21, 0, Math.PI * 2);
-          ctx.fillStyle = `rgb(${sky.join(",")})`;
-          ctx.fill();
-        }
-        const label = `${String(Math.floor(hr)).padStart(2, "0")}:${String(Math.floor((hr % 1) * 60)).padStart(2, "0")}`;
-        ctx.font = "700 13px 'Inter Variable', system-ui, sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillStyle = c.ink;
-        ctx.fillText(label, sx, sy + 44);
       }
+      const label = `${String(Math.floor(hr)).padStart(2, "0")}:${String(Math.floor((hr % 1) * 60)).padStart(2, "0")}`;
+      ctx.font = "700 13px 'Inter Variable', system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillStyle = c.ink;
+      ctx.fillText(label, sx, sy + 40);
 
-      // the day as a skyline at the bottom; windows light up at night
+      // the day as a skyline: soft white edges, navy windows (creme in the dark theme); the block of "now" lights up pink
       const base = h - 1;
-      const x = (v) => w * 0.03 + ((v - 7) / 16) * w * 0.94;
+      const x = (v) => w * 0.04 + ((v - 7) / 16) * w * 0.92;
       for (const [a0, a1, height, cat] of BLOCKS) {
         const bx = x(a0) + 2;
         const bw = x(a1) - x(a0) - 4;
-        const bh = height * h * (narrow ? 0.2 : 0.3);
+        const bh = height * h * 0.36;
         const by = base - bh;
         const now = hr >= a0 && hr < a1;
-        rect(bx, by, bw, bh, 6);
+        rect(bx, by, bw, bh + 8, 7);
         ctx.fillStyle = c.cats[cat];
         ctx.fill();
-        ctx.lineWidth = now ? 2 : 1;
-        ctx.strokeStyle = now ? c.deep : c.rule;
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = now ? c.deep : c.edge;
         ctx.stroke();
-        if (hr > a1 || now) {
-          ctx.fillStyle = night ? c.pink : c.rule;
-          for (let wy = by + 10; wy < base - 10; wy += 16) for (let wx = bx + 8; wx < bx + bw - 10; wx += 14) ctx.fillRect(wx, wy, 6, 7);
-        }
+        ctx.fillStyle = now ? c.deep : c.ink;
+        ctx.globalAlpha = now ? 0.9 : hr > a1 ? 0.75 : 0.32;
+        for (let wy = by + 10; wy < base - 8; wy += 15) for (let wx = bx + 7; wx < bx + bw - 9; wx += 13) ctx.fillRect(wx, wy, 6, 7);
+        ctx.globalAlpha = 1;
       }
     }
 
@@ -187,16 +184,16 @@ export function SkyDay({ className }) {
       if (!visible || document.hidden) return;
       const idle = t - ptr.last > 2500 || ptr.x < 0;
       // with the pointer: the hour under it; alone: the day goes by, from dawn to night and back
-      const target = idle ? 7 + 8 * (1 - Math.cos((t / 1000) * 0.16)) : 7 + Math.min(1, Math.max(0, ptr.x / w)) * 16;
+      const target = idle ? 7 + 8 * (1 - Math.cos((t / 1000) * 0.16)) : 7 + Math.min(1, Math.max(0, ptr.x)) * 16;
       hour += (target - hour) * Math.min(1, dt * (idle ? 1.2 : 5));
       paint();
     };
 
     const onMove = (e) => {
-      const r = canvas.getBoundingClientRect();
-      const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      const area = (canvas.closest(".hero-panel") ?? canvas).getBoundingClientRect();
+      const inside = e.clientX >= area.left && e.clientX <= area.right && e.clientY >= area.top && e.clientY <= area.bottom;
       if (!inside) return;
-      ptr.x = e.clientX - r.left;
+      ptr.x = (e.clientX - area.left) / area.width;
       ptr.last = performance.now();
     };
 

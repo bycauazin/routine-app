@@ -86,6 +86,8 @@
   --sky-21: #dfe3f3;
   --sky-23: #d3d8ec;
   --sky-moon: #fffaf2;
+  /* edges of the skyline blocks: a soft white, not pure */
+  --sky-edge: rgb(255 255 255 / 0.78);
 
   /* Third-party brand (WhatsApp button on the public pages). */
   --whatsapp: #25d366;
@@ -145,6 +147,7 @@
   --sky-21: #172540;
   --sky-23: #121c30;
   --sky-moon: #faf3e8;
+  --sky-edge: rgb(250 243 232 / 0.4);
 
   --chart-work: #5684cf;
   --chart-class: #c97a37;

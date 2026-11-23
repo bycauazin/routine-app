@@ -12,7 +12,8 @@ const WAVE = 380; // ms for the wave to cross the screen
 const IN = 260;
 const OUT = 280;
 const EASE = "cubic-bezier(.2,.8,.2,1)";
-const COLORS = ["var(--accent)", "var(--selected)", "var(--cat-commute)", "var(--cat-study)", "var(--cat-class)", "var(--cat-work)"];
+/** Solid colors only (--selected is translucent in the dark theme and let the page show through). */
+const COLORS = ["var(--accent)", "var(--ink)", "var(--cat-commute)", "var(--cat-study)", "var(--cat-class)", "var(--cat-work)"];
 
 let running = false;
 
@@ -38,7 +39,8 @@ function buildOverlay() {
     const tile = document.createElement("span");
     const c = i % cols;
     const r = (i - c) / cols;
-    Object.assign(tile.style, { background: COLORS[(i * 7 + r) % COLORS.length], borderRadius: "6px", transform: "scale(0)" });
+    // square corners and a little overlap when full, so no gap ever shows the page behind
+    Object.assign(tile.style, { background: COLORS[(i * 7 + r) % COLORS.length], transform: "scale(0)" });
     tile.dataset.delay = String(((c + r) / Math.max(1, cols + rows - 2)) * WAVE);
     overlay.appendChild(tile);
     tiles.push(tile);
@@ -59,11 +61,11 @@ export async function withGridTransition(change) {
   running = true;
   const { overlay, tiles } = buildOverlay();
   try {
-    await wave(tiles, "scale(0)", "scale(1.04)", IN, EASE);
+    await wave(tiles, "scale(0)", "scale(1.08)", IN, EASE);
     await change();
     window.scrollTo(0, 0);
     await nextPaint();
-    await wave(tiles, "scale(1.04)", "scale(0)", OUT, "ease-in");
+    await wave(tiles, "scale(1.08)", "scale(0)", OUT, "ease-in");
   } finally {
     overlay.remove();
     running = false;

@@ -121,11 +121,12 @@ Fica todo em `routine-front/src/index.css`, em tokens CSS expostos ao Tailwind 4
 
 Escolhidas numa página de comparação com 6 opções por grupo:
 
-- **Céu do dia** (`pages/landing/sky-day.jsx`), na abertura da landing: a luz do painel segue a hora em que o mouse
-  está, do amanhecer (esquerda) à noite (direita); o sol percorre um arco alto à direita, longe do texto, e vira lua
-  depois das 19:30; embaixo, os blocos do dia formam uma cidade cujas janelas acendem à noite. Sem mouse, o dia passa
-  sozinho. Cores em tokens `--sky-*` (claro e escuro). No celular, só a cor do céu e a cidade. A abertura é um painel
-  que cabe numa tela só, com telas do app bem desfocadas atrás.
+- **Céu do dia** (`pages/landing/sky-day.jsx`), numa janela à direita da abertura (o título fica à esquerda, com
+  prioridade): a luz segue a hora em que o mouse está na abertura, do amanhecer (borda esquerda) à noite (borda
+  direita); o sol percorre um arco e vira lua depois das 19:30; embaixo, os blocos do dia formam uma cidade com bordas
+  num branco suave e janelas na cor de texto (marinho no claro, creme no escuro), e o bloco de agora em rosa. Sem
+  mouse, o dia passa sozinho. Cores em tokens `--sky-*`. A abertura é um painel com borda marinho que cabe numa tela
+  só; as telas do app (celular e computador) vêm logo abaixo, na seção "No celular e no computador".
 - **Sequência** (`pages/landing/streak-run.jsx`), na linha entre as seções: quadradinhos de dias se preenchem de uma
   ponta à outra da página e terminam no selo "N dias seguidos".
 - **Planilha viva** (`pages/landing/live-sheet.jsx`), no contato e nas telas de entrar e criar conta: a grade da planilha no fundo; as células perto do mouse se
@@ -136,7 +137,7 @@ Escolhidas numa página de comparação com 6 opções por grupo:
 - **Cursor de encaixe** (`pages/landing/snap-cursor.jsx`): ponto marinho + anel rosa que segue com atraso e, em
   cima de link ou botão, assume o formato dele. Só com mouse de verdade (`pointer: fine`); em campos de texto volta
   o cursor normal.
-- **Grade da semana** (`lib/grid-transition.js` + `GridLink`): quadrados nas cores das categorias cobrem a tela em
+- **Grade da semana** (`lib/grid-transition.js` + `GridLink`): quadrados sólidos (cantos retos, sem frestas) cobrem a tela em
   onda diagonal, a página troca por baixo e eles se desfazem. Usada nas entradas (landing → entrar, criar conta,
   contato, abrir o app), não em todo clique dentro do app.
 - Gráficos (relatórios e mockups): as categorias usam `--chart-*` (validadas para daltonismo nos dois temas, ordem
