@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Routine logo (Cream Routine palette): navy #253B57, creme #FAF3E8, soft pink #F4A6C1.
+       A calendar page for the day, with a check: the day done. -->
+  <rect width="1024" height="1024" rx="232" fill="#253B57"/>
+  <!-- the page -->
+  <rect x="222" y="262" width="580" height="560" rx="92" fill="#FAF3E8"/>
+  <!-- pink header of the page -->
+  <path d="M222 354 Q222 262 314 262 L710 262 Q802 262 802 354 L802 404 L222 404 Z" fill="#F4A6C1"/>
+  <!-- binder rings -->
+  <rect x="356" y="196" width="64" height="150" rx="32" fill="#FAF3E8" stroke="#253B57" stroke-width="22"/>
+  <rect x="604" y="196" width="64" height="150" rx="32" fill="#FAF3E8" stroke="#253B57" stroke-width="22"/>
+  <!-- the check -->
+  <path d="M378 610 L478 706 L658 520" fill="none" stroke="#253B57" stroke-width="74" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

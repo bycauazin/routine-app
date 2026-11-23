@@ -1,0 +1,179 @@
+// Routine — PostgreSQL schema
+//
+// Conventions (see docs/ARCHITECTURE.md):
+// - Every user-owned table has `user_id` and a composite unique (id, user_id).
+//   Child tables reference parents through (parent_id, user_id) so the database
+//   itself rejects cross-user references, not only the service layer.
+// - Civil dates (a day of the routine) use `date`; instants use `timestamptz`.
+//   Civil dates are interpreted in America/Sao_Paulo.
+// - Times of day are minutes since 00:00 (Int, 0–1440).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────────────────────── Auth ─────────────────────────────
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+model User {
+  id                    String    @id @default(uuid(7)) @db.Uuid
+  email                 String    @unique // always stored lower-cased
+  name                  String
+  passwordHash          String    @map("password_hash")
+  role                  UserRole  @default(USER)
+  onboardingCompletedAt DateTime? @map("onboarding_completed_at") @db.Timestamptz(3)
+  /// Set when the user opens the confirmation link (or resets the password by e-mail).
+  /// Login is refused while null.
+  emailVerifiedAt       DateTime? @map("email_verified_at") @db.Timestamptz(3)
+  /// Set when an admin lets a public sign-up in (accounts created by the
+  /// `user:create` script start approved). Login is refused while null.
+  approvedAt            DateTime? @map("approved_at") @db.Timestamptz(3)
+  /// Only on demonstration accounts (one per visitor, fictional data): when
+  /// it stops working and is deleted. Null on every real account.
+  demoExpiresAt         DateTime? @map("demo_expires_at") @db.Timestamptz(3)
+  /// Two-step verification (authenticator app, TOTP). The secret is stored
+  /// encrypted (AES-256-GCM, key derived from AUTH_SECRET); it is set while
+  /// the user sets it up, and 2FA is on only once `twoFactorEnabledAt` is set.
+  twoFactorSecret       String?   @map("two_factor_secret")
+  twoFactorEnabledAt    DateTime? @map("two_factor_enabled_at") @db.Timestamptz(3)
+  /// Last 30-second step whose code was accepted: each code works only once.
+  twoFactorLastStep     Int?      @map("two_factor_last_step")
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  sessions      Session[]
+  authTokens    AuthToken[]
+  recoveryCodes RecoveryCode[]
+  settings      UserSettings?
+  auditLogs     AuditLog[]
+
+  @@index([demoExpiresAt])
+  @@map("users")
+}
+
+/// Server-side session. `id` is the HMAC-SHA256 (hex, keyed by AUTH_SECRET) of
+/// the random token stored in the HttpOnly cookie; the raw token is never persisted.
+model Session {
+  id         String   @id
+  userId     String   @map("user_id") @db.Uuid
+  expiresAt  DateTime @map("expires_at") @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  lastSeenAt DateTime @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  userAgent  String?  @map("user_agent")
+  ipAddress  String?  @map("ip_address")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+enum AuthTokenPurpose {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+  EMAIL_CHANGE
+  /// Password accepted, waiting for the authenticator code (never e-mailed).
+  TWO_FACTOR_LOGIN
+}
+
+/// One-time recovery codes for two-step verification (when the phone is
+/// lost). `id` is the HMAC of the code; the code itself is shown only once.
+model RecoveryCode {
+  id        String   @id
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("recovery_codes")
+}
+
+/// Requests per client per minute, for the API-wide limit. One row per
+/// bucket ("ip:1.2.3.4") and minute; old rows are deleted now and then.
+model RequestCounter {
+  bucket      String
+  windowStart DateTime @map("window_start") @db.Timestamptz(3)
+  count       Int      @default(0)
+
+  @@id([bucket, windowStart])
+  @@index([windowStart])
+  @@map("request_counters")
+}
+
+/// One-time tokens sent by e-mail (confirm account, reset password, confirm a
+/// new e-mail). `id` is the HMAC of the token in the link; the raw token is
+/// never stored. Deleted when used, replaced when a new one is asked for.
+model AuthToken {
+  id        String           @id
+  userId    String           @map("user_id") @db.Uuid
+  purpose   AuthTokenPurpose
+  /// EMAIL_CHANGE only: the address being confirmed.
+  newEmail  String?          @map("new_email")
+  expiresAt DateTime         @map("expires_at") @db.Timestamptz(3)
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+  @@index([expiresAt])
+  @@map("auth_tokens")
+}
+
+/// Login attempts, used for rate limiting (per e-mail and per IP). Other
+/// limited actions (sign-up, e-mails) use it too, with a prefixed identifier
+/// such as "register-ip:1.2.3.4" and no ip_address.
+model LoginAttempt {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  identifier String // lower-cased e-mail as typed
+  ipAddress  String?  @map("ip_address")
+  success    Boolean
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([identifier, createdAt])
+  @@index([ipAddress, createdAt])
+  @@map("login_attempts")
+}
+
+// ─────────────────────────── Settings ───────────────────────────
+
+model UserSettings {
+  userId    String   @id @map("user_id") @db.Uuid
+  locale    String   @default("pt-BR")
+  /// "Today" and the routine's hours are read in this time zone.
+  timezone  String   @default("America/Sao_Paulo")
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+// ───────────────────────────── System ─────────────────────────────
+
+/// Append-only trail of sensitive changes (deletions, auth, security).
+/// Never store passwords or tokens in `metadata`.
+model AuditLog {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id") @db.Uuid
+  metadata   Json?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}

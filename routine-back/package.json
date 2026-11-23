@@ -1,0 +1,51 @@
+{
+  "name": "routine-back",
+  "version": "0.1.0",
+  "description": "Routine — API (Node.js + Express + PostgreSQL)",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env --watch server.js",
+    "start": "node server.js",
+    "user:create": "node --env-file-if-exists=.env scripts/create-user.js",
+    "mail:test": "node --env-file-if-exists=.env scripts/send-test-mail.js",
+    "user:disable-2fa": "node --env-file-if-exists=.env scripts/disable-two-factor.js",
+    "db:migrate": "prisma migrate dev && prisma generate",
+    "db:deploy": "prisma migrate deploy && prisma generate",
+    "db:deploy:prod": "node --env-file=.env.production node_modules/prisma/build/index.js migrate deploy",
+    "db:status:prod": "node --env-file=.env.production scripts/migration-status.js",
+    "db:pull:prod": "node --env-file=.env.production scripts/pull-prod.js",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "db:copy": "node --env-file-if-exists=.env scripts/copy-data.js",
+    "test": "vitest run",
+    "test:unit": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "test:watch": "vitest",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@node-rs/argon2": "2.2.2",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "cookie-parser": "1.4.7",
+    "express": "5.3.0",
+    "helmet": "8.3.0",
+    "nodemailer": "10.3.1",
+    "pg": "8.23.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "dotenv": "18.0.10",
+    "prisma": "7.10.1",
+    "supertest": "7.3.2",
+    "vitest": "5.1.0"
+  },
+  "allowScripts": {
+    "@prisma/engines@7.10.1": true,
+    "prisma@7.10.1": true
+  }
+}

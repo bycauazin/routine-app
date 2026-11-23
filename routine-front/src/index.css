@@ -1,0 +1,557 @@
+@import "@fontsource-variable/inter";
+@import "tailwindcss";
+
+/*
+ * Routine — visual system "Cream Routine"
+ * Made for the phone first, 60-30-10 color rule: creme (light) or navy (dark)
+ * is the 60% base, the other one is the 30% of text, navigation and lines,
+ * and soft pink is the 10% reserved for main actions, selected states and
+ * highlights (check done, "agora").
+ *
+ * Soft pink has no contrast for text on creme (~1.8:1), so:
+ *  - text ON pink is always navy (--accent-ink), never white;
+ *  - pink text, small icons, links and thin bars use --accent-text (deep pink).
+ *  In the dark theme the soft pink itself works for everything.
+ *
+ * done / danger / warn keep their meaning outside the 60-30-10 count
+ * (done = completed, danger = errors and missed, warn = attention).
+ * Every color comes from these tokens: no loose hex in components.
+ * <html data-theme> is "light" or "dark".
+ */
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  /* Official palette */
+  --brand-creme: #faf3e8;
+  --brand-navy: #253b57;
+  --brand-pink: #f4a6c1;
+
+  --bg: #faf3e8;
+  --paper: #ffffff;
+  --paper-2: #fffdf9;
+  --sunk: #f2e9da;
+  --ink: #253b57;
+  --ink-2: #2e4766;
+  --muted: #55667b;
+  --faint: #5f6f84;
+  --rule: #eadfcf;
+  --rule-strong: #d5c6b0;
+
+  --accent: #f4a6c1;
+  --accent-hover: #ee9ab8;
+  --accent-active: #e88daf;
+  --accent-ink: #253b57;
+  --accent-text: #b8336a;
+  --accent-soft: rgb(244 166 193 / 0.22);
+  --selected: #fce4ec;
+  --highlight: rgb(244 166 193 / 0.4);
+  --highlight-soft: rgb(244 166 193 / 0.16);
+  --focus-ring: #253b57;
+
+  --done: #2b7355;
+  --done-soft: rgb(43 115 85 / 0.1);
+  --danger: #b42318;
+  --danger-soft: rgb(180 35 24 / 0.08);
+  --warn: #9a5b0a;
+  --warn-soft: rgb(154 91 10 / 0.1);
+
+  /* Category tints (outside 60-30-10): block backgrounds, always with --ink text. */
+  --cat-work: #e6e2db;
+  --cat-commute: #dcebf7;
+  --cat-study: #d8e1f6;
+  --cat-meal: #f8e3cc;
+  --cat-workout: #d8efdf;
+  --cat-class: #ecdff6;
+  --cat-personal: #fbe0e9;
+
+  /* Third-party brand (WhatsApp button on the public pages). */
+  --whatsapp: #25d366;
+  --whatsapp-ink: #062d18;
+
+  --overlay: rgb(37 59 87 / 0.45);
+  --shadow: 0 1px 2px rgb(37 59 87 / 0.06);
+  --shadow-lg: 0 18px 48px -20px rgb(37 59 87 / 0.3), 0 1px 3px rgb(37 59 87 / 0.06);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  /* navy base · creme text and lines · soft pink for actions */
+  --bg: #16253a;
+  --paper: #1e3149;
+  --paper-2: #233752;
+  --sunk: #111d2e;
+  --ink: #faf3e8;
+  --ink-2: #ede5d8;
+  --muted: #b5bdc8;
+  --faint: #96a0ae;
+  --rule: #2a405c;
+  --rule-strong: #3a5374;
+
+  --accent: #f4a6c1;
+  --accent-hover: #f7b6cd;
+  --accent-active: #f09bb9;
+  --accent-ink: #16253a;
+  --accent-text: #f4a6c1;
+  --accent-soft: rgb(244 166 193 / 0.14);
+  --selected: rgb(244 166 193 / 0.16);
+  --highlight: rgb(244 166 193 / 0.3);
+  --highlight-soft: rgb(244 166 193 / 0.1);
+  --focus-ring: #f4a6c1;
+
+  --done: #6fcf9f;
+  --done-soft: rgb(111 207 159 / 0.13);
+  --danger: #ff8a7a;
+  --danger-soft: rgb(255 138 122 / 0.12);
+  --warn: #f2b84b;
+  --warn-soft: rgb(242 184 75 / 0.12);
+
+  --cat-work: #2c3a4e;
+  --cat-commute: #22405e;
+  --cat-study: #2b3a68;
+  --cat-meal: #4a3a2a;
+  --cat-workout: #22473a;
+  --cat-class: #3d3159;
+  --cat-personal: #4b2c3f;
+
+  --overlay: rgb(8 14 24 / 0.66);
+  --shadow: none;
+  --shadow-lg: 0 24px 60px -24px rgb(0 0 0 / 0.8);
+}
+
+@theme inline {
+  --font-sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* semantic colors */
+  --color-bg: var(--bg);
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-sunk: var(--sunk);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-active: var(--accent-active);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-text: var(--accent-text);
+  --color-accent-soft: var(--accent-soft);
+  --color-selected: var(--selected);
+  --color-highlight: var(--highlight);
+  --color-highlight-soft: var(--highlight-soft);
+  --color-focus-ring: var(--focus-ring);
+  --color-done: var(--done);
+  --color-done-soft: var(--done-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-overlay: var(--overlay);
+  --color-cat-work: var(--cat-work);
+  --color-cat-commute: var(--cat-commute);
+  --color-cat-study: var(--cat-study);
+  --color-cat-meal: var(--cat-meal);
+  --color-cat-workout: var(--cat-workout);
+  --color-cat-class: var(--cat-class);
+  --color-cat-personal: var(--cat-personal);
+  --color-whatsapp: var(--whatsapp);
+  --color-whatsapp-ink: var(--whatsapp-ink);
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  --ease-out-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --shadow-paper: var(--shadow);
+  --shadow-lg: var(--shadow-lg);
+}
+
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv11";
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    min-height: 100dvh;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  ::selection {
+    background: var(--highlight);
+    color: var(--ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+  }
+
+  /* Tailwind 4 resets buttons to the default arrow: every clickable shows the hand. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="tab"],
+  [role="menuitem"],
+  [role="option"],
+  [role="switch"],
+  summary,
+  label[for],
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+  /* Key figures: tight, semibold, aligned digits. */
+  .display {
+    font-family: var(--font-sans);
+    font-weight: 650;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Numbers (times, counters): aligned digits. */
+  .num {
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+    font-weight: 540;
+    letter-spacing: -0.01em;
+  }
+
+  /* Discreet caption above a figure or a column. */
+  .label {
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--muted);
+  }
+  .label::first-letter {
+    text-transform: uppercase;
+  }
+
+  /* A surface. */
+  .sheet {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+  }
+
+  /* Subtle accent tint behind text. */
+  .marker {
+    background: var(--highlight-soft);
+    border-radius: 4px;
+    padding: 0 0.2em;
+    box-decoration-break: clone;
+  }
+
+
+
+  /* Arrow that slides on hover of its link. */
+  .nudge-arrow {
+    display: inline-block;
+    transition: transform 220ms var(--ease-out-soft);
+  }
+  a:hover > .nudge-arrow,
+  button:hover > .nudge-arrow {
+    transform: translateX(3px);
+  }
+}
+
+dialog[open]::backdrop {
+  animation: backdrop-in 220ms ease both;
+}
+
+@layer utilities {
+  .select-chevron {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b95a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
+}
+
+/* ───────── motion ───────── */
+
+@keyframes dialog-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes slide-from-right {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes slide-from-left {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* A "feito" badge popping in. */
+@keyframes stamp {
+  0% { opacity: 0; transform: scale(0.6); }
+  60% { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Check mark drawing itself. */
+@keyframes draw {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* Vertical bars grow up from the axis. */
+@keyframes grow-up {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+/* Skeleton: a calm pulse while data loads. */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* Toast: slides up, check draws itself, the bar empties until it closes. */
+@keyframes toast-up {
+  0% { opacity: 0; transform: translateY(14px) scale(0.96); }
+  60% { opacity: 1; transform: translateY(-2px) scale(1.01); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes toast-out {
+  to { opacity: 0; transform: translateY(8px) scale(0.97); }
+}
+@keyframes ring-pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  70% { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes drain {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+/* Page content enters in a short cascade (once, on navigation). */
+.page-enter > * > * {
+  animation: fade-up 420ms var(--ease-out-soft) backwards;
+}
+.page-enter > * > *:nth-child(2) { animation-delay: 50ms; }
+.page-enter > * > *:nth-child(3) { animation-delay: 100ms; }
+.page-enter > * > *:nth-child(4) { animation-delay: 150ms; }
+.page-enter > * > *:nth-child(n + 5) { animation-delay: 200ms; }
+
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* A row that was just done flashes once. */
+@keyframes done-flash {
+  0% { background-color: var(--done-soft); }
+  100% { background-color: transparent; }
+}
+
+/* Expanding panel (first steps). */
+@keyframes open-down {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.stagger > * {
+  /* backwards (not both): a finished animation must not leave a stacking context,
+     or the next row paints over an open menu. */
+  animation: fade-up 380ms var(--ease-out-soft) backwards;
+}
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 35ms; }
+.stagger > *:nth-child(3) { animation-delay: 70ms; }
+.stagger > *:nth-child(4) { animation-delay: 105ms; }
+.stagger > *:nth-child(5) { animation-delay: 140ms; }
+.stagger > *:nth-child(n + 6) { animation-delay: 175ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/*
+ * Section headers inside sheets (groups of the day…):
+ * a solid band with a strong title. Unlayered on purpose so the title
+ * always wins over utility colors.
+ */
+.section-head {
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  background: var(--sunk);
+}
+.section-head .label {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Dialog fields come in one after another when the dialog opens. */
+dialog[open] form > * {
+  animation: fade-up 320ms var(--ease-out-soft) backwards;
+}
+dialog[open] form > *:nth-child(2) { animation-delay: 40ms; }
+dialog[open] form > *:nth-child(3) { animation-delay: 80ms; }
+dialog[open] form > *:nth-child(4) { animation-delay: 120ms; }
+dialog[open] form > *:nth-child(5) { animation-delay: 160ms; }
+dialog[open] form > *:nth-child(n + 6) { animation-delay: 200ms; }
+
+/* Press ripple (see ripple() in Button). */
+.ripple {
+  position: absolute;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.16;
+  transform: scale(0);
+  pointer-events: none;
+  animation: ripple 560ms ease-out forwards;
+}
+@keyframes ripple {
+  to { transform: scale(2.6); opacity: 0; }
+}
+
+/* Small pulsing dot before "atrasada" / missed. */
+.late-dot {
+  position: relative;
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 9999px;
+  background: var(--danger);
+  vertical-align: 1px;
+}
+.late-dot::after {
+  position: absolute;
+  inset: -3px;
+  border-radius: 9999px;
+  background: var(--danger);
+  opacity: 0.35;
+  content: "";
+  animation: late-ping 1.8s ease-out infinite;
+}
+@keyframes late-ping {
+  from { transform: scale(0.6); opacity: 0.45; }
+  to { transform: scale(1.8); opacity: 0; }
+}
+
+/* Edge draws its own eye on password fields; PasswordInput already has one. */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+/* Landing: blocks rise in as they scroll into view (see useReveal). */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 600ms var(--ease-out-soft),
+    transform 600ms var(--ease-out-soft);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Landing: chart bars grow once their block is visible. */
+[data-reveal] .grow-x,
+[data-reveal] .grow-y {
+  transition: transform 900ms var(--ease-out-soft);
+  transition-delay: var(--grow-delay, 200ms);
+}
+[data-reveal] .grow-x {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+[data-reveal] .grow-y {
+  transform: scaleY(0);
+  transform-origin: bottom;
+}
+[data-reveal].is-visible .grow-x,
+[data-reveal].is-visible .grow-y {
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] .grow-x,
+  [data-reveal] .grow-y {
+    transform: none;
+  }
+}
+
+/* Landing: the phone in the hero floats gently. */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+

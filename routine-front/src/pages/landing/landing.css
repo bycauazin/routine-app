@@ -1,0 +1,79 @@
+/* Landing and contact page only (loaded with their chunk). Colors come from the tokens in index.css. */
+
+/* A highlighted phrase in a title: navy text over a soft pink highlighter stroke. */
+.mark-pink {
+  background: linear-gradient(transparent 58%, var(--accent) 58%, var(--accent) 92%, transparent 92%);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding-inline: 0.06em;
+}
+/* Dark: creme text on soft pink is unreadable, so the stroke becomes a thin band under the letters. */
+[data-theme="dark"] .mark-pink {
+  background: linear-gradient(transparent 84%, var(--accent) 84%, var(--accent) 96%, transparent 96%);
+}
+
+/* Hero title lines rise one after the other. */
+.rise-line {
+  display: block;
+  animation: rise-line 900ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes rise-line {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The phone in the hero floats gently. */
+.float-a {
+  animation: float-y 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* The week sheet: faint grid lines like the original spreadsheet. */
+.sheet-lines {
+  background-image:
+    linear-gradient(to right, var(--rule) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
+  background-size: 56px 28px;
+}
+
+/* A check that ticks itself when its block scrolls into view. */
+[data-reveal] .tick-in {
+  transform: scale(0.4);
+  opacity: 0;
+  transition:
+    transform 420ms var(--ease-spring),
+    opacity 200ms ease;
+  transition-delay: var(--tick-delay, 300ms);
+}
+[data-reveal].is-visible .tick-in {
+  transform: none;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .rise-line,
+  .float-a {
+    animation: none;
+  }
+  [data-reveal] .tick-in {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* Sections below the hero are only laid out and painted when they come near the
+   screen (faster first load). The browser remembers each real size once seen. */
+.lazy-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}

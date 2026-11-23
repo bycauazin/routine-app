@@ -1,0 +1,18 @@
+# dependencies
+node_modules/
+
+# builds
+dist/
+coverage/
+
+# environment (each app has its own .env.example)
+.env
+.env.*
+!.env.example
+
+# logs / OS / editor
+*.log
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.vscode/*.code-workspace
