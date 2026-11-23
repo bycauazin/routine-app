@@ -122,8 +122,9 @@ Fica todo em `routine-front/src/index.css`, em tokens CSS expostos ao Tailwind 4
 Escolhidas numa página de comparação com 6 opções por grupo:
 
 - **Planilha viva** (`pages/landing/live-sheet.jsx`): a grade da planilha no fundo; as células perto do mouse se
-  pintam com as cores das categorias e se apagam. **Nada anima atrás de elementos `[data-calm]`** (título, textos,
-  botões, o menu fixo). Sem mouse por um tempo, um ponteiro "fantasma" passeia. Começa só depois que a página
+  pintam com as cores das categorias e se apagam. **Atrás de elementos `[data-calm]`** (título, textos, botões, o
+  menu fixo) as células continuam acendendo, mas numa camada desfocada e mais fraca, para não atrapalhar a
+  leitura. Sem mouse por um tempo, um ponteiro "fantasma" passeia. Começa só depois que a página
   carrega e o navegador fica ocioso, pausa fora da tela e com a aba escondida, e as linhas são desenhadas uma vez só.
 - **Cursor de encaixe** (`pages/landing/snap-cursor.jsx`): ponto marinho + anel rosa que segue com atraso e, em
   cima de link ou botão, assume o formato dele. Só com mouse de verdade (`pointer: fine`); em campos de texto volta
@@ -131,6 +132,9 @@ Escolhidas numa página de comparação com 6 opções por grupo:
 - **Grade da semana** (`lib/grid-transition.js` + `GridLink`): quadrados nas cores das categorias cobrem a tela em
   onda diagonal, a página troca por baixo e eles se desfazem. Usada nas entradas (landing → entrar, criar conta,
   contato, abrir o app), não em todo clique dentro do app.
+- Gráficos (relatórios e mockups): as categorias usam `--chart-*` (validadas para daltonismo nos dois temas, ordem
+  fixa: trabalho, aulas, treino, estudo) e sempre têm rótulo direto. Os tons `--cat-*` são só para fundo de bloco
+  com texto, nunca para gráfico.
 - Tudo respeita `prefers-reduced-motion`: com ele ligado, a grade fica parada, o cursor é o do sistema e a página
   troca sem transição.
 
