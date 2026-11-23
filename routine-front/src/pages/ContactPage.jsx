@@ -3,8 +3,10 @@ import { useState } from "react";
 import { cn } from "@/lib/cn";
 import { useTheme } from "@/lib/theme";
 import { BrandIcon } from "./landing/brand-icons";
+import { LiveSheet } from "./landing/live-sheet";
 import { FloatingActions, PublicFooter, PublicHeader } from "./landing/public-chrome";
 import { btnPrimary, PORTFOLIO, SOCIALS, WHATSAPP } from "./landing/public-links";
+import { SnapCursor } from "./landing/snap-cursor";
 import "./landing/landing.css";
 
 const TOPICS = ["Dúvida", "Sugestão", "Problema no app", "Outro assunto"];
@@ -38,13 +40,13 @@ export function ContactPage() {
     <div className="min-h-dvh overflow-x-clip bg-bg text-ink">
       <PublicHeader />
       <main>
-        <section className="sheet-lines relative overflow-hidden border-b border-rule">
-          <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_80%_at_30%_40%,transparent,var(--bg)_75%)]" aria-hidden />
+        <section className="relative overflow-hidden border-b border-rule">
+          <LiveSheet />
           <div className="relative mx-auto max-w-[1180px] px-5 pt-32 pb-16 sm:px-8 md:pt-40 md:pb-20">
-            <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-rule bg-paper px-3.5 py-1.5 text-[12.5px] font-[560] text-muted">
+            <p data-calm className="mb-6 inline-flex items-center gap-2 rounded-full border border-rule bg-paper px-3.5 py-1.5 text-[12.5px] font-[560] text-muted">
               <span className="size-1.5 rounded-full bg-accent-text" aria-hidden /> Contato
             </p>
-            <h1 className="max-w-[720px] text-[42px] leading-[1.02] font-[680] tracking-[-0.04em] sm:text-[60px]">
+            <h1 data-calm className="w-fit max-w-[720px] text-[42px] leading-[1.02] font-[680] tracking-[-0.04em] sm:text-[60px]">
               <span className="rise-line" style={{ "--d": "100ms" }}>
                 Uma dúvida, uma ideia
               </span>
@@ -52,7 +54,7 @@ export function ContactPage() {
                 ou um problema? <span className="mark-pink">Fale comigo.</span>
               </span>
             </h1>
-            <p className="mt-6 max-w-[480px] animate-[fade-up_700ms_ease_400ms_backwards] text-[16.5px] leading-relaxed text-muted">
+            <p data-calm className="mt-6 w-fit max-w-[480px] animate-[fade-up_700ms_ease_400ms_backwards] text-[16.5px] leading-relaxed text-muted">
               Quem responde é o Cauã, que fez o Routine. Normalmente no mesmo dia.
             </p>
           </div>
@@ -161,6 +163,7 @@ export function ContactPage() {
       </main>
       <PublicFooter />
       <FloatingActions />
+      <SnapCursor />
     </div>
   );
 }

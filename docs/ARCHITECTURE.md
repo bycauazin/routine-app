@@ -117,6 +117,23 @@ Fica todo em `routine-front/src/index.css`, em tokens CSS expostos ao Tailwind 4
 - Fonte **Inter** (`@fontsource-variable/inter`), números tabulares em horários e contadores.
 - Mobile-first: barra de abas embaixo no celular, no topo a partir de `md`.
 
+### Movimento (páginas públicas: landing, contato, entrar, criar conta)
+
+Escolhidas numa página de comparação com 6 opções por grupo:
+
+- **Planilha viva** (`pages/landing/live-sheet.jsx`): a grade da planilha no fundo; as células perto do mouse se
+  pintam com as cores das categorias e se apagam. **Nada anima atrás de elementos `[data-calm]`** (título, textos,
+  botões, o menu fixo). Sem mouse por um tempo, um ponteiro "fantasma" passeia. Começa só depois que a página
+  carrega e o navegador fica ocioso, pausa fora da tela e com a aba escondida, e as linhas são desenhadas uma vez só.
+- **Cursor de encaixe** (`pages/landing/snap-cursor.jsx`): ponto marinho + anel rosa que segue com atraso e, em
+  cima de link ou botão, assume o formato dele. Só com mouse de verdade (`pointer: fine`); em campos de texto volta
+  o cursor normal.
+- **Grade da semana** (`lib/grid-transition.js` + `GridLink`): quadrados nas cores das categorias cobrem a tela em
+  onda diagonal, a página troca por baixo e eles se desfazem. Usada nas entradas (landing → entrar, criar conta,
+  contato, abrir o app), não em todo clique dentro do app.
+- Tudo respeita `prefers-reduced-motion`: com ele ligado, a grade fica parada, o cursor é o do sistema e a página
+  troca sem transição.
+
 ## Etapas
 
 | Etapa | Escopo | Situação |

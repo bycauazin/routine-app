@@ -1,0 +1,72 @@
+/**
+ * "Grade da semana" page transition: tiles in the category colors cover the
+ * screen in a diagonal wave, the page changes underneath, and the tiles clear
+ * away in the same wave. Used when going from the public pages to the login,
+ * the sign-up or the app (the entrance), not for every click inside the app.
+ *
+ * Plain DOM + Web Animations (no React state), on top of everything, and it
+ * blocks clicks while it runs. Reduced motion: the page just changes.
+ */
+const TILE = 88; // px, about the size of a spreadsheet block on screen
+const WAVE = 380; // ms for the wave to cross the screen
+const IN = 260;
+const OUT = 280;
+const EASE = "cubic-bezier(.2,.8,.2,1)";
+const COLORS = ["var(--accent)", "var(--selected)", "var(--cat-commute)", "var(--cat-study)", "var(--cat-class)", "var(--cat-work)"];
+
+let running = false;
+
+const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const nextPaint = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+function buildOverlay() {
+  const cols = Math.ceil(window.innerWidth / TILE);
+  const rows = Math.ceil(window.innerHeight / TILE);
+  const overlay = document.createElement("div");
+  overlay.setAttribute("aria-hidden", "true");
+  Object.assign(overlay.style, {
+    position: "fixed",
+    inset: "0",
+    zIndex: "200",
+    display: "grid",
+    gridTemplateColumns: `repeat(${cols}, 1fr)`,
+    gridTemplateRows: `repeat(${rows}, 1fr)`,
+    pointerEvents: "auto",
+  });
+  const tiles = [];
+  for (let i = 0; i < cols * rows; i++) {
+    const tile = document.createElement("span");
+    const c = i % cols;
+    const r = (i - c) / cols;
+    Object.assign(tile.style, { background: COLORS[(i * 7 + r) % COLORS.length], borderRadius: "6px", transform: "scale(0)" });
+    tile.dataset.delay = String(((c + r) / Math.max(1, cols + rows - 2)) * WAVE);
+    overlay.appendChild(tile);
+    tiles.push(tile);
+  }
+  document.body.appendChild(overlay);
+  return { overlay, tiles };
+}
+
+const wave = (tiles, from, to, duration, easing) =>
+  Promise.all(tiles.map((t) => t.animate([{ transform: from }, { transform: to }], { duration, delay: Number(t.dataset.delay), easing, fill: "forwards" }).finished));
+
+/**
+ * Covers the screen, runs `change` (navigate, may return a promise), waits for
+ * the new page to paint, then clears the tiles away.
+ */
+export async function withGridTransition(change) {
+  if (running || reduced()) return change();
+  running = true;
+  const { overlay, tiles } = buildOverlay();
+  try {
+    await wave(tiles, "scale(0)", "scale(1.04)", IN, EASE);
+    await change();
+    window.scrollTo(0, 0);
+    await nextPaint();
+    await wave(tiles, "scale(1.04)", "scale(0)", OUT, "ease-in");
+  } finally {
+    overlay.remove();
+    running = false;
+  }
+  return undefined;
+}

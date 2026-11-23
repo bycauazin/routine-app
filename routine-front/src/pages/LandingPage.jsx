@@ -1,12 +1,14 @@
 import { ArrowRight, CalendarHeart, Download, GraduationCap, KeyRound, ListChecks, Repeat, ShieldCheck, Smartphone, Sparkles, Star, Utensils } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { Link } from "react-router";
+import { GridLink } from "@/components/layout/GridLink";
 import { cn } from "@/lib/cn";
 import { useTheme } from "@/lib/theme";
 import { CATEGORY_LABEL, CATEGORY_TINT } from "@/lib/categories";
+import { LiveSheet } from "./landing/live-sheet";
 import { TodayMock, WeekGrid } from "./landing/mocks";
 import { FloatingActions, PublicFooter, PublicHeader, StartButton } from "./landing/public-chrome";
 import { btnGhost, useHashScroll } from "./landing/public-links";
+import { SnapCursor } from "./landing/snap-cursor";
 import "./landing/landing.css";
 
 /** Adds `is-visible` to every [data-reveal] inside the page as it scrolls into view. */
@@ -44,15 +46,15 @@ const SectionTitle = ({ kicker, children, className, onInk }) => (
 
 function Hero() {
   return (
-    <section className="sheet-lines relative overflow-hidden border-b border-rule" aria-labelledby="hero-title">
-      {/* fade the grid lines out toward the edges */}
-      <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_70%_at_30%_40%,transparent,var(--bg)_75%)]" aria-hidden />
+    <section className="relative overflow-hidden border-b border-rule" aria-labelledby="hero-title">
+      {/* "Planilha viva": the spreadsheet grid lights up under the pointer, never behind [data-calm] */}
+      <LiveSheet />
       <div className="relative mx-auto grid max-w-[1180px] items-center gap-12 px-5 pt-28 pb-16 sm:px-8 md:pt-36 lg:grid-cols-[1.15fr_1fr] lg:pb-24">
         <div>
-          <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-rule bg-paper px-3.5 py-1.5 text-[12.5px] font-[560] text-muted">
+          <p data-calm className="mb-6 inline-flex items-center gap-2 rounded-full border border-rule bg-paper px-3.5 py-1.5 text-[12.5px] font-[560] text-muted">
             <span className="size-1.5 rounded-full bg-accent-text" aria-hidden /> Controle de rotina · bycauazin
           </p>
-          <h1 id="hero-title" className="text-[44px] leading-[1.02] font-[680] tracking-[-0.04em] sm:text-[62px] lg:text-[70px]">
+          <h1 id="hero-title" data-calm className="text-[44px] leading-[1.02] font-[680] tracking-[-0.04em] sm:text-[62px] lg:text-[70px]">
             <span className="rise-line" style={{ "--d": "80ms" }}>
               Sua semana inteira,
             </span>
@@ -60,15 +62,15 @@ function Hero() {
               <span className="mark-pink">um dia de cada vez.</span>
             </span>
           </h1>
-          <p className="mt-6 max-w-[500px] animate-[fade-up_700ms_ease_380ms_backwards] text-[17px] leading-relaxed text-muted">
+          <p data-calm className="mt-6 w-fit max-w-[500px] animate-[fade-up_700ms_ease_380ms_backwards] text-[17px] leading-relaxed text-muted">
             Configure uma vez o trabalho, as aulas, o treino e os hábitos. Todo dia o Routine monta a sua lista em ordem de horário, com um check para cada
             coisa feita.
           </p>
-          <div className="mt-8 flex flex-col gap-3 animate-[fade-up_700ms_ease_480ms_backwards] sm:flex-row">
+          <div data-calm className="mt-8 flex w-fit flex-col gap-3 animate-[fade-up_700ms_ease_480ms_backwards] sm:flex-row">
             <StartButton compact />
-            <Link to="/login" className={cn(btnGhost, "h-11 text-[14px] sm:h-12 sm:text-[14.5px]")}>
+            <GridLink to="/login" className={cn(btnGhost, "h-11 bg-paper text-[14px] sm:h-12 sm:text-[14.5px]")}>
               Ver a demonstração
-            </Link>
+            </GridLink>
           </div>
         </div>
         <div className="flex justify-center lg:justify-end">
@@ -203,12 +205,12 @@ function FinalCall() {
         </p>
         <div className="mt-8 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
           <StartButton className="w-full sm:w-auto" />
-          <Link
+          <GridLink
             to="/contato"
             className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-full border border-bg/30 px-5 text-[14.5px] font-[560] transition-colors hover:border-bg sm:w-auto"
           >
             Falar comigo <ArrowRight className="size-4" aria-hidden />
-          </Link>
+          </GridLink>
         </div>
       </div>
     </section>
@@ -233,6 +235,7 @@ export function LandingPage() {
       </main>
       <PublicFooter />
       <FloatingActions />
+      <SnapCursor />
     </div>
   );
 }

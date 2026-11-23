@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { GridLink } from "@/components/layout/GridLink";
 import { cn } from "@/lib/cn";
 import { btnPrimary, PORTFOLIO, SOCIALS, WHATSAPP, YEAR } from "./public-links";
 
@@ -23,10 +24,10 @@ export function StartButton({ className, label, compact }) {
   const { status } = useAuth();
   const signedIn = status === "authenticated";
   return (
-    <Link to={signedIn ? "/hoje" : "/criar-conta"} className={cn(btnPrimary, compact ? "h-11 text-[14px] sm:h-12 sm:text-[14.5px]" : "h-12 text-[14.5px]", className)}>
+    <GridLink to={signedIn ? "/hoje" : "/criar-conta"} className={cn(btnPrimary, compact ? "h-11 text-[14px] sm:h-12 sm:text-[14.5px]" : "h-12 text-[14.5px]", className)}>
       {signedIn ? "Abrir o Routine" : (label ?? "Criar minha conta")}
       <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
-    </Link>
+    </GridLink>
   );
 }
 
@@ -49,6 +50,7 @@ export function PublicHeader() {
   return (
     <header className="fixed inset-x-0 top-0 z-40 px-3 pt-3 sm:px-5">
       <div
+        data-calm
         className={cn(
           "mx-auto flex h-14 max-w-[1180px] items-center gap-4 rounded-full border px-2.5 pl-3 text-ink transition-[background,border-color,box-shadow] duration-300",
           scrolled || open ? "border-rule bg-paper/95 shadow-lg backdrop-blur" : "border-transparent",
@@ -71,9 +73,9 @@ export function PublicHeader() {
         </nav>
         <div className="ml-auto flex items-center gap-1.5 md:ml-0">
           <ThemeToggle className="size-10" />
-          <Link to={signedIn ? "/hoje" : "/login"} className={cn(btnPrimary, "h-10 px-4 text-[13.5px]")}>
+          <GridLink to={signedIn ? "/hoje" : "/login"} className={cn(btnPrimary, "h-10 px-4 text-[13.5px]")}>
             {signedIn ? "Abrir" : "Entrar"}
-          </Link>
+          </GridLink>
           <button
             type="button"
             className="grid size-10 place-items-center rounded-full hover:bg-sunk md:hidden"
@@ -123,9 +125,9 @@ export function PublicFooter() {
         </div>
         <div className="flex flex-col gap-2 text-[13.5px]">
           <p className="mb-1 text-[12px] font-[600] text-faint">Contato</p>
-          <Link to="/contato" className="w-fit text-ink-2 hover:text-accent-text">
+          <GridLink to="/contato" className="w-fit text-ink-2 hover:text-accent-text">
             Fale comigo
-          </Link>
+          </GridLink>
           {SOCIALS.map(([label, href]) => (
             <a key={label} href={href} target="_blank" rel="noreferrer" className="w-fit text-ink-2 hover:text-accent-text">
               {label}
