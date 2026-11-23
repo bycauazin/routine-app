@@ -43,9 +43,6 @@ export function ContactPage() {
         <section className="relative overflow-hidden border-b border-rule">
           <LiveSheet />
           <div className="relative mx-auto max-w-[1180px] px-5 pt-32 pb-16 sm:px-8 md:pt-40 md:pb-20">
-            <p data-calm className="mb-6 inline-flex items-center gap-2 rounded-full border border-rule bg-paper px-3.5 py-1.5 text-[12.5px] font-[560] text-muted">
-              <span className="size-1.5 rounded-full bg-accent-text" aria-hidden /> Contato
-            </p>
             <h1 data-calm className="w-fit max-w-[720px] text-[42px] leading-[1.02] font-[680] tracking-[-0.04em] sm:text-[60px]">
               <span className="rise-line" style={{ "--d": "100ms" }}>
                 Uma dúvida, uma ideia

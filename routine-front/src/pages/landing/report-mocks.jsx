@@ -1,3 +1,4 @@
+import { Flame } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 /**
@@ -84,7 +85,9 @@ export function StreaksCard({ className }) {
         <div key={name} className="flex flex-col gap-1.5">
           <div className="flex items-baseline justify-between gap-2 text-[13.5px]">
             <span className="font-[580]">{name}</span>
-            <span className="text-[12.5px] font-[650] text-ink tabular-nums">🔥 {days} dias</span>
+            <span className="inline-flex items-center gap-1 text-[12.5px] font-[650] text-ink tabular-nums">
+              <Flame className="size-3.5 text-accent-text" aria-hidden /> {days} dias
+            </span>
           </div>
           <div className="flex gap-[3px]" aria-hidden>
             {[...pattern].map((d, i) => (

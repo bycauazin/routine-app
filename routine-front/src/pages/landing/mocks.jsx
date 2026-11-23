@@ -1,3 +1,4 @@
+import { Flame } from "lucide-react";
 import { CATEGORY_TINT as CAT } from "@/lib/categories";
 import { cn } from "@/lib/cn";
 
@@ -70,7 +71,10 @@ export function TodayMock({ className }) {
         <p className="px-2.5 text-[10.5px] font-[650] tracking-[0.05em] text-muted uppercase">A qualquer hora</p>
         <div className="flex flex-wrap gap-2 px-1">
           <span className="flex items-center gap-1.5 rounded-full border border-accent-text bg-paper px-3 py-1.5 text-[12.5px]">
-            Duolingo <b className="font-[650] text-accent-text">🔥 12</b>
+            Duolingo
+            <b className="inline-flex items-center gap-0.5 font-[650] text-accent-text">
+              <Flame className="size-3.5" aria-hidden /> 12
+            </b>
           </span>
           <span className="rounded-full border border-rule bg-paper px-3 py-1.5 text-[12.5px]">Estudar 10 min</span>
         </div>
@@ -137,6 +141,67 @@ export function WeekGrid({ className }) {
             <span className="truncate">{label}</span>
           </span>
         ))}
+      </div>
+    </div>
+  );
+}
+
+
+const DESK_DAY = [
+  ["07:00", "Acordar", "personal", true],
+  ["08:00", "Condução", "commute", true],
+  ["09:00", "Trabalho", "work", false, true],
+  ["13:00", "Almoço e estudo", "meal"],
+  ["14:00", "Trabalho", "work"],
+  ["18:30", "Aula · Pedro", "class"],
+  ["20:00", "Academia", "workout"],
+  ["21:00", "Estudo", "study"],
+];
+
+/**
+ * The Routine app on a computer (top bar, the day, the week and a report),
+ * used only as the blurred picture behind the hero. Decorative: hidden from
+ * screen readers.
+ */
+export function DesktopAppShot({ className }) {
+  return (
+    <div className={cn("w-[1120px] overflow-hidden rounded-[22px] border border-rule-strong bg-bg shadow-lg", className)} aria-hidden>
+      <div className="flex h-12 items-center gap-6 border-b border-rule bg-paper px-5 text-[13px]">
+        <span className="flex items-center gap-2 font-[700]">
+          <span className="size-6 rounded-[7px] bg-ink" /> Routine
+        </span>
+        <span className="font-[650]">Hoje</span>
+        <span className="text-muted">Semana</span>
+        <span className="text-muted">Relatórios</span>
+        <span className="text-muted">Configurações</span>
+        <span className="ml-auto size-7 rounded-full bg-accent" />
+      </div>
+      <div className="grid grid-cols-[360px_minmax(0,1fr)] gap-5 p-5">
+        <div className="flex flex-col gap-1 rounded-[16px] border border-rule bg-paper p-3">
+          <p className="px-2 pt-1 text-[12px] text-muted">Hoje</p>
+          <p className="px-2 pb-2 text-[20px] font-[700]">Segunda, 23 nov</p>
+          {DESK_DAY.map(([time, name, cat, done, now]) => (
+            <div key={time + name} className={cn("grid grid-cols-[48px_1fr_22px] items-center gap-2 rounded-[10px] px-2 py-2 text-[13px]", now && "bg-selected")}>
+              <span className="text-muted tabular-nums">{time}</span>
+              <span className="flex items-center gap-2">
+                <span className={cn("h-6 w-1 rounded-full", CAT[cat])} />
+                <span className={cn(done && "text-muted line-through")}>{name}</span>
+              </span>
+              <span className={cn("size-5 rounded-full border-2", done ? "border-accent bg-accent" : "border-rule-strong")} />
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-col gap-5">
+          <WeekGrid />
+          <div className="grid grid-cols-3 gap-4">
+            {[["82%", "da rotina na semana"], ["8,4", "nota de hoje"], ["12", "dias de Duolingo"]].map(([value, label]) => (
+              <div key={label} className="rounded-[16px] border border-rule bg-paper p-4">
+                <p className="text-[28px] font-[720] tabular-nums">{value}</p>
+                <p className="text-[12.5px] text-muted">{label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

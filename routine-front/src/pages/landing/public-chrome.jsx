@@ -1,25 +1,24 @@
-import { ArrowRight, ArrowUp, Menu, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ArrowRight, Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { useAuth } from "@/auth/AuthProvider";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { GridLink } from "@/components/layout/GridLink";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { cn } from "@/lib/cn";
 import { btnPrimary, PORTFOLIO, SOCIALS, WHATSAPP, YEAR } from "./public-links";
 
 const SECTIONS = [
   ["/#como-funciona", "Como funciona"],
-  ["/#recursos", "Recursos"],
+  ["/#recursos", "O que cadastrar"],
   ["/#relatorios", "Relatórios"],
-  ["/#seguranca", "Segurança"],
-  ["/contato", "Contato"],
+  ["/#seus-dados", "Seus dados"],
 ];
 
 export function Logo({ className }) {
   return <img src="/logo.svg" alt="" className={cn("size-8 rounded-[9px]", className)} />;
 }
 
-/** "Criar conta" for visitors, "Abrir o Routine" when signed in. compact: smaller on phones. */
+/** "Criar minha conta" for visitors, "Abrir o Routine" when signed in. compact: smaller on phones. */
 export function StartButton({ className, label, compact }) {
   const { status } = useAuth();
   const signedIn = status === "authenticated";
@@ -31,7 +30,7 @@ export function StartButton({ className, label, compact }) {
   );
 }
 
-/** Floating pill header: transparent over the hero, with a background after a little scroll. */
+/** A plain top bar: transparent over the hero, with the page color and a line after a little scroll. */
 export function PublicHeader() {
   const { status } = useAuth();
   const signedIn = status === "authenticated";
@@ -41,44 +40,48 @@ export function PublicHeader() {
   const close = () => setOpen(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40 px-3 pt-3 sm:px-5">
-      <div
-        data-calm
-        className={cn(
-          "mx-auto flex h-14 max-w-[1180px] items-center gap-4 rounded-full border px-2.5 pl-3 text-ink transition-[background,border-color,box-shadow] duration-300",
-          scrolled || open ? "border-rule bg-paper/95 shadow-lg backdrop-blur" : "border-transparent",
-        )}
-      >
+    <header className={cn("fixed inset-x-0 top-0 z-40 border-b transition-[background-color,border-color] duration-300", scrolled || open ? "border-rule bg-bg/95 backdrop-blur" : "border-transparent")}>
+      <div data-calm className="mx-auto flex h-16 max-w-[1180px] items-center gap-8 px-5 sm:px-8">
         <Link to="/" className="flex items-center gap-2.5 text-[16px] font-[680] tracking-[-0.02em]" aria-label="Routine — início">
           <Logo />
           Routine
         </Link>
-        <nav aria-label="Seções" className="mx-auto hidden items-center gap-0.5 rounded-full border border-rule bg-paper/80 p-1 text-[13.5px] md:flex">
+        <nav aria-label="Seções" className="hidden items-center gap-6 text-[14px] md:flex">
           {SECTIONS.map(([to, label]) => (
-            <Link
-              key={to}
-              to={to}
-              className={cn("rounded-full px-3.5 py-1.5 text-muted transition-colors hover:bg-sunk hover:text-ink", pathname === to && "bg-selected text-ink")}
-            >
+            <Link key={to} to={to} className="text-muted transition-colors hover:text-ink">
               {label}
             </Link>
           ))}
-        </nav>
-        <div className="ml-auto flex items-center gap-1.5 md:ml-0">
-          <ThemeToggle className="size-10" />
-          <GridLink to={signedIn ? "/hoje" : "/login"} className={cn(btnPrimary, "h-10 px-4 text-[13.5px]")}>
-            {signedIn ? "Abrir" : "Entrar"}
+          <GridLink to="/contato" className={cn("text-muted transition-colors hover:text-ink", pathname === "/contato" && "font-[600] text-ink")}>
+            Contato
           </GridLink>
+        </nav>
+        <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle className="size-9" />
+          {signedIn ? (
+            <GridLink to="/hoje" className={cn(btnPrimary, "h-10 px-4 text-[13.5px]")}>
+              Abrir o app
+            </GridLink>
+          ) : (
+            <>
+              <GridLink to="/login" className="hidden px-2 text-[14px] font-[580] transition-colors hover:text-accent-text sm:inline">
+                Entrar
+              </GridLink>
+              <GridLink to="/criar-conta" className={cn(btnPrimary, "h-10 px-4 text-[13.5px]")}>
+                Criar conta
+              </GridLink>
+            </>
+          )}
           <button
             type="button"
-            className="grid size-10 place-items-center rounded-full hover:bg-sunk md:hidden"
+            className="grid size-10 place-items-center rounded-[10px] hover:bg-sunk md:hidden"
             aria-expanded={open}
             aria-controls="public-menu"
             aria-label={open ? "Fechar menu" : "Abrir menu"}
@@ -89,60 +92,50 @@ export function PublicHeader() {
         </div>
       </div>
       {open && (
-        <nav
-          id="public-menu"
-          aria-label="Seções"
-          className="mx-auto mt-2 flex max-w-[1180px] animate-[fade-up_240ms_ease] flex-col rounded-[22px] border border-rule bg-paper p-2 text-ink shadow-lg md:hidden"
-        >
+        <nav id="public-menu" aria-label="Seções" className="flex animate-[fade-up_200ms_ease] flex-col border-t border-rule px-5 pb-3 md:hidden">
           {SECTIONS.map(([to, label]) => (
-            <Link key={to} to={to} onClick={close} className="rounded-[14px] px-4 py-3 text-[15px] hover:bg-sunk">
+            <Link key={to} to={to} onClick={close} className="border-b border-rule py-3.5 text-[15px]">
               {label}
             </Link>
           ))}
+          <GridLink to="/contato" onClick={close} className="border-b border-rule py-3.5 text-[15px]">
+            Contato
+          </GridLink>
+          {!signedIn && (
+            <GridLink to="/login" onClick={close} className="py-3.5 text-[15px] font-[600]">
+              Entrar
+            </GridLink>
+          )}
         </nav>
       )}
     </header>
   );
 }
 
+/** One line: the brand, the links, the signature. */
 export function PublicFooter() {
   return (
     <footer className="border-t border-rule">
-      <div className="mx-auto grid max-w-[1180px] gap-8 px-5 py-12 sm:grid-cols-[1.4fr_1fr_1fr] sm:px-8">
-        <div>
-          <Link to="/" className="flex items-center gap-2.5 text-[16px] font-[680]">
-            <Logo /> Routine
-          </Link>
-          <p className="mt-3 max-w-xs text-[13.5px] leading-relaxed text-muted">A sua rotina organizada dia a dia: o que fazer, a que horas, o que já foi feito e como foi a semana.</p>
-        </div>
-        <div className="hidden flex-col gap-2 text-[13.5px] sm:flex">
-          <p className="mb-1 text-[12px] font-[600] text-faint">Produto</p>
-          {SECTIONS.slice(0, 4).map(([to, label]) => (
-            <Link key={to} to={to} className="w-fit text-ink-2 hover:text-accent-text">
-              {label}
-            </Link>
-          ))}
-        </div>
-        <div className="flex flex-col gap-2 text-[13.5px]">
-          <p className="mb-1 text-[12px] font-[600] text-faint">Contato</p>
-          <GridLink to="/contato" className="w-fit text-ink-2 hover:text-accent-text">
-            Fale comigo
+      <div className="mx-auto flex max-w-[1180px] flex-col gap-5 px-5 py-9 text-[13.5px] sm:px-8 md:flex-row md:items-center md:justify-between">
+        <Link to="/" className="flex items-center gap-2.5 font-[680]">
+          <Logo className="size-7" /> Routine
+        </Link>
+        <nav aria-label="Rodapé" className="flex flex-wrap gap-x-5 gap-y-2 text-ink-2">
+          <GridLink to="/contato" className="hover:text-accent-text">
+            Contato
           </GridLink>
           {SOCIALS.map(([label, href]) => (
-            <a key={label} href={href} target="_blank" rel="noreferrer" className="w-fit text-ink-2 hover:text-accent-text">
+            <a key={label} href={href} target="_blank" rel="noreferrer" className="hover:text-accent-text">
               {label}
             </a>
           ))}
-        </div>
-      </div>
-      <div className="mx-auto flex max-w-[1180px] flex-col gap-2 border-t border-rule px-5 py-5 text-[12.5px] text-muted sm:flex-row sm:justify-between sm:px-8">
-        <span>
-          © {YEAR} Cauã ·{" "}
-          <a href={PORTFOLIO} target="_blank" rel="noreferrer" className="font-[560] text-ink-2 hover:text-accent-text">
+        </nav>
+        <p className="text-muted">
+          © {YEAR} ·{" "}
+          <a href={PORTFOLIO} target="_blank" rel="noreferrer" className="font-[600] text-ink-2 hover:text-accent-text">
             bycauazin
           </a>
-        </span>
-        <span>React · Node.js · PostgreSQL</span>
+        </p>
       </div>
     </footer>
   );
@@ -156,48 +149,18 @@ function WhatsAppGlyph({ className }) {
   );
 }
 
-/** Floating WhatsApp (always) and "back to top" (after some scroll). */
+/** A small round WhatsApp button in the corner. */
 export function FloatingActions() {
-  const [showTop, setShowTop] = useState(false);
-  const ticking = useRef(false);
-  useEffect(() => {
-    const onScroll = () => {
-      if (ticking.current) return;
-      ticking.current = true;
-      requestAnimationFrame(() => {
-        setShowTop(window.scrollY > window.innerHeight * 0.9);
-        ticking.current = false;
-      });
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
   return (
-    <div className="fixed right-4 bottom-4 z-40 flex flex-col items-end gap-2.5 sm:right-6 sm:bottom-6">
-      <button
-        type="button"
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        aria-label="Voltar ao topo"
-        title="Voltar ao topo"
-        className={cn(
-          "grid size-11 place-items-center rounded-full border border-rule bg-ink text-bg shadow-lg transition-[opacity,transform] duration-300 hover:-translate-y-0.5",
-          showTop ? "opacity-100" : "pointer-events-none translate-y-3 opacity-0",
-        )}
-        tabIndex={showTop ? 0 : -1}
-      >
-        <ArrowUp className="size-[18px]" aria-hidden />
-      </button>
-      <a
-        href={WHATSAPP}
-        target="_blank"
-        rel="noreferrer"
-        aria-label="Falar com o Cauã pelo WhatsApp"
-        title="Falar pelo WhatsApp"
-        className="flex h-[50px] items-center gap-2 rounded-full bg-whatsapp px-4 text-[12.5px] font-[700] text-whatsapp-ink shadow-lg transition-[transform,filter] duration-200 hover:-translate-y-0.5 hover:brightness-105 max-sm:w-[50px] max-sm:justify-center max-sm:px-0"
-      >
-        <WhatsAppGlyph className="size-6" />
-        <span className="max-sm:hidden">WhatsApp</span>
-      </a>
-    </div>
+    <a
+      href={WHATSAPP}
+      target="_blank"
+      rel="noreferrer"
+      aria-label="Falar com o Cauã pelo WhatsApp"
+      title="Falar pelo WhatsApp"
+      className="fixed right-4 bottom-4 z-40 grid size-12 place-items-center rounded-full bg-whatsapp text-whatsapp-ink shadow-lg transition-transform duration-200 hover:-translate-y-0.5 sm:right-6 sm:bottom-6"
+    >
+      <WhatsAppGlyph className="size-6" />
+    </a>
   );
 }

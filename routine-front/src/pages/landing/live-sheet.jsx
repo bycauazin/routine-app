@@ -8,6 +8,8 @@ const CATS = ["--cat-work", "--cat-commute", "--cat-study", "--cat-meal", "--cat
 const DAYS = ["seg", "ter", "qua", "qui", "sex", "sáb", "dom"];
 /** The soft layer (cells behind text) is drawn at this fraction of the size: the blur hides it and it costs less. */
 const SOFT_SCALE = 0.5;
+/** Distance (px) over which a cell fades and blurs out as it gets close to text. */
+const FEATHER = 64;
 
 /** The week as it lived in the spreadsheet: weekday columns, hour rows → category index. */
 const DAY_ROWS = [6, 1, 0, 0, 0, 0, 3, 0, 0, 0, 0, 2, 2, 1, 4, 4, 5, 6];
@@ -26,9 +28,10 @@ function catFor(c, r) {
  * a while, a ghost pointer wanders. `labels` adds the spreadsheet edges: day
  * names on the first row and hours on the first column.
  *
- * Behind text: cells under elements marked [data-calm] (titles, text,
- * buttons, the fixed header) still light up, but on a second canvas that is
- * blurred and fainter, so the motion stays and the reading is not disturbed.
+ * Near text: as a cell gets close to an element marked [data-calm] (titles,
+ * text, buttons, the fixed header) it moves to a second, blurred canvas and
+ * fades with the distance; on top of the text it is gone. Nothing shows behind
+ * the letters, and the colors dissolve instead of being cut off.
  *
  * Performance (lessons from the Finance hero): lines and labels are drawn once
  * into an offscreen canvas, only cells near the pointer are tested, the soft
@@ -55,7 +58,7 @@ export function LiveSheet({ className, labels = false }) {
     let cols = 0;
     let rows = 0;
     let heat = new Float32Array(0);
-    let calm = new Uint8Array(0);
+    let calm = new Float32Array(0); // per cell: 0 = on text (hidden) … 1 = far from text (normal)
     let colors = { rule: "", sunk: "", muted: "", accent: "", cats: [] };
     const ptr = { x: -999, y: -999, tx: -999, ty: -999, last: -1e9, inside: false };
     let visible = true;
@@ -111,12 +114,19 @@ export function LiveSheet({ className, labels = false }) {
         const r = el.getBoundingClientRect();
         return [r.left - box.left - pad, r.top - box.top - pad, r.right - box.left + pad, r.bottom - box.top + pad];
       });
-      calm = new Uint8Array(cols * rows);
+      calm = new Float32Array(cols * rows);
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           const x0 = c * CW;
           const y0 = r * CH;
-          if (zones.some(([a, b, cc, d]) => x0 + CW > a && x0 < cc && y0 + CH > b && y0 < d)) calm[r * cols + c] = 1;
+          // distance from the cell's box to the nearest text box (0 when they touch)
+          let d = Infinity;
+          for (const [a, b, cc, dd] of zones) {
+            const dx = Math.max(a - (x0 + CW), 0, x0 - cc);
+            const dy = Math.max(b - (y0 + CH), 0, y0 - dd);
+            d = Math.min(d, Math.hypot(dx, dy));
+          }
+          calm[r * cols + c] = Math.min(1, d / FEATHER);
         }
       }
     };
@@ -173,9 +183,11 @@ export function LiveSheet({ className, labels = false }) {
         const c = i % cols;
         const r = (i - c) / cols;
         const color = colors.cats[catFor(c, r)];
-        if (calm[i]) {
-          // behind text: on the blurred layer, fainter, no outline
-          soft.globalAlpha = Math.min(1, v * 1.6) * 0.75;
+        const room = calm[i];
+        if (room === 0) continue; // on top of text: nothing
+        if (room < 1) {
+          // getting close to text: blurred, fading with the distance, no outline
+          soft.globalAlpha = Math.min(1, v * 1.6) * room * room;
           soft.fillStyle = color;
           cellPath(soft, c, r);
           soft.fill();
@@ -264,8 +276,8 @@ export function LiveSheet({ className, labels = false }) {
   return (
     <>
       <canvas ref={ref} className={cn("pointer-events-none absolute inset-0 h-full w-full", className)} aria-hidden />
-      {/* cells behind text: blurred and fainter (drawn at half size, stretched) */}
-      <canvas ref={softRef} className={cn("pointer-events-none absolute inset-0 h-full w-full opacity-70 blur-[7px]", className)} aria-hidden />
+      {/* cells close to text: blurred and fading out (drawn at half size, stretched) */}
+      <canvas ref={softRef} className={cn("pointer-events-none absolute inset-0 h-full w-full blur-[6px]", className)} aria-hidden />
     </>
   );
 }
