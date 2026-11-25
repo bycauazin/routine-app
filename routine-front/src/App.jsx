@@ -40,6 +40,7 @@ const router = createBrowserRouter([
               { index: true, element: <Navigate to="/configuracoes/rotina" replace /> },
               { path: "rotina", lazy: page(() => import("@/features/settings/RoutineSettings"), "RoutineSettings") },
               { path: "categorias", lazy: page(() => import("@/features/settings/CategoriesSettings"), "CategoriesSettings") },
+              { path: "dias-especiais", lazy: page(() => import("@/features/settings/SpecialDaysSettings"), "SpecialDaysSettings") },
               { path: "telegram", lazy: page(() => import("@/features/settings/TelegramSettings"), "TelegramSettings") },
               { path: "perfil", lazy: page(() => import("@/features/settings/ProfileSettings"), "ProfileSettings") },
               { path: "seguranca", lazy: page(() => import("@/features/settings/SecuritySettings"), "SecuritySettings") },

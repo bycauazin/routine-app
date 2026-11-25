@@ -185,6 +185,73 @@ export function OneOffDialog({ date, categories, onClose, onSaved }) {
   );
 }
 
+/** Do two time spans cross? An item without an end counts as a moment. */
+function overlaps(item, start, end) {
+  if (item.startMinute === null || start === null || end === null) return false;
+  const itemEnd = item.endMinute ?? item.startMinute + 1;
+  return item.startMinute < end && itemEnd > start;
+}
+
+/**
+ * Imprevisto: something outside the plan, with a time. The planned items it
+ * covers are suggested as "tirados por ele" (they still count in the score).
+ */
+export function UnplannedDialog({ date, categories, onClose, onSaved }) {
+  const [day, setDay] = useState(date);
+  const [name, setName] = useState("");
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [icon, setIcon] = useState(null);
+  const [unchecked, setUnchecked] = useState(() => new Set());
+  const { saving, errors, save } = useSave(onSaved);
+  const { data: dayData } = useApi(day ? `/days/${day}` : null);
+  const startMinute = parseTime(start);
+  const endMinute = parseTime(end);
+  const covered = (dayData?.items ?? []).filter((i) => !i.isUnplanned && i.status === "PENDING" && overlaps(i, startMinute, endMinute));
+  const toggle = (id) => setUnchecked((set) => {
+    const next = new Set(set);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    return next;
+  });
+
+  function submit(e) {
+    e.preventDefault();
+    const displaceIds = covered.filter((i) => !unchecked.has(i.id)).map((i) => i.id);
+    save(() => api(`/days/${day}/items`, { method: "POST", body: { kind: "APPOINTMENT", name, categoryId: categoryId || null, icon, startMinute, endMinute, unplanned: true, displaceIds } }), "Imprevisto registrado.");
+  }
+
+  return (
+    <Dialog open size="sm" onClose={onClose} title="Imprevisto" footer={<Footer form="unplanned-form" saving={saving} onClose={onClose} label="Registrar" />}>
+      <form id="unplanned-form" noValidate className="grid gap-4" onSubmit={submit}>
+        <NameField value={name} onChange={setName} error={errors.name} placeholder="Ex.: Freelance, Trânsito, Cano estourado" />
+        <Field label="Dia" error={errors.date}>
+          {(p) => <Input {...p} type="date" value={day} onChange={(e) => setDay(e.target.value)} required />}
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="De" error={errors.startMinute}>{(p) => <Input {...p} type="time" value={start} onChange={(e) => setStart(e.target.value)} required />}</Field>
+          <Field label="Até" error={errors.endMinute}>{(p) => <Input {...p} type="time" value={end} onChange={(e) => setEnd(e.target.value)} required />}</Field>
+        </div>
+        {covered.length > 0 && (
+          <fieldset className="grid gap-1.5">
+            <legend className="mb-1 text-[13.5px] font-[600]">Tirou do lugar</legend>
+            {covered.map((item) => (
+              <label key={item.id} className="flex cursor-pointer items-center gap-2 text-[14px]">
+                <input type="checkbox" checked={!unchecked.has(item.id)} onChange={() => toggle(item.id)} className="size-4 accent-[var(--accent-text)]" />
+                <span className="num text-muted">{itemTime(item)}</span> {item.name}
+              </label>
+            ))}
+            <p className="text-[12.5px] text-muted">Continuam contando na nota; os Relatórios mostram que foi por isso.</p>
+          </fieldset>
+        )}
+        <CategoryField value={categoryId} onChange={setCategoryId} error={errors.categoryId} categories={categories} />
+        <ItemIconField value={icon} onChange={setIcon} name={name} kind="APPOINTMENT" categoryId={categoryId} categories={categories} />
+      </form>
+    </Dialog>
+  );
+}
+
 /**
  * Editar: an item from the fixed routine can change "só neste dia" (only this
  * item) or "daqui pra frente" (the rule, from this day on; the past stays).

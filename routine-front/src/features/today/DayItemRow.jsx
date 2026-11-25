@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarClock, Check, ChevronDown, Clock, Clock4, Flame, Inbox, ListChecks, MoreHorizontal, Pencil, Repeat, RotateCcw, SkipForward, Trash2 } from "lucide-react";
+import { CalendarClock, Check, ChevronDown, Clock, Clock4, Flame, Inbox, ListChecks, MoreHorizontal, Pencil, Repeat, RotateCcw, SkipForward, Trash2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ItemIcon } from "@/components/ui/ItemIcon";
 import { Menu } from "@/components/ui/Menu";
@@ -114,7 +114,12 @@ export function DayItemRow({ item, missed, showDate, timeAside, busy, onStatus, 
   return (
     <li className="flex items-start gap-2.5 sm:gap-3">
       {timeAside && <TimeAside item={item} />}
-      <div className={cn("sheet flex min-w-0 flex-1 items-start gap-3 px-3 py-2.5 sm:px-4", done && "bg-paper/70", skipped && "opacity-70")}>
+      <div className={cn("sheet flex min-w-0 flex-1 items-start gap-3 px-3 py-2.5 sm:px-4", done && !item.isUnplanned && "bg-paper/70", skipped && "opacity-70", item.isUnplanned && "border-dashed border-[#d97706]")}>
+      {item.isUnplanned ? (
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#d97706]/15 text-[#d97706]" aria-hidden>
+          <Zap className="size-5" />
+        </span>
+      ) : (
       <button
         type="button"
         onClick={check}
@@ -129,18 +134,19 @@ export function DayItemRow({ item, missed, showDate, timeAside, busy, onStatus, 
       >
         <Check className="size-5" strokeWidth={2.6} aria-hidden />
       </button>
+      )}
 
-      <ItemTile item={item} muted={done || skipped} />
+      <ItemTile item={item} muted={(done && !item.isUnplanned) || skipped} />
 
       <div className="min-w-0 flex-1 pt-0.5">
-        <p className={cn("truncate text-[15px] font-[600]", (done || skipped) && "text-muted line-through decoration-1")}>
+        <p className={cn("truncate text-[15px] font-[600]", ((done && !item.isUnplanned) || skipped) && "text-muted line-through decoration-1")}>
           {item.name}
           {item.variant && <span className="font-[500] text-muted"> · {item.variant}</span>}
         </p>
         <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12.5px] text-muted">
           {!timeAside && itemTime(item) && <span className="num font-[560] text-ink/80">{itemTime(item)}</span>}
           {showDate && item.date && <span>{formatDate(item.date)}</span>}
-          <span>{itemKindLabel(item)}</span>
+          <span>{item.isUnplanned ? "Imprevisto" : itemKindLabel(item)}</span>
           {steps.length > 0 && <span className="num">{stepsDone} de {steps.length} afazeres</span>}
           {item.category && (
             <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-px text-ink", tint)}>
@@ -150,6 +156,11 @@ export function DayItemRow({ item, missed, showDate, timeAside, busy, onStatus, 
           )}
           {skipped && <span className="font-[560]">não houve{item.skipReason && item.skipReason !== "Não houve" ? ` · ${item.skipReason}` : ""}</span>}
           {missed && <span className="font-[560] text-danger">não feita</span>}
+          {item.displacedBy && !done && (
+            <span className="inline-flex items-center gap-1 font-[560] text-[#d97706]">
+              <Zap className="size-3" aria-hidden /> tirado por {item.displacedBy.name}
+            </span>
+          )}
           {item.isOverridden && item.ruleId && <span title="Mudado só neste dia">editado</span>}
         </p>
         {steps.length > 0 && isList && (

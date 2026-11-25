@@ -1,4 +1,4 @@
-import { Repeat, ShieldCheck, Tags, UserRound, Users, Send } from "lucide-react";
+import { CalendarOff, Repeat, ShieldCheck, Tags, UserRound, Users, Send } from "lucide-react";
 import { NavLink, Outlet } from "react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { cn } from "@/lib/cn";
@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 const TABS = [
   { to: "/configuracoes/rotina", label: "Rotina fixa", icon: Repeat },
   { to: "/configuracoes/categorias", label: "Categorias", icon: Tags },
+  { to: "/configuracoes/dias-especiais", label: "Dias especiais", icon: CalendarOff },
   { to: "/configuracoes/telegram", label: "Telegram", icon: Send },
   { to: "/configuracoes/perfil", label: "Perfil e senha", icon: UserRound },
   { to: "/configuracoes/seguranca", label: "Segurança", icon: ShieldCheck },

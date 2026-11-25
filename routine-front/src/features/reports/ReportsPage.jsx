@@ -1,4 +1,4 @@
-import { CheckCircle2, ChevronDown, Clock, Droplet, Dumbbell, Flame, Star, Table2 } from "lucide-react";
+import { Zap, AlertTriangle, CheckCircle2, ChevronDown, Clock, Droplet, Dumbbell, Flame, Star, Table2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import { HelpButton, HelpPanel } from "@/components/ui/Help";
@@ -11,6 +11,7 @@ import { DateRange } from "./DateRange";
 import { Goals } from "./Goals";
 import { BarList, ColumnChart, Ring } from "./Charts";
 
+const minuteLabel = (m) => (m === null || m === undefined ? "" : `${Math.floor(m / 60)}h${m % 60 ? String(m % 60).padStart(2, "0") : ""}`);
 const weekdayLabels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const weekdays = [1, 2, 3, 4, 5, 6, 0];
 const hours = Array.from({ length: 24 }, (_, hour) => hour);
@@ -145,6 +146,28 @@ export function ReportsPage() {
         </Panel>
       </div>
       <DelayHeatmap key={`${report.from}-${report.to}`} delays={report.delays} />
+      {report.unplanned?.count > 0 && <Panel icon={Zap} color="#d97706" title="Imprevistos" help="O que aconteceu fora do plano. O que eles tiraram do lugar continua contando na nota (sem desculpa), mas aqui fica o porquê.">
+        <p className="text-[13px] text-muted">
+          <b className="num text-ink">{report.unplanned.count}</b> {report.unplanned.count === 1 ? "imprevisto" : "imprevistos"} · <b className="num text-ink">{hoursLabel(report.unplanned.minutes)}</b> no total
+          {report.unplanned.missed > 0 && <> · <b className="num text-ink">{report.unplanned.missed}</b> {report.unplanned.missed === 1 ? "item ficou" : "itens ficaram"} sem fazer por causa deles</>}
+        </p>
+        <ul className="grid gap-2">
+          {report.unplanned.list.map((u) => (
+            <li key={u.id} className="text-[13.5px]">
+              <span className="font-[600]">{u.name}</span>{" "}
+              <span className="num text-muted">{formatDate(u.date)} · {minuteLabel(u.startMinute)}–{minuteLabel(u.endMinute)}</span>
+              {u.taken.length > 0 && <span className="block text-[12.5px] text-muted">Tirou: {u.taken.map((t) => `${t.name}${t.status === "DONE" ? " (feito depois)" : ""}`).join(", ")}</span>}
+            </li>
+          ))}
+        </ul>
+      </Panel>}
+      {report.special?.missed.length > 0 && <Panel icon={AlertTriangle} color="var(--danger)" title="Ponto de atenção: fim de semana e dias especiais" help="Sábado, domingo, feriados, férias e dias doente. O que continua valendo nesses dias (como Rotina diária e Rotina de dormir) e ficou sem fazer aparece aqui.">
+        <p className="text-[13px] text-muted">
+          <b className="num text-ink">{report.special.weekends}</b> {report.special.weekends === 1 ? "dia de fim de semana" : "dias de fim de semana"}
+          {report.special.days > 0 && <> · <b className="num text-ink">{report.special.days}</b> {report.special.days === 1 ? "dia especial" : "dias especiais"}</>}
+        </p>
+        <BarList rows={report.special.missed.map((m) => ({ key: m.name, name: m.name, value: m.count }))} color="var(--danger)" format={(n) => `${n}× sem fazer`} empty="" />
+      </Panel>}
       <Panel icon={Flame} color={ACCENT} title="Sequências de afazeres" help="Dias seguidos em que cada afazer foi feito (atual e recorde) e quanto dele foi cumprido no período.">
         {report.streaks.length ? <ul className="grid gap-2 sm:grid-cols-2">
           {report.streaks.map((s) => <li key={s.key ?? s.name} className="flex items-center gap-3 rounded-[10px] bg-sunk/70 px-3 py-2">

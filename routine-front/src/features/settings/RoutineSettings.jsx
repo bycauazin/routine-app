@@ -131,6 +131,7 @@ export function RuleDialog({ rule, insideBlock, categories, startDate, onClose, 
     icon: rule?.icon ?? null,
     steps: toEditorSteps(rule?.steps),
     insideRuleIds: rule?.insideRuleIds ?? (insideBlock ? [insideBlock.id] : []),
+    skipOnHolidays: rule?.skipOnHolidays ?? false,
     date: editing ? (rule.startDate > today() ? rule.startDate : today()) : startDate && startDate > today() ? startDate : today(),
   });
   const [time, setTime] = useState(timeValues(rule, insideBlock ? "none" : "exact"));
@@ -158,6 +159,7 @@ export function RuleDialog({ rule, insideBlock, categories, startDate, onClose, 
       icon: values.icon,
       steps,
       insideRuleIds: values.insideRuleIds,
+      skipOnHolidays: values.skipOnHolidays,
     };
     try {
       if (editing) await api(`/rules/${rule.id}`, { method: "PATCH", body: { ...body, from: values.date } });
@@ -207,6 +209,13 @@ export function RuleDialog({ rule, insideBlock, categories, startDate, onClose, 
 
         <TimeFields values={time} setValues={setTime} errors={errors} />
 
+        <label className="flex cursor-pointer gap-2 text-[14px]">
+          <input type="checkbox" checked={values.skipOnHolidays} onChange={(e) => setValues((v) => ({ ...v, skipOnHolidays: e.target.checked }))} className="mt-0.5 size-4 accent-[var(--accent-text)]" />
+          <span>
+            <span className="block font-[560]">Pula em dias especiais</span>
+            <span className="block text-[12.5px] text-muted">Feriado, férias ou doente. Ex.: Trabalho e Condução pulam; Rotina diária continua.</span>
+          </span>
+        </label>
         <StepsEditor steps={values.steps} onChange={(steps) => setValues((v) => ({ ...v, steps }))} error={errors.steps} />
         {values.steps.some((s) => s.name.trim()) && (
           <InsidePicker ruleId={rule?.id} value={values.insideRuleIds} onChange={(insideRuleIds) => setValues((v) => ({ ...v, insideRuleIds }))} error={errors.insideRuleIds} />

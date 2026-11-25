@@ -10,6 +10,7 @@ import { PERIODS, formatMinute, formatRange } from "@/lib/minutes";
 import { useApi } from "@/lib/use-api";
 import { WEEKDAY_SHORT } from "@/lib/weekdays";
 import { useNowMinute } from "@/lib/use-now-minute";
+import { SPECIAL } from "@/lib/special";
 import { EditItemDialog } from "./ItemDialogs";
 
 /** Height of one hour in the grid, in px, and the hour the grid opens at (scroll to see earlier). */
@@ -112,6 +113,7 @@ export function WeekView({ date, onWeek, onOpenDay }) {
                   <button type="button" onClick={() => onOpenDay(day.date)} className="flex items-center justify-between gap-1 rounded-md text-left hover:text-accent-text" aria-label={`Abrir ${WEEKDAY_SHORT[weekdayOf(day.date)]}, dia ${Number(day.date.slice(8))}`}>
                     <span>
                       <span className="block text-[13px] font-[600] uppercase tracking-[0.04em] text-muted">{WEEKDAY_SHORT[weekdayOf(day.date)]}</span>
+                      {day.special && <span className="mt-0.5 block truncate text-[11.5px] font-[600] text-accent-text">{day.special.name ?? SPECIAL[day.special.kind].label}</span>}
                       <span className={cn("num mt-0.5 block text-[24px] font-[700] leading-none", isToday && "text-accent-text")}>{Number(day.date.slice(8))}</span>
                     </span>
                     <span className="flex flex-col items-end gap-0.5 text-[13px] font-[560] text-muted">

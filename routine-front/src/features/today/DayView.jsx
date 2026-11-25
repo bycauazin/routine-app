@@ -1,4 +1,4 @@
-import { AlertCircle, CalendarPlus, Clock, Droplet, ChevronLeft, ChevronRight, Inbox, Repeat, Sun } from "lucide-react";
+import { AlertCircle, CalendarPlus, Clock, Droplet, ChevronLeft, ChevronRight, Inbox, Repeat, Sun, Zap } from "lucide-react";
 import { Fragment, useState } from "react";
 import { Link } from "react-router";
 import { useAuth } from "@/auth/AuthProvider";
@@ -11,12 +11,13 @@ import { api } from "@/lib/api";
 import { formatDayTitle, greeting, shiftDate, today as todayDate } from "@/lib/dates";
 import { ADD_OPTIONS } from "@/lib/kinds";
 import { liters } from "@/lib/water";
+import { SPECIAL } from "@/lib/special";
 import { RuleDialog } from "@/features/settings/RoutineSettings";
 import { formatMinute, sortMinute } from "@/lib/minutes";
 import { useNowMinute } from "@/lib/use-now-minute";
 import { useApi } from "@/lib/use-api";
 import { DayItemRow } from "./DayItemRow";
-import { DoneDialog, EditItemDialog, OneOffDialog, RescheduleDialog, StepsDialog } from "./ItemDialogs";
+import { DoneDialog, EditItemDialog, OneOffDialog, RescheduleDialog, StepsDialog, UnplannedDialog } from "./ItemDialogs";
 
 function Progress({ progress }) {
   if (progress.percent === null) {
@@ -166,6 +167,32 @@ export function DayView({ date, onDate }) {
             <Progress progress={day.progress} />
           </section>
 
+          {day.special ? (
+            <section className="sheet flex flex-wrap items-center gap-3 px-4 py-2.5">
+              {(() => {
+                const Icon = SPECIAL[day.special.kind].icon;
+                return <Icon className="size-[18px] shrink-0 text-accent-text" aria-hidden />;
+              })()}
+              <span className="text-[14px] font-[600]">{day.special.name ?? SPECIAL[day.special.kind].label}</span>
+              <span className="text-[12.5px] text-muted">{SPECIAL[day.special.kind].label} · o que pula em dias especiais não aparece</span>
+              <Button variant="ghost" size="sm" className="ml-auto" loading={busyId === "special"} onClick={() => act("special", () => api(`/special-days/${day.special.id}`, { method: "DELETE" }), "Dia especial desmarcado.")}>Desmarcar</Button>
+            </section>
+          ) : (
+            !isPast && (
+              <div className="flex flex-wrap items-center gap-2 text-[13px] text-muted">
+                <span>{isToday ? "Hoje é" : "Este dia é"}</span>
+                {["HOLIDAY", "SICK"].map((kind) => {
+                  const Icon = SPECIAL[kind].icon;
+                  return (
+                    <Button key={kind} variant="secondary" size="sm" loading={busyId === `special-${kind}`} onClick={() => act(`special-${kind}`, () => api("/special-days", { method: "POST", body: { kind, from: date } }), `Marcado como ${SPECIAL[kind].label.toLowerCase()}.`)}>
+                      <Icon className="size-4" aria-hidden /> {SPECIAL[kind].label}
+                    </Button>
+                  );
+                })}
+              </div>
+            )
+          )}
+
           {day.water && (
             <Link to={isToday ? "/agua" : `/agua?dia=${date}`} className="sheet flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-sunk">
               <Droplet className="size-[18px] shrink-0 text-[#4fb3c8]" aria-hidden />
@@ -184,9 +211,9 @@ export function DayView({ date, onDate }) {
               <h2 id="add-title" className="text-[16.5px] font-[660] tracking-[-0.01em]">Adicionar</h2>
               <HelpButton open={addHelp} onClick={() => setAddHelp((value) => !value)} about="adicionar tarefas e compromissos" />
             </div>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid grid-cols-3 gap-2">
               {ADD_OPTIONS.map((option) => {
-                const Icon = option.key === "fixed" ? Repeat : CalendarPlus;
+                const Icon = option.key === "fixed" ? Repeat : option.key === "unplanned" ? Zap : CalendarPlus;
                 return (
                   <button
                     key={option.key}
@@ -270,6 +297,7 @@ export function DayView({ date, onDate }) {
         </>
       )}
 
+      {dialog?.type === "unplanned" && <UnplannedDialog date={date} categories={categories} onClose={close} onSaved={saved} />}
       {dialog?.type === "oneOff" && <OneOffDialog date={date} categories={categories} onClose={close} onSaved={saved} />}
       {dialog?.type === "fixed" && <RuleDialog categories={categories} startDate={date} onClose={close} onSaved={saved} />}
       {dialog?.type === "edit" && <EditItemDialog item={dialog.item} categories={categories} onClose={close} onSaved={saved} onListsChanged={reload} />}

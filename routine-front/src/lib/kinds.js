@@ -25,5 +25,6 @@ export function itemKindLabel(item) {
 /** The two ways to add something on Hoje: it repeats (fixo, needs a rule) or it happens once (avulso). */
 export const ADD_OPTIONS = [
   { key: "fixed", label: "Fixo", hint: "Se repete. Você escolhe a regra: em quais dias da semana, em que horário (ou período, ou sem horário) e a partir de quando. Ex.: trabalho de seg a sex, 8h às 17h." },
+  { key: "unplanned", label: "Imprevisto", hint: "Algo que aconteceu fora do plano: freela, trânsito, cano estourado. Diga de que horas a que horas (já contando a condução) e escolha o que ele tirou do lugar. O que ficou sem fazer continua contando na nota, mas os Relatórios mostram o porquê." },
   { key: "oneOff", label: "Avulso", hint: "Acontece uma vez. Data, período e horário são opcionais: sem data, vai para “Quando der”. Se tiver dia e não fizer, fica como atrasado até você fazer (menos compromissos, como dentista)." },
 ];
