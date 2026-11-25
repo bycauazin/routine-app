@@ -9,7 +9,7 @@ class UserDataDao {
   async exportAll(userId) {
     const where = { where: { userId } };
     const byDate = { ...where, orderBy: { createdAt: "asc" } };
-    const [user, settings, categories, routineRules, dayItems, dayItemSteps, dayModes, waterLogs, auditLogs, personalGoals, telegram, simulations] = await prisma.$transaction([
+    const [user, settings, categories, routineRules, dayItems, dayItemSteps, dayModes, waterLogs, auditLogs, personalGoals, telegram, simulations, specialDays] = await prisma.$transaction([
       prisma.user.findUnique({
         where: { id: userId },
         select: {
@@ -34,8 +34,9 @@ class UserDataDao {
       prisma.personalGoal.findMany(byDate),
       prisma.telegramLink.findMany({ ...where, select: { username: true, linkedAt: true } }),
       prisma.simulation.findMany(byDate),
+      prisma.specialDay.findMany(byDate),
     ]);
-    return { user, settings, categories, routineRules, dayItems, dayItemSteps, dayModes, waterLogs, auditLogs, personalGoals, telegram, simulations };
+    return { user, settings, categories, routineRules, dayItems, dayItemSteps, dayModes, waterLogs, auditLogs, personalGoals, telegram, simulations, specialDays };
   }
 }
 

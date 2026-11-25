@@ -1,10 +1,11 @@
+import SpecialDayService from "./SpecialDayService.js";
 import DayItemDao from "../daos/DayItemDao.js";
 import RoutineRuleDao from "../daos/RoutineRuleDao.js";
 import WaterLogDao from "../daos/WaterLogDao.js";
 import { ValidationError } from "../shared/errors.js";
 import { addDays, civilDateToDb, dbToCivilDate, todayIn } from "../utils/dateUtils.js";
 import { activitySummary, delayMap, goalValue, goalWindow, waterSummary } from "../utils/reportUtils.js";
-import { datesBetween, fitsMode, occursOn, streak } from "../utils/routineUtils.js";
+import { datesBetween, fitsMode, occursOn, streak, weekdayOf } from "../utils/routineUtils.js";
 import DayService from "./DayService.js";
 import GoalService from "./GoalService.js";
 import WaterService from "./WaterService.js";
@@ -20,6 +21,34 @@ function range(query, today, pending = false) {
   }
   const limit = pending ? addDays(today, -1) : today;
   return { from, to: to < limit ? to : limit, requestedTo: to };
+}
+
+/**
+ * Imprevistos of the period: how long they took, and the planned items they
+ * took (still counted in the score, here with the reason).
+ */
+function unplannedSummary(items) {
+  const unplanned = items.filter((item) => item.isUnplanned);
+  const list = unplanned.map((u) => {
+    const taken = items.filter((item) => item.displacedById === u.id);
+    return {
+      id: u.id,
+      name: u.name,
+      date: u.civilDate,
+      startMinute: u.startMinute,
+      endMinute: u.endMinute,
+      minutes: Math.max(0, (u.endMinute ?? 0) - (u.startMinute ?? 0)),
+      icon: u.icon ?? null,
+      category: u.category ? { name: u.category.name, colorKey: u.category.colorKey, icon: u.category.icon } : null,
+      taken: taken.map((item) => ({ name: item.name, status: item.status })),
+    };
+  });
+  return {
+    count: list.length,
+    minutes: list.reduce((sum, u) => sum + u.minutes, 0),
+    missed: list.reduce((sum, u) => sum + u.taken.filter((t) => t.status === "PENDING").length, 0),
+    list: list.sort((a, b) => (a.date === b.date ? (a.startMinute ?? 0) - (b.startMinute ?? 0) : a.date < b.date ? 1 : -1)),
+  };
 }
 
 class ReportService {
@@ -50,7 +79,8 @@ class ReportService {
       }),
     ]);
     const rows = items.map((item) => ({ ...item, civilDate: civil(item.date) }));
-    const selected = rows.filter((item) => inRange(item.civilDate, from, to));
+    const all = rows.filter((item) => inRange(item.civilDate, from, to));
+    const selected = all.filter((item) => !item.isUnplanned);
     const delays = new Map([...moved.map((item) => ({ ...item, civilDate: civil(item.date) })), ...selected].map((item) => [item.id, item]));
     const water = new Map(waterRows.map((row) => [civil(row.date), row._sum.amountMl ?? 0]));
     const dateKeys = datesBetween(from, to);
@@ -60,6 +90,8 @@ class ReportService {
       water: waterSummary(water, firstWater[0] ? civil(firstWater[0].date) : null, from, to, goalMl),
       delays: delayMap(delays.values(), from, to, today),
       streaks: await this.streaks(userId, selected, from, to, today),
+      special: await this.specialAttention(userId, selected, from, to, today),
+      unplanned: unplannedSummary(all),
       goals: goals.map((goal) => {
         const windows = new Map();
         for (const date of dateKeys) {
@@ -75,6 +107,33 @@ class ReportService {
         });
         return { ...goal, results };
       }),
+    };
+  }
+
+  /**
+   * Fins de semana and dias especiais in the period (up to yesterday): the
+   * fixed items still planned on them (Rotina diária, Rotina de dormir…) and
+   * how many were left undone. This is the "ponto de atenção".
+   */
+  async specialAttention(userId, items, from, to, today) {
+    const end = to < today ? to : addDays(today, -1);
+    if (end < from) return { weekends: 0, days: 0, missed: [] };
+    const special = await SpecialDayService.map(userId, from, end);
+    const weekend = (date) => [0, 6].includes(weekdayOf(date));
+    const dates = datesBetween(from, end);
+    const byName = new Map();
+    for (const item of items) {
+      const date = item.civilDate;
+      if (!item.ruleId || date > end || item.status === "SKIPPED" || (!weekend(date) && !special.has(date))) continue;
+      const row = byName.get(item.name) ?? { name: item.name, planned: 0, count: 0 };
+      row.planned += 1;
+      if (item.status === "PENDING") row.count += 1;
+      byName.set(item.name, row);
+    }
+    return {
+      weekends: dates.filter(weekend).length,
+      days: dates.filter((d) => special.has(d) && !weekend(d)).length,
+      missed: [...byName.values()].filter((r) => r.count > 0).sort((a, b) => b.count - a.count),
     };
   }
 

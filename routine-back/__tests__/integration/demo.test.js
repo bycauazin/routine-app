@@ -36,6 +36,16 @@ describe("demonstration accounts", () => {
     const today = (await agent.get(`/api/v1/days/${todayIn()}`)).body.data;
     expect(today.overdue.map((i) => i.name)).toContain("Marcar dentista");
     expect(today.anytime.map((i) => i.name)).toContain("Comprar presente da Ju");
+
+    // The newer parts have something to show: holiday, vacation, imprevistos, weekends, a simulation.
+    const { addDays } = await import("../../src/utils/dateUtils.js");
+    const report = (await agent.get(`/api/v1/reports?from=${addDays(todayIn(), -14)}&to=${todayIn()}`)).body.data;
+    expect(report.unplanned.count).toBe(3);
+    expect(report.unplanned.missed).toBe(2);
+    expect(report.special.days).toBe(1);
+    expect(report.special.missed.length).toBeGreaterThan(0);
+    expect((await agent.get("/api/v1/special-days")).body.data.map((s) => s.kind).sort()).toEqual(["HOLIDAY", "VACATION"]);
+    expect((await agent.get("/api/v1/simulations")).body.data).toHaveLength(1);
   });
 
   it("gives each visitor their own copy, and leaving deletes it", { timeout: 90_000 }, async () => {

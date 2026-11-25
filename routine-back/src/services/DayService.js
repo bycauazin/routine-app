@@ -21,6 +21,7 @@ import {
   weekStart,
 } from "../utils/routineUtils.js";
 import CategoryService from "./CategoryService.js";
+import SpecialDayService from "./SpecialDayService.js";
 import WaterService from "./WaterService.js";
 
 const notWorkout = "Só treinos têm tipo de treino.";
@@ -49,6 +50,8 @@ class DayService {
       doneAt: i.doneAt,
       doneMinute: i.doneMinute,
       skipReason: i.skipReason,
+      isUnplanned: i.isUnplanned ?? false,
+      displacedById: i.displacedById ?? null,
       isOverridden: i.isOverridden,
       notes: i.notes,
       category: i.category ?? null,
@@ -83,12 +86,13 @@ class DayService {
     const rules = await RoutineRuleDao.activeBetween(userId, from, to, options);
     if (rules.length === 0) return 0;
     const modes = await this.modeMap(userId, from, to, options);
+    const special = await SpecialDayService.map(userId, from, to, options);
     const rows = [];
     for (const date of datesBetween(from, to)) {
       const mode = modes.get(date).value;
       for (const rule of rules) {
         const days = { weekdays: rule.weekdays, startDate: dbToCivilDate(rule.startDate), endDate: rule.endDate ? dbToCivilDate(rule.endDate) : null };
-        if (!occursOn(days, date) || !fitsMode(rule.mode, mode)) continue;
+        if (!occursOn(days, date) || !fitsMode(rule.mode, mode) || (rule.skipOnHolidays && special.has(date))) continue;
         rows.push({
           ruleId: rule.id,
           seriesId: rule.seriesId,
@@ -152,17 +156,19 @@ class DayService {
       this.modeRelevant(userId),
       WaterService.summary(userId, date),
     ]);
-    const dtos = this.withLists(await this.withStreaks(userId, items.map((i) => this.itemDto(i)), date));
+    const special = (await SpecialDayService.map(userId, date, date)).get(date) ?? null;
+    const dtos = this.withDisplaced(this.withLists(await this.withStreaks(userId, items.map((i) => this.itemDto(i)), date)));
     const { timed, anytime } = splitTimeline(dtos);
     return {
       date,
       today,
       mode: { ...modes.get(date), relevant },
+      special,
       items: timed,
       anytime,
       overdue: overdue.map((i) => this.itemDto(i)),
       inbox: inbox.map((i) => this.itemDto(i)),
-      progress: dayProgress(dtos),
+      progress: dayProgress(dtos.filter((i) => !i.isUnplanned)),
       water,
     };
   }
@@ -182,18 +188,24 @@ class DayService {
     });
   }
 
+  /** Items taken by an imprevisto get its name: `displacedBy: { id, name }`. */
+  withDisplaced(items) {
+    const unplanned = new Map(items.filter((i) => i.isUnplanned).map((i) => [i.id, i]));
+    return items.map((i) => (i.displacedById && unplanned.has(i.displacedById) ? { ...i, displacedBy: { id: i.displacedById, name: unplanned.get(i.displacedById).name } } : i));
+  }
+
   /** The Semana tab: Monday to Sunday of the week of `date`, each day with its items in order. */
   async week(userId, date) {
     const from = weekStart(date);
     const to = addDays(from, 6);
     await this.materialize(userId, from, to);
-    const [items, modes, relevant] = await Promise.all([DayItemDao.between(userId, from, to), this.modeMap(userId, from, to), this.modeRelevant(userId)]);
+    const [items, modes, relevant, special] = await Promise.all([DayItemDao.between(userId, from, to), this.modeMap(userId, from, to), this.modeRelevant(userId), SpecialDayService.map(userId, from, to)]);
     const byDate = new Map(datesBetween(from, to).map((d) => [d, []]));
     for (const item of items) byDate.get(dbToCivilDate(item.date)).push(this.itemDto(item));
     const days = [...byDate].map(([day, raw]) => {
-      const list = this.withLists(raw);
+      const list = this.withDisplaced(this.withLists(raw));
       const { timed, anytime } = splitTimeline(list);
-      return { date: day, mode: modes.get(day), items: timed, anytime, progress: dayProgress(list) };
+      return { date: day, mode: modes.get(day), special: special.get(day) ?? null, items: timed, anytime, progress: dayProgress(list.filter((i) => !i.isUnplanned)) };
     });
     return { from, to, today: todayIn(), modeRelevant: relevant, days };
   }
@@ -236,6 +248,8 @@ class DayService {
     const period = undated ? null : (input.period ?? null);
     const error = timeError(startMinute, endMinute, period);
     if (error) throw new ValidationError(error, { startMinute: error });
+    const unplanned = Boolean(input.unplanned) && !undated;
+    if (unplanned && (startMinute === null || endMinute === null)) throw new ValidationError("Diga de que horas a que horas foi o imprevisto.", { startMinute: "Diga de que horas a que horas foi o imprevisto." });
     return withTransaction(async (tx) => {
       const categoryId = await CategoryService.assertUsable(userId, input.categoryId ?? null, { tx });
       const item = await DayItemDao.create(userId, {
@@ -248,7 +262,11 @@ class DayService {
         period,
         icon: input.icon ?? null,
         notes: input.notes ?? null,
+        ...(unplanned ? { isUnplanned: true, status: "DONE", doneAt: new Date() } : {}),
       }, { tx });
+      if (unplanned && input.displaceIds?.length) {
+        await DayItemDao.updateManyOwned(userId, { id: { in: input.displaceIds }, date: civilDateToDb(date), isUnplanned: false }, { displacedById: item.id }, { tx });
+      }
       return this.itemDto(await DayItemDao.findOwnedWithCategory(userId, item.id, { tx }));
     });
   }
@@ -406,7 +424,10 @@ class DayService {
   async remove(userId, id) {
     const item = await this.findOrThrow(userId, id);
     if (item.ruleId) throw new ConflictError("Este item vem da rotina fixa. Marque “não houve” ou mude o item fixo.");
-    await DayItemDao.deleteOwned(userId, id);
+    await withTransaction(async (tx) => {
+      if (item.isUnplanned) await DayItemDao.updateManyOwned(userId, { displacedById: id }, { displacedById: null }, { tx });
+      await DayItemDao.deleteOwned(userId, id, { tx });
+    });
   }
 }
 

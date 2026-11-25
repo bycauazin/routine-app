@@ -12,7 +12,7 @@ const withDetails = {
  * checked. These may be deleted and made again (a rule changed "daqui pra
  * frente", a day switched between office and home); the others are kept.
  */
-export const UNTOUCHED = Object.freeze({ status: "PENDING", isOverridden: false, reviewedAt: null, steps: { none: { doneAt: { not: null } } } });
+export const UNTOUCHED = Object.freeze({ status: "PENDING", isOverridden: false, reviewedAt: null, displacedById: null, steps: { none: { doneAt: { not: null } } } });
 
 class DayItemDao extends BaseDao {
   constructor() {

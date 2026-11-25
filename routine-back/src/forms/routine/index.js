@@ -159,6 +159,8 @@ export class CreateOneOff extends BaseForm {
         endMinute: minuteSchema,
         period: periodSchema,
         notes: optionalTextSchema(300),
+        unplanned: z.boolean().optional(),
+        displaceIds: z.array(z.uuid({ error: "Item inválido." })).max(50).optional(),
       }),
     };
   }
@@ -273,5 +275,26 @@ export class UpdateSimulation extends BaseForm {
 export class ApplySimulation extends BaseForm {
   static get schemas() {
     return { params: idParams, body: z.object({ from: civilDateSchema.optional() }) };
+  }
+}
+
+// ── Dias especiais (stage 5) ──
+
+export class ListSpecialDays extends BaseForm {
+  static get schemas() {
+    return { query: z.object({ from: civilDateSchema.optional(), to: civilDateSchema.optional() }) };
+  }
+}
+
+export class CreateSpecialDay extends BaseForm {
+  static get schemas() {
+    return {
+      body: z.object({
+        kind: z.enum(["HOLIDAY", "VACATION", "SICK"], { error: "Escolha feriado, férias ou doente." }),
+        from: civilDateSchema,
+        to: civilDateSchema.optional(),
+        name: optionalTextSchema(60),
+      }),
+    };
   }
 }

@@ -1,13 +1,16 @@
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { prisma } from "../database/prisma.js";
 import DayItemDao from "../daos/DayItemDao.js";
 import UserDao from "../daos/UserDao.js";
-import { addDays, civilDateToDb, todayIn } from "../utils/dateUtils.js";
+import { addDays, civilDateToDb, dbToCivilDate, todayIn } from "../utils/dateUtils.js";
+import { weekdayOf } from "../utils/routineUtils.js";
 import CategoryService from "./CategoryService.js";
 import DayService from "./DayService.js";
 import GoalService from "./GoalService.js";
 import RoutineSettingsService from "./RoutineSettingsService.js";
 import RuleService from "./RuleService.js";
+import SimulationService from "./SimulationService.js";
+import SpecialDayService from "./SpecialDayService.js";
 import { DEMO_EMAIL_DOMAIN, DEMO_LIFETIME_HOURS, DEMO_MAX_ACCOUNTS, DEMO_NAME } from "../shared/constants.js";
 import logger from "./logger.js";
 import UserService from "./UserService.js";
@@ -107,6 +110,12 @@ class DemoService {
       created.push(await RuleService.create(userId, { name, kind, categoryId: cat(category), weekdays, startMinute, endMinute, startDate: start, skipOnHolidays: !steps && category !== "Treino", ...extra, steps, insideRuleIds }));
     }
 
+    // Last week: Monday was a holiday (work and commute skip it), Tuesday a
+    // pipe burst and took the yoga, Wednesday an extra class took the English.
+    const lastMonday = addDays(today, -((weekdayOf(today) + 6) % 7) - 7);
+    await SpecialDayService.create(userId, { kind: "HOLIDAY", from: lastMonday, name: "Feriado municipal" });
+    await SpecialDayService.create(userId, { kind: "VACATION", from: addDays(today, 21), to: addDays(today, 25), name: "Férias na praia" });
+
     const yesterday = addDays(today, -1);
     await DayService.materialize(userId, start, yesterday);
     const past = await DayItemDao.findAllOwned(userId, { select: { id: true, startMinute: true, endMinute: true }, orderBy: [{ date: "asc" }, { startMinute: "asc" }, { id: "asc" }] });
@@ -127,6 +136,8 @@ class DemoService {
     for (const item of delayed) {
       await DayItemDao.updateOwned(userId, item.id, { doneMinute: Math.min(1439, item.startMinute + 35) });
     }
+    await this.weekendsAndImprevistos(userId, today, lastMonday, cat);
+
     const moved = past.filter((item) => !doneIds.has(item.id) && !skippedIds.has(item.id) && item.startMinute !== null && (item.endMinute ?? item.startMinute) < 1410);
     for (const item of moved.slice(-2)) await DayService.shift(userId, item.id, { minutes: 30 });
 
@@ -156,8 +167,45 @@ class DemoService {
     ];
     for (const goal of goals) await GoalService.save(userId, goal);
 
+    // A simulation: the same week with a gym before work.
+    const simulation = await SimulationService.create(userId, { name: "Com academia de manhã", from: "current" });
+    const gym = { key: randomUUID(), name: "Academia", categoryId: cat("Treino"), icon: null, weekdays: [1, 3, 5], startMinute: 330, endMinute: 385, period: null, steps: [], insideKeys: [] };
+    await SimulationService.update(userId, simulation.id, { blocks: [...simulation.blocks, gym] });
+
     await DayService.createOneOff(userId, null, { kind: "TASK", name: "Renovar a CNH" });
     await DayService.createOneOff(userId, null, { kind: "TASK", name: "Trocar a lâmpada da cozinha", categoryId: cat("Pessoal") });
+  }
+
+  /**
+   * The weekend is where Marina slips: about half of the bedtime routines and
+   * daily lists of Saturdays and Sundays were left undone (the reports' "ponto
+   * de atenção"). And three imprevistos: a Saturday freelance, a burst pipe that
+   * took the yoga and an extra class that took the English (still in the score,
+   * with the reason in the reports).
+   */
+  async weekendsAndImprevistos(userId, today, lastMonday, cat) {
+    const lists = await DayItemDao.findAllOwned(userId, { where: { name: { in: ["Rotina de dormir", "Rotina diária"] }, date: { lt: civilDateToDb(today) } }, select: { id: true, date: true }, orderBy: [{ date: "asc" }, { id: "asc" }] });
+    const weekend = lists.filter((i) => [0, 6].includes(weekdayOf(dbToCivilDate(i.date)))).filter((_, index) => index % 2 === 0).map((i) => i.id);
+    await this.undo(userId, weekend);
+
+    const lastSaturday = addDays(today, -(((weekdayOf(today) + 1) % 7) || 7));
+    await DayService.createOneOff(userId, lastSaturday, { kind: "APPOINTMENT", name: "Freelance", categoryId: cat("Trabalho"), startMinute: 840, endMinute: 1260, unplanned: true });
+    for (const [date, name, takes, startMinute, endMinute] of [
+      [addDays(lastMonday, 1), "Cano estourado", "Yoga", 1110, 1260],
+      [addDays(lastMonday, 2), "Aula extra", "Inglês", 1080, 1200],
+    ]) {
+      const day = await DayService.get(userId, date);
+      const taken = day.items.filter((i) => i.name === takes).map((i) => i.id);
+      await this.undo(userId, taken);
+      await DayService.createOneOff(userId, date, { kind: "APPOINTMENT", name, categoryId: name === "Aula extra" ? cat("Trabalho") : null, startMinute, endMinute, unplanned: true, displaceIds: taken });
+    }
+  }
+
+  /** Back to not done (and every step unchecked). */
+  async undo(userId, ids) {
+    if (!ids.length) return;
+    await DayItemDao.updateManyOwned(userId, { id: { in: ids } }, { status: "PENDING", doneAt: null, doneMinute: null, skipReason: null });
+    await prisma.dayItemStep.updateMany({ where: { userId, dayItemId: { in: ids } }, data: { doneAt: null } });
   }
 }
 

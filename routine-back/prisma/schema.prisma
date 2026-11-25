@@ -62,6 +62,7 @@ model User {
   waterLogs     WaterLog[]
   telegram      TelegramLink?
   simulations   Simulation[]
+  specialDays   SpecialDay[]
   personalGoals PersonalGoal[]
 
   @@index([demoExpiresAt])
@@ -313,6 +314,12 @@ model DayItem {
   scheduledDate DateTime?    @map("scheduled_date") @db.Date
   scheduledMinute Int?       @map("scheduled_minute")
   skipReason   String?       @map("skip_reason")
+  /// Imprevisto: something that happened outside the plan (freela, trânsito,
+  /// cano estourado). Always one-off, with a time; does not count in the score.
+  isUnplanned  Boolean       @default(false) @map("is_unplanned")
+  /// The imprevisto that took this item's time. It still counts in the score;
+  /// the reports show why.
+  displacedById String?      @map("displaced_by_id") @db.Uuid
   /// Changed "só hoje" (or rescheduled): no longer follows its rule.
   isOverridden Boolean       @default(false) @map("is_overridden")
   notes        String?
@@ -455,4 +462,28 @@ model Simulation {
 
   @@index([userId])
   @@map("simulations")
+}
+
+/// Feriado, férias or doente (stage 5).
+enum SpecialKind {
+  HOLIDAY
+  VACATION
+  SICK
+}
+
+/// A special day or period (from…to, both included). Fixed items with
+/// skipOnHolidays do not happen on these days. See SpecialDayService.
+model SpecialDay {
+  id        String      @id @default(uuid(7)) @db.Uuid
+  userId    String      @map("user_id") @db.Uuid
+  kind      SpecialKind
+  fromDate  DateTime    @map("from_date") @db.Date
+  toDate    DateTime    @map("to_date") @db.Date
+  name      String?
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, fromDate])
+  @@map("special_days")
 }
