@@ -46,3 +46,9 @@ Simulação guarda blocos em JSON (sem datas, sem materializar): não afeta dias
 
 ### 2026-11-25 11:03 · claude
 Etapa 9 (Refeições) cancelada a pedido do usuário: controle demais agora.
+
+### 2026-11-25 11:11 · claude
+Dias especiais reaproveitam rule.skipOnHolidays como 'pula em dias especiais'; feriados não vêm prontos (o usuário marca).
+
+### 2026-11-25 11:50 · claude
+Imprevisto não entra na nota; o que ele tirou entra (sem desculpa), com o motivo à vista. Vitest no Windows: usar caminho C: maiúsculo.

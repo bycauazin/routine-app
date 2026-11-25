@@ -32,7 +32,14 @@
 - Revisão apresentada e aceita pelo usuário.
 
 ## Objetivo atual
-**Simulações** (pedido do usuário em 2026-11-25, prioridade acima da etapa 7B–D): aba ao lado de Dia/Semana com a mesma grade da Semana para montar rotinas de teste. Decisões: ao criar, escolher cópia da rotina atual / de outra simulação / vazia; aplicar como rotina real a partir de uma data; comparar horas por categoria com a atual e avisar blocos que batem; editar clicando E arrastando.
+Ordem pedida pelo usuário (2026-11-25): 1 commit ✅ (branch rotina-etapas-3-a-7, 3 commits) → 5 dias especiais ✅ (falta só a limpeza opcional do presencial/home) → 2 usuário testa → 3 bot 7B–D → 4 publicar (etapa 8). Refeições saiu do plano.
+
+Dias especiais (claude): special_days (HOLIDAY/VACATION/SICK, de–até, nome), SpecialDayService (map por data; marcar apaga itens intocados de fixos com skipOnHolidays; desmarcar refaz ao abrir), materialize pula fixos skipOnHolidays, Dia/Semana mostram `special`, relatório `special: { days, missed }` (ponto de atenção); front: barra no Dia (Hoje é Feriado/Doente, Desmarcar), Configurações → Dias especiais, "Pula em dias especiais" no Fixo, etiqueta na Semana, painel de atenção nos Relatórios. Back 131 + 1, front 28.
+
+Ponto de atenção agora cobre sábado/domingo também (`special: { weekends, days, missed[{name, planned, count}] }`, só fixos, SKIPPED não conta). Presencial/home: usuário já tirou da tela; limpeza do banco descartada.
+
+Imprevistos (claude): day_items.is_unplanned + displaced_by_id (migração 20261125150000_unplanned). POST /days/:date/items com `unplanned: true` (exige início e fim; nasce DONE; fora do progresso e da nota) e `displaceIds` (itens do dia que ele tirou: continuam contando na nota). Dia/Semana: `displacedBy {id,name}`; excluir o imprevisto desliga. Relatório `unplanned: { count, minutes, missed, list[{..., taken}] }`. Front: botão Imprevisto (3º em Adicionar), UnplannedDialog (marca sozinho o que cruza o horário, dá pra desmarcar), linha com raio e "tirado por X", painel Imprevistos nos Relatórios. Sem tipos (usuário pediu só nome; ícone/categoria pelo nome ou escolhidos). Bot: "freelance sábado 14h às 21h" entra no 7B. Teste: __tests__/integration/unplanned.test.js. Back 132 + 1.
+ATENÇÃO testes no Windows: rodar o Vitest com o caminho "C:\..." (maiúsculo); com "c:\" ele carrega duas cópias e todos falham com "failed to find the runner".
 
 ## Status
 - S1 back ✅ (claude): tabela simulations (blocks JSON), SimulationService (create from current|empty|id, update com validação, remove, apply: tira fixos daqui pra frente e cria os blocos, listas por insideKeys), rotas /api/v1/simulations, /simulations/current, /:id, /:id/apply; testes em __tests__/integration/simulations.test.js. Back 130 + 1 pulado.
