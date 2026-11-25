@@ -159,3 +159,73 @@ export function IconBadge({ icon: Icon, color, size = "md" }) {
     </span>
   );
 }
+
+/**
+ * Icon of a routine item, collapsed by default. `value` null = automatic: the
+ * icon suggested by the name (else the category's). "Trocar" opens the icons
+ * by theme; "Automático" goes back to following the name.
+ * @param {{ value: string | null, onChange: (icon: string | null) => void, auto: string, tint?: string, color?: string }} props  auto: the icon shown when automatic; tint: category class for the tile, else `color`
+ */
+export function IconField({ value, onChange, auto, tint, color }) {
+  const [open, setOpen] = useState(false);
+  const shown = value ?? auto;
+  const groupOf = (name) => ICON_GROUPS.find((g) => g.icons.includes(name))?.key ?? ICON_GROUPS[0].key;
+  const [group, setGroup] = useState(() => groupOf(shown));
+  const tileColor = color ?? colorForIcon(shown);
+  const toggle = () => {
+    if (!open) setGroup(groupOf(shown));
+    setOpen((v) => !v);
+  };
+
+  return (
+    <div className="overflow-hidden rounded-[12px] border border-rule">
+      <button type="button" onClick={toggle} aria-expanded={open} className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-sunk">
+        {tint ? (
+          <span className={cn("grid size-10 shrink-0 place-items-center rounded-[12px] text-ink", tint)} aria-hidden>
+            <ItemIconOnly name={shown} />
+          </span>
+        ) : (
+          <ItemChip name={shown} color={tileColor} size="lg" />
+        )}
+        <span className="min-w-0 flex-1">
+          <span className="block text-[13.5px] font-[560]">Ícone</span>
+          <span className="block text-[12.5px] text-muted">{open ? "Escolha abaixo" : value ? "Escolhido por você. Toque para trocar." : "Sugerido pelo nome. Toque para trocar."}</span>
+        </span>
+        <span className="inline-flex items-center gap-1 text-[13px] font-[560] text-accent-text">
+          {open ? "Pronto" : "Trocar"}
+          <ChevronDown className={cn("size-4 transition-transform duration-300", open && "rotate-180")} aria-hidden />
+        </span>
+      </button>
+
+      {open && (
+        <div className="flex flex-col gap-3 border-t border-rule px-3 py-3 animate-[open-down_240ms_cubic-bezier(.2,.8,.2,1)]">
+          <div role="tablist" aria-label="Temas de ícones" className="-mx-3 flex gap-1.5 overflow-x-auto px-3 pb-0.5 [scrollbar-width:none]">
+            {ICON_GROUPS.map((g) => (
+              <button
+                key={g.key}
+                type="button"
+                role="tab"
+                aria-selected={group === g.key}
+                onClick={() => setGroup(g.key)}
+                className={cn("h-8 shrink-0 rounded-full border px-3 text-[12.5px] transition-colors", group === g.key ? "border-accent bg-accent-soft font-[600] text-accent-text" : "border-rule text-muted hover:text-ink")}
+              >
+                {g.label}
+              </button>
+            ))}
+          </div>
+          <IconRow key={group} options={ICON_GROUPS.find((g) => g.key === group)?.icons ?? []} value={shown} onChange={onChange} color={tileColor} />
+          {value && (
+            <button type="button" onClick={() => onChange(null)} className="self-start text-[13px] font-[560] text-accent-text hover:underline">
+              Voltar ao automático (pelo nome)
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ItemIconOnly({ name }) {
+  const Icon = ICONS[name] ?? ICONS.tag;
+  return <Icon className="size-5" />;
+}

@@ -1,11 +1,12 @@
-import { CalendarCheck, Settings } from "lucide-react";
+import { ChartNoAxesColumn, CalendarCheck, Droplet, Settings } from "lucide-react";
 
 /**
- * Main navigation: only what is used every day. Set-up screens (fixed
- * routine, habits, students, profile) live under Configurações.
- * Semana and Relatórios join as their stages are built.
+ * Main navigation. Set-up screens (fixed routine, categories, profile) live
+ * under Configurações. The week is a tab on Hoje.
  */
 export const NAV_ITEMS = [
   { to: "/hoje", label: "Hoje", short: "Hoje", icon: CalendarCheck },
+  { to: "/agua", label: "Água", short: "Água", icon: Droplet },
+  { to: "/relatorios", label: "Relatórios", short: "Relatórios", icon: ChartNoAxesColumn },
   { to: "/configuracoes", label: "Configurações", short: "Ajustes", icon: Settings },
 ];

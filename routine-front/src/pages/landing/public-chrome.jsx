@@ -18,13 +18,13 @@ export function Logo({ className }) {
   return <img src="/logo.svg" alt="" className={cn("size-8 rounded-[9px]", className)} />;
 }
 
-/** "Criar minha conta" for visitors, "Abrir o Routine" when signed in. compact: smaller on phones. */
+/** "Entrar" for visitors, "Abrir o Routine" when signed in. */
 export function StartButton({ className, label, compact }) {
   const { status } = useAuth();
   const signedIn = status === "authenticated";
   return (
-    <GridLink to={signedIn ? "/hoje" : "/criar-conta"} className={cn(btnPrimary, compact ? "h-11 px-4 text-[14px] sm:h-12 sm:px-5 sm:text-[14.5px]" : "h-12 text-[14.5px]", className)}>
-      {signedIn ? "Abrir o Routine" : (label ?? "Criar minha conta")}
+    <GridLink to={signedIn ? "/hoje" : "/login"} className={cn(btnPrimary, compact ? "h-11 px-4 text-[14px] sm:h-12 sm:px-5 sm:text-[14.5px]" : "h-12 text-[14.5px]", className)}>
+      {signedIn ? "Abrir o Routine" : (label ?? "Entrar")}
       <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
     </GridLink>
   );
@@ -71,11 +71,11 @@ export function PublicHeader() {
             </GridLink>
           ) : (
             <>
-              <GridLink to="/login" className="hidden px-2 text-[14px] font-[580] transition-colors hover:text-accent-text sm:inline">
-                Entrar
-              </GridLink>
-              <GridLink to="/criar-conta" className={cn(btnPrimary, "h-10 px-4 text-[13.5px]")}>
+              <GridLink to="/criar-conta" className="hidden px-2 text-[14px] font-[580] transition-colors hover:text-accent-text sm:inline">
                 Criar conta
+              </GridLink>
+              <GridLink to="/login" className={cn(btnPrimary, "h-10 px-4 text-[13.5px]")}>
+                Entrar
               </GridLink>
             </>
           )}
@@ -102,8 +102,8 @@ export function PublicHeader() {
             Contato
           </GridLink>
           {!signedIn && (
-            <GridLink to="/login" onClick={close} className="py-3.5 text-[15px] font-[600]">
-              Entrar
+            <GridLink to="/criar-conta" onClick={close} className="py-3.5 text-[15px] font-[600] sm:hidden">
+              Criar conta
             </GridLink>
           )}
         </nav>

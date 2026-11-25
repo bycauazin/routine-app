@@ -68,6 +68,7 @@
   --cat-workout: #d8efdf;
   --cat-class: #ecdff6;
   --cat-personal: #fbe0e9;
+  --cat-daily: #f4edc6;
 
   /* Chart colors of the categories (validated with the dataviz checks, light on
      creme/white, dark on navy). Fixed order: work, classes, workout, study.
@@ -82,9 +83,9 @@
   --sky-10: #eef4fa;
   --sky-13: #f4f8fb;
   --sky-17: #fbe7d3;
-  --sky-19: #f6d9e2;
-  --sky-21: #dfe3f3;
-  --sky-23: #d3d8ec;
+  --sky-19: #8a6f9a;
+  --sky-21: #3e4874;
+  --sky-23: #262d50;
   --sky-moon: #fffaf2;
   /* edges of the skyline blocks: a soft white, not pure */
   --sky-edge: rgb(255 255 255 / 0.78);
@@ -138,11 +139,12 @@
   --cat-workout: #22473a;
   --cat-class: #3d3159;
   --cat-personal: #4b2c3f;
+  --cat-daily: #47432a;
 
-  --sky-07: #2c2c4c;
-  --sky-10: #1d3653;
-  --sky-13: #223d5c;
-  --sky-17: #3a3048;
+  --sky-07: #4c4a78;
+  --sky-10: #3a6690;
+  --sky-13: #4677a6;
+  --sky-17: #6b5078;
   --sky-19: #33284a;
   --sky-21: #172540;
   --sky-23: #121c30;
@@ -199,6 +201,7 @@
   --color-cat-workout: var(--cat-workout);
   --color-cat-class: var(--cat-class);
   --color-cat-personal: var(--cat-personal);
+  --color-cat-daily: var(--cat-daily);
   --color-chart-work: var(--chart-work);
   --color-chart-class: var(--chart-class);
   --color-chart-workout: var(--chart-workout);

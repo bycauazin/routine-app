@@ -29,12 +29,18 @@ const router = createBrowserRouter([
         HydrateFallback: () => <Spinner className="p-10" />,
         children: [
           { path: "hoje", lazy: page(() => import("@/features/today/TodayPage"), "TodayPage") },
+          { path: "agua", lazy: page(() => import("@/features/water/WaterPage"), "WaterPage") },
+          { path: "relatorios", lazy: page(() => import("@/features/reports/ReportsPage"), "ReportsPage") },
+          { path: "relatorios/pendentes", lazy: page(() => import("@/features/reports/PendingDaysPage"), "PendingDaysPage") },
           // Set-up screens, used once in a while, live under Configurações.
           {
             path: "configuracoes",
             lazy: page(() => import("@/features/settings/SettingsLayout"), "SettingsLayout"),
             children: [
-              { index: true, element: <Navigate to="/configuracoes/perfil" replace /> },
+              { index: true, element: <Navigate to="/configuracoes/rotina" replace /> },
+              { path: "rotina", lazy: page(() => import("@/features/settings/RoutineSettings"), "RoutineSettings") },
+              { path: "categorias", lazy: page(() => import("@/features/settings/CategoriesSettings"), "CategoriesSettings") },
+              { path: "telegram", lazy: page(() => import("@/features/settings/TelegramSettings"), "TelegramSettings") },
               { path: "perfil", lazy: page(() => import("@/features/settings/ProfileSettings"), "ProfileSettings") },
               { path: "seguranca", lazy: page(() => import("@/features/settings/SecuritySettings"), "SecuritySettings") },
               { path: "usuarios", lazy: page(() => import("@/features/settings/UsersSettings"), "UsersSettings") },

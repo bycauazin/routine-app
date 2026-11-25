@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Presentation } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { z } from "zod";
 import { useAuth } from "@/auth/AuthProvider";
 import { AuthFooter, AuthNotice, AuthShell, authLink } from "@/components/layout/AuthShell";
+import { DemoButton } from "@/components/layout/DemoButton";
 import { Button } from "@/components/ui/Button";
 import { Field, Input, PasswordInput } from "@/components/ui/Field";
 import { api } from "@/lib/api";
@@ -52,32 +53,13 @@ function NotVerified({ email }) {
  * It is deleted when they leave it (or after a day).
  */
 function DemoEntry() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  async function open() {
-    setLoading(true);
-    setError(null);
-    try {
-      await api("/auth/demo", { method: "POST" });
-      // Full reload: the app starts fresh in the demo account.
-      window.location.assign("/hoje");
-    } catch (e) {
-      setError(e.message);
-      setLoading(false);
-    }
-  }
-
   return (
     <div className="mt-6 flex flex-col gap-2">
       <div className="flex items-center gap-3 text-[12px] text-faint" aria-hidden>
         <span className="h-px flex-1 bg-rule" /> ou <span className="h-px flex-1 bg-rule" />
       </div>
-      <Button variant="secondary" size="lg" onClick={open} loading={loading}>
-        <Presentation className="size-4" aria-hidden /> Ver demonstração
-      </Button>
+      <DemoButton className="justify-center" />
       <p className="text-center text-[12.5px] text-muted">Uma conta com dados fictícios, sem cadastro. Ela é apagada quando você sai.</p>
-      {error && <p className="text-center text-[12.5px] text-danger">{error}</p>}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { Check, Clock3, MoveRight } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/auth/AuthProvider";
+import { DemoButton } from "@/components/layout/DemoButton";
 import { GridLink } from "@/components/layout/GridLink";
 import { CATEGORY_TINT } from "@/lib/categories";
 import { cn } from "@/lib/cn";
@@ -58,7 +59,7 @@ function Hero() {
         <div className="hero-shot-2" aria-hidden>
           <TodayMock />
         </div>
-        <div className="relative mx-auto grid w-full max-w-[1180px] flex-1 items-center gap-8 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-12">
+        <div className="relative mx-auto grid w-full max-w-[1360px] flex-1 items-center gap-8 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.4fr)] lg:gap-12">
           <div>
             <h1 id="hero-title" className="w-fit text-[38px] leading-[1.03] font-[700] tracking-[-0.04em] sm:text-[56px] lg:text-[64px]">
               <span className="rise-line" style={{ "--d": "60ms" }}>
@@ -72,11 +73,9 @@ function Hero() {
               Cadastre uma vez o trabalho, as aulas, o treino e os hábitos. O Routine monta a lista de cada dia em ordem de horário, você marca o que fez e vê nos
               relatórios como foi a semana.
             </p>
-            <div className="mt-7 flex flex-wrap gap-2.5 animate-[fade-up_700ms_ease_460ms_backwards] sm:gap-3">
+            <div className="mt-7 flex flex-wrap items-start gap-2.5 animate-[fade-up_700ms_ease_460ms_backwards] sm:gap-3">
               <StartButton compact />
-              <GridLink to="/login" className={cn(btnGhost, "h-11 border-ink bg-paper px-4 text-[14px] sm:h-12 sm:px-5 sm:text-[14.5px]")}>
-                Ver a demonstração
-              </GridLink>
+              <DemoButton className={cn(btnGhost, "h-11 border-ink bg-paper px-4 text-[14px] sm:h-12 sm:px-5 sm:text-[14.5px]")} />
             </div>
           </div>
 
@@ -336,9 +335,9 @@ function FinalCall() {
       {!signedIn && (
         <p className="mt-4 text-[14.5px] text-muted">
           Prefere olhar antes?{" "}
-          <GridLink to="/login" className="font-[600] text-accent-text underline underline-offset-2 hover:no-underline">
+          <DemoButton variant="ghost" size="sm" className="inline-flex h-auto px-0 font-[600] text-accent-text underline underline-offset-2 hover:bg-transparent hover:no-underline">
             Abra a demonstração
-          </GridLink>
+          </DemoButton>
           .
         </p>
       )}

@@ -11,6 +11,7 @@ export const CATEGORY_TINT = {
   workout: "bg-cat-workout",
   class: "bg-cat-class",
   personal: "bg-cat-personal",
+  daily: "bg-cat-daily",
 };
 
 export const CATEGORY_LABEL = {
@@ -21,4 +22,5 @@ export const CATEGORY_LABEL = {
   workout: "Treino",
   meal: "Refeição",
   personal: "Pessoal",
+  daily: "Rotina diária",
 };

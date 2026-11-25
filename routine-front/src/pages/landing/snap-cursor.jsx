@@ -14,9 +14,12 @@ const PAD = 6;
  * the shape of the element (same size and corners, plus a little margin) and
  * stays stuck to it, leaning slightly toward the mouse.
  *
- * Only with a real mouse (pointer: fine) and without "reduce motion"; on
- * phones nothing changes. Everything is moved with transforms in one
- * requestAnimationFrame loop, no React renders.
+ * Works over the whole page. What is under the mouse is checked on every
+ * frame (not only when the mouse moves), so scrolling with the mouse still
+ * keeps the ring on the right element. Only a real mouse drives it (touches
+ * on hybrid screens are ignored), it hides when the mouse leaves the window,
+ * and it is off with "reduce motion" or without a fine pointer (phones).
+ * Everything moves with transforms in one requestAnimationFrame loop.
  */
 export function SnapCursor() {
   const dotRef = useRef(null);
@@ -30,39 +33,40 @@ export function SnapCursor() {
 
     const html = document.documentElement;
     html.classList.add("snap-cursor");
-    const p = { x: -100, y: -100, rx: -100, ry: -100, w: RING, h: RING, shown: false };
+    const p = { x: 0, y: 0, rx: 0, ry: 0, w: RING, h: RING, has: false, shown: false, away: false };
     let target = null;
     let radius = RING / 2;
     let pressed = false;
     let raf = 0;
 
-    const setShown = (on) => {
+    const show = (on) => {
+      if (on === p.shown) return;
       p.shown = on;
       dot.dataset.shown = String(on);
       ring.dataset.shown = String(on);
     };
 
     const onMove = (e) => {
-      if (!p.shown) {
+      if (e.pointerType && e.pointerType !== "mouse") return;
+      if (!p.has) {
         p.rx = e.clientX;
         p.ry = e.clientY;
+        p.has = true;
+      }
+      if (p.away) {
+        p.rx = e.clientX; // coming back: start from here, no jump from where it left
+        p.ry = e.clientY;
+        p.away = false;
       }
       p.x = e.clientX;
       p.y = e.clientY;
-      const el = e.target instanceof Element ? e.target : null;
-      const inField = !!el?.closest(FIELDS);
-      setShown(!inField);
-      const next = inField ? null : el?.closest(TARGETS) ?? null;
-      if (next !== target) {
-        target = next;
-        radius = target ? parseFloat(getComputedStyle(target).borderRadius) || 10 : RING / 2;
-      }
     };
-    const onLeave = (e) => {
-      if (!e.relatedTarget) setShown(false);
+    const onLeave = () => {
+      p.away = true;
+      show(false);
     };
-    const onDown = () => {
-      pressed = true;
+    const onDown = (e) => {
+      if (e.pointerType === "mouse") pressed = true;
     };
     const onUp = () => {
       pressed = false;
@@ -70,14 +74,25 @@ export function SnapCursor() {
 
     const frame = () => {
       raf = requestAnimationFrame(frame);
+      if (!p.has || p.away) return;
+      // what is under the mouse right now (also after a scroll without moving it)
+      const el = document.elementFromPoint(p.x, p.y);
+      const inField = !!el?.closest(FIELDS);
+      show(!!el && !inField);
       if (!p.shown) return;
+      const next = inField ? null : (el?.closest(TARGETS) ?? null);
+      if (next !== target) {
+        target = next;
+        radius = target ? parseFloat(getComputedStyle(target).borderRadius) || 10 : RING / 2;
+      }
+
       let tx = p.x;
       let ty = p.y;
       let tw = RING;
       let th = RING;
       let tr = RING / 2;
       let snapped = false;
-      if (target?.isConnected) {
+      if (target) {
         const r = target.getBoundingClientRect();
         if (r.width <= MAX_SNAP.w && r.height <= MAX_SNAP.h) {
           const cx = r.left + r.width / 2;
@@ -97,11 +112,11 @@ export function SnapCursor() {
         tw *= 0.92;
         th *= 0.92;
       }
-      const k = snapped ? 0.3 : 0.2;
+      const k = snapped ? 0.35 : 0.25;
       p.rx += (tx - p.rx) * k;
       p.ry += (ty - p.ry) * k;
-      p.w += (tw - p.w) * 0.28;
-      p.h += (th - p.h) * 0.28;
+      p.w += (tw - p.w) * 0.3;
+      p.h += (th - p.h) * 0.3;
       ring.style.width = `${p.w}px`;
       ring.style.height = `${p.h}px`;
       ring.style.borderRadius = `${tr}px`;
@@ -111,7 +126,8 @@ export function SnapCursor() {
     };
 
     window.addEventListener("pointermove", onMove, { passive: true });
-    document.addEventListener("pointerout", onLeave);
+    html.addEventListener("mouseleave", onLeave);
+    window.addEventListener("blur", onLeave);
     window.addEventListener("pointerdown", onDown);
     window.addEventListener("pointerup", onUp);
     raf = requestAnimationFrame(frame);
@@ -120,7 +136,8 @@ export function SnapCursor() {
       cancelAnimationFrame(raf);
       html.classList.remove("snap-cursor");
       window.removeEventListener("pointermove", onMove);
-      document.removeEventListener("pointerout", onLeave);
+      html.removeEventListener("mouseleave", onLeave);
+      window.removeEventListener("blur", onLeave);
       window.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointerup", onUp);
     };

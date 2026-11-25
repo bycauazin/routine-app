@@ -41,3 +41,33 @@ export function formatDayTitle(civilDate) {
   const weekday = WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
   return `${weekday}, ${d} de ${MONTHS[m - 1]}`;
 }
+
+/** "2026-11-23" ± days, on the calendar (no time zone shift). */
+export function shiftDate(civilDate, days) {
+  const [y, m, d] = civilDate.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
+}
+
+/** First day of an inclusive range ending on `end` and covering a rolling calendar month. */
+export function monthStartForRange(end) {
+  const [year, month, day] = end.split("-").map(Number);
+  const previousMonth = month - 2;
+  const last = new Date(Date.UTC(year, previousMonth + 1, 0)).getUTCDate();
+  const previousDate = new Date(Date.UTC(year, previousMonth, Math.min(day, last))).toISOString().slice(0, 10);
+  return shiftDate(previousDate, 1);
+}
+
+/** Monday of the week of a date (weeks run Monday to Sunday, like the API). */
+export function weekStart(civilDate) {
+  const [y, m, d] = civilDate.split("-").map(Number);
+  return shiftDate(civilDate, -((new Date(Date.UTC(y, m - 1, d)).getUTCDay() + 6) % 7));
+}
+
+/** "23 a 29 de novembro", "30 de novembro a 6 de dezembro" (same year assumed unless it changes). */
+export function formatWeekRange(from, to) {
+  const [fy, fm, fd] = from.split("-").map(Number);
+  const [ty, tm, td] = to.split("-").map(Number);
+  if (fy !== ty) return `${fd} de ${MONTHS[fm - 1]} de ${fy} a ${td} de ${MONTHS[tm - 1]} de ${ty}`;
+  if (fm !== tm) return `${fd} de ${MONTHS[fm - 1]} a ${td} de ${MONTHS[tm - 1]}`;
+  return `${fd} a ${td} de ${MONTHS[tm - 1]}`;
+}

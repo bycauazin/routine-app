@@ -68,7 +68,7 @@ export function TodayMock({ className }) {
             </li>
           ))}
         </ul>
-        <p className="px-2.5 text-[10.5px] font-[650] tracking-[0.05em] text-muted uppercase">A qualquer hora</p>
+        <p className="px-2.5 text-[10.5px] font-[650] tracking-[0.05em] text-muted uppercase">Para hoje, sem horário</p>
         <div className="flex flex-wrap gap-2 px-1">
           <span className="flex items-center gap-1.5 rounded-full border border-accent-text bg-paper px-3 py-1.5 text-[12.5px]">
             Duolingo

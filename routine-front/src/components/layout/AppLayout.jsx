@@ -1,3 +1,4 @@
+import { api } from "@/lib/api";
 import { Globe, LogOut, Presentation, Settings } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
@@ -44,6 +45,18 @@ function UserMenu() {
   const items = [
     { label: "Configurações", icon: Settings, onSelect: () => navigate("/configuracoes") },
     { label: "Página de apresentação", icon: Globe, onSelect: () => navigate("/") },
+    ...(user?.demo
+      ? []
+      : [
+          {
+            label: "Ver demonstração",
+            icon: Presentation,
+            onSelect: async () => {
+              await api("/auth/demo", { method: "POST" });
+              window.location.assign("/hoje");
+            },
+          },
+        ]),
     user?.demo
       ? { label: "Sair da demonstração", icon: LogOut, danger: true, onSelect: leaveDemo }
       : {

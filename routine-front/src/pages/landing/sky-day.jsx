@@ -1,8 +1,17 @@
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/cn";
 
-/** Hours with a known light (tokens --sky-HH in index.css); the ones in between are mixed. */
-const STOPS = [7, 10, 13, 17, 19, 21, 23];
+/** Hours with a known light; the ones in between are mixed. Tokens --sky-HH in index.css (17 = sunset, 19 = first night). */
+const STOPS = [7, 10, 13, 17.5, 18.5, 21, 24];
+const STOP_TOKENS = ["07", "10", "13", "17", "19", "21", "23"];
+/** The line: dawn (7h) at the left edge, 18h in the middle, midnight at the right edge. */
+const START = 7;
+const MIDDLE = 18;
+const END = 24;
+/** Hour -> position on the line (0–1). */
+const posOf = (hr) => (hr <= MIDDLE ? ((hr - START) / (MIDDLE - START)) * 0.5 : 0.5 + ((hr - MIDDLE) / (END - MIDDLE)) * 0.5);
+/** Position on the line (0–1) -> hour. */
+const hourAt = (p) => (p <= 0.5 ? START + (p / 0.5) * (MIDDLE - START) : MIDDLE + ((p - 0.5) / 0.5) * (END - MIDDLE));
 const CATS = ["--cat-personal", "--cat-commute", "--cat-work", "--cat-meal", "--cat-work", "--cat-class", "--cat-workout", "--cat-study"];
 /** The day as a skyline: [from hour, to hour, height (0–1), category]. */
 const BLOCKS = [
@@ -15,7 +24,8 @@ const BLOCKS = [
   [20, 21, 0.42, 6],
   [21, 23, 0.52, 7],
 ];
-const NIGHT_FROM = 19.5;
+/** The moon takes the sun's place halfway through dusk (17:30–18:30). */
+const NIGHT_FROM = 18;
 
 const toRgb = (color) => {
   const hex = color.replace("#", "");
@@ -53,7 +63,7 @@ export function SkyDay({ className }) {
     let w = 0;
     let h = 0;
     let c = { stops: [], moon: [0, 0, 0], page: [0, 0, 0], pink: "", deep: "", ink: "", rule: "", edge: "", cats: [] };
-    let hour = Math.min(22.9, Math.max(7, hourNow()));
+    let hour = Math.min(END - 0.02, Math.max(START, hourNow()));
     const ptr = { x: -1, last: -1e9 };
     let visible = true;
     let raf = 0;
@@ -63,7 +73,7 @@ export function SkyDay({ className }) {
       const s = getComputedStyle(document.documentElement);
       const v = (n) => s.getPropertyValue(n).trim();
       c = {
-        stops: STOPS.map((hh) => toRgb(v(`--sky-${String(hh).padStart(2, "0")}`))),
+        stops: STOP_TOKENS.map((t) => toRgb(v(`--sky-${t}`))),
         moon: toRgb(v("--sky-moon")),
         page: toRgb(v("--bg")),
         pink: v("--accent"),
@@ -117,9 +127,11 @@ export function SkyDay({ className }) {
       const cy = h * 0.66;
       const rx = w * 0.38;
       const ry = h * 0.5;
-      const a = Math.PI + ((hr - 7) / 16) * Math.PI;
+      const a = Math.PI + posOf(hr) * Math.PI;
+      // at night the sky is dark in both themes, so the arc and the hour use the moon's light
+      const text = night ? `rgb(${c.moon.join(",")})` : c.ink;
       ctx.setLineDash([3, 7]);
-      ctx.strokeStyle = c.ink;
+      ctx.strokeStyle = text;
       ctx.globalAlpha = 0.28;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
@@ -152,12 +164,12 @@ export function SkyDay({ className }) {
       const label = `${String(Math.floor(hr)).padStart(2, "0")}:${String(Math.floor((hr % 1) * 60)).padStart(2, "0")}`;
       ctx.font = "700 13px 'Inter Variable', system-ui, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillStyle = c.ink;
+      ctx.fillStyle = text;
       ctx.fillText(label, sx, sy + 40);
 
       // the day as a skyline: soft white edges, navy windows (creme in the dark theme); the block of "now" lights up pink
       const base = h - 1;
-      const x = (v) => w * 0.04 + ((v - 7) / 16) * w * 0.92;
+      const x = (v) => w * 0.04 + posOf(v) * w * 0.92;
       for (const [a0, a1, height, cat] of BLOCKS) {
         const bx = x(a0) + 2;
         const bw = x(a1) - x(a0) - 4;
@@ -184,7 +196,8 @@ export function SkyDay({ className }) {
       if (!visible || document.hidden) return;
       const idle = t - ptr.last > 2500 || ptr.x < 0;
       // with the pointer: the hour under it; alone: the day goes by, from dawn to night and back
-      const target = idle ? 7 + 8 * (1 - Math.cos((t / 1000) * 0.16)) : 7 + Math.min(1, Math.max(0, ptr.x)) * 16;
+      const p = idle ? 0.5 * (1 - Math.cos((t / 1000) * 0.16)) : Math.min(1, Math.max(0, ptr.x));
+      const target = hourAt(Math.min(0.999, p));
       hour += (target - hour) * Math.min(1, dt * (idle ? 1.2 : 5));
       paint();
     };
