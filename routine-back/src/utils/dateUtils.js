@@ -53,6 +53,15 @@ export function todayIn(timeZone = DEFAULT_TIME_ZONE, now = new Date()) {
   }).format(now);
 }
 
+/** Minutes since 00:00 right now in the given time zone (0–1439). */
+export function minuteOfDayIn(timeZone = DEFAULT_TIME_ZONE, now = new Date()) {
+  const [hour, minute] = new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+    .format(now)
+    .split(":")
+    .map(Number);
+  return hour * 60 + minute;
+}
+
 /**
  * Adds calendar months, clamping the day to the target month's length:
  * 2025-01-31 + 1 month → 2025-02-28. Never "adds 30 days".

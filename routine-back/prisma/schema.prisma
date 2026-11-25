@@ -54,6 +54,15 @@ model User {
   recoveryCodes RecoveryCode[]
   settings      UserSettings?
   auditLogs     AuditLog[]
+  categories    Category[]
+  routineRules  RoutineRule[]
+  dayItems      DayItem[]
+  dayItemSteps  DayItemStep[]
+  dayModes      DayMode[]
+  waterLogs     WaterLog[]
+  telegram      TelegramLink?
+  simulations   Simulation[]
+  personalGoals PersonalGoal[]
 
   @@index([demoExpiresAt])
   @@map("users")
@@ -83,6 +92,8 @@ enum AuthTokenPurpose {
   EMAIL_CHANGE
   /// Password accepted, waiting for the authenticator code (never e-mailed).
   TWO_FACTOR_LOGIN
+  /// One-time t.me link that ties a Telegram chat to the user (stage 7).
+  TELEGRAM_LINK
 }
 
 /// One-time recovery codes for two-step verification (when the phone is
@@ -151,11 +162,233 @@ model UserSettings {
   locale    String   @default("pt-BR")
   /// "Today" and the routine's hours are read in this time zone.
   timezone  String   @default("America/Sao_Paulo")
+  /// Office weekdays over time, oldest first: [{ from: "YYYY-MM-DD", weekdays:
+  /// [2, 4] }] (0 = Sunday … 6 = Saturday). A change applies from a day on, so
+  /// past days keep theirs. Other days are home days; one day can be switched
+  /// ("Hoje é home"): see DayMode.
+  officeDays     Json     @default("[]") @map("office_days")
+  /// Workouts offered when a workout is marked done (free text, editable).
+  workoutTypes   String[] @default(["Corrida", "Muay thai", "Academia"]) @map("workout_types")
+  /// Water goal of a day, in ml (stage 4).
+  waterGoalMl    Int      @default(2000) @map("water_goal_ml")
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")
+}
+
+// ───────────────────────────── Routine ─────────────────────────────
+
+/// What an item is. HABIT (stage 3) and CLASS (stage 4) exist already so the
+/// enum never needs a migration of its own later.
+enum ItemKind {
+  ROUTINE
+  APPOINTMENT
+  WORKOUT
+  TASK
+  HABIT
+  CLASS
+}
+
+/// A part of the day, for items without an exact time ("sábado de manhã").
+/// Morning 06–12, afternoon 12–18, evening 18–24 (utils/routineUtils.PERIODS).
+enum DayPeriod {
+  MORNING
+  AFTERNOON
+  EVENING
+}
+
+/// Office or home day. On a rule: the item only happens on that kind of day.
+enum WorkMode {
+  OFFICE
+  HOME
+}
+
+enum DayItemStatus {
+  PENDING
+  DONE
+  /// "Não houve": kept so it is not created again, and it does not count as a miss.
+  SKIPPED
+}
+
+/// Color and icon of items. `colorKey` names one of the --cat-* tints of the
+/// front (never a hex). Used categories are archived, not deleted.
+model Category {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  name       String
+  colorKey   String   @map("color_key")
+  icon       String
+  sortOrder  Int      @default(0) @map("sort_order")
+  isArchived Boolean  @default(false) @map("is_archived")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rules    RoutineRule[]
+  dayItems DayItem[]
+
+  @@unique([id, userId])
+  @@index([userId])
+  @@map("categories")
+}
+
+/// A fixed item: repeats on the chosen weekdays from `startDate` until
+/// `endDate` (inclusive, open when null). "Daqui pra frente" closes a rule and
+/// starts a new one, so past days never change.
+model RoutineRule {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  seriesId       String    @default(uuid(7)) @map("series_id") @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  categoryId     String?   @map("category_id") @db.Uuid
+  kind           ItemKind
+  name           String
+  /// 0 = Sunday … 6 = Saturday, sorted, no repeats.
+  weekdays       Int[]
+  /// Minutes since 00:00; both null = no time ("a qualquer hora").
+  startMinute    Int?      @map("start_minute")
+  endMinute      Int?      @map("end_minute")
+  startDate      DateTime  @map("start_date") @db.Date
+  endDate        DateTime? @map("end_date") @db.Date
+  /// A part of the day instead of exact times (never both).
+  period         DayPeriod?
+  /// Null = every day; OFFICE / HOME = only on office / home days.
+  mode           WorkMode?
+  /// Planned workout ("Muay thai"); null = chosen when marked done. WORKOUT only.
+  variant        String?
+  /// Icon of the item (lucide kebab-case name); null = the category's icon.
+  icon           String?
+  /// Checklist of a routine block ("afazeres"), copied to each day:
+  /// [{ key: uuid, name }]. The key stays the same across "daqui pra frente"
+  /// versions, so a step keeps its streak. ROUTINE only; [] otherwise.
+  steps          Json      @default("[]")
+  /// A list ("Rotina diária", "Rotina do trabalho"): its steps also show inside the blocks of these
+  /// rules on the same day (Condução, Almoço…). Checking them there checks this item's steps.
+  insideRuleIds  String[]  @default([]) @map("inside_rule_ids") @db.Uuid
+  /// Skipped on holidays, vacation and days off (stage 5).
+  skipOnHolidays Boolean   @default(false) @map("skip_on_holidays")
+  notes          String?
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId, userId], references: [id, userId], onDelete: NoAction, onUpdate: NoAction)
+  dayItems DayItem[]
+
+  @@unique([id, userId])
+  @@index([userId, startDate])
+  @@index([userId, seriesId])
+  @@map("routine_rules")
+}
+
+/// What exists on a day: made from a rule the first time the day is opened
+/// (`ruleId` + `originDate`), or added just for that day (no rule: a task, an
+/// appointment). `date` is where the item is now (rescheduling changes it);
+/// `originDate` is the rule's day, so a moved or skipped item is never made again.
+model DayItem {
+  id           String        @id @default(uuid(7)) @db.Uuid
+  userId       String        @map("user_id") @db.Uuid
+  ruleId       String?       @map("rule_id") @db.Uuid
+  seriesId     String?       @map("series_id") @db.Uuid
+  categoryId   String?       @map("category_id") @db.Uuid
+  kind         ItemKind
+  name         String
+  /// Null only for a one-off task without a date ("A fazer").
+  date         DateTime?     @db.Date
+  originDate   DateTime?     @map("origin_date") @db.Date
+  startMinute  Int?          @map("start_minute")
+  endMinute    Int?          @map("end_minute")
+  period       DayPeriod?
+  /// Workout done (or planned): "Corrida", "Muay thai"… WORKOUT only.
+  variant      String?
+  /// Copied from the rule, or chosen for a one-off item; null = the category's icon.
+  icon         String?
+  status       DayItemStatus @default(PENDING)
+  doneAt       DateTime?     @map("done_at") @db.Timestamptz(3)
+  /// When it was really done, in minutes since 00:00 of its day ("fiz em
+  /// outro horário"); null when unknown (marked on a later day).
+  doneMinute   Int?          @map("done_minute")
+  reviewedAt   DateTime?     @map("reviewed_at") @db.Timestamptz(3)
+  scheduledDate DateTime?    @map("scheduled_date") @db.Date
+  scheduledMinute Int?       @map("scheduled_minute")
+  skipReason   String?       @map("skip_reason")
+  /// Changed "só hoje" (or rescheduled): no longer follows its rule.
+  isOverridden Boolean       @default(false) @map("is_overridden")
+  notes        String?
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rule     RoutineRule? @relation(fields: [ruleId, userId], references: [id, userId], onDelete: NoAction, onUpdate: NoAction)
+  category Category?    @relation(fields: [categoryId, userId], references: [id, userId], onDelete: NoAction, onUpdate: NoAction)
+  steps    DayItemStep[]
+
+  @@unique([id, userId])
+  @@unique([ruleId, originDate])
+  @@index([userId, date])
+  @@index([userId, status, date])
+  @@index([userId, scheduledDate])
+  @@map("day_items")
+}
+
+model PersonalGoal {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  name       String
+  subject    String
+  targetKey  String?  @map("target_key") @db.Uuid
+  targetName String?  @map("target_name")
+  unit       String
+  amount     Int
+  period     String
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([id, userId])
+  @@index([userId])
+  @@map("personal_goals")
+}
+
+/// One step of a routine block on a day (copied from the rule's `steps`).
+/// Done = `doneAt` set. "Não houve" is for the whole block (its DayItem).
+model DayItemStep {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  dayItemId String    @map("day_item_id") @db.Uuid
+  /// The step's key in the rule (same across versions): streaks follow it.
+  stepKey   String    @map("step_key") @db.Uuid
+  name      String
+  /// Optional time inside the block (minutes since 00:00), e.g. "Reunião 15:00" inside Trabalho.
+  minute    Int?
+  sortOrder Int       @map("sort_order")
+  doneAt    DateTime? @map("done_at") @db.Timestamptz(3)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dayItem DayItem @relation(fields: [dayItemId, userId], references: [id, userId], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([id, userId])
+  @@unique([dayItemId, stepKey])
+  @@index([userId, stepKey])
+  @@map("day_item_steps")
+}
+
+/// A day switched from its default ("Hoje é home"). Days without a row
+/// follow UserSettings.officeWeekdays.
+model DayMode {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  date      DateTime @db.Date
+  mode      WorkMode
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("day_modes")
 }
 
 // ───────────────────────────── System ─────────────────────────────
@@ -176,4 +409,50 @@ model AuditLog {
   @@index([userId, createdAt])
   @@index([entityType, entityId])
   @@map("audit_logs")
+}
+
+/// One time water was drunk ("bebi 300"): the amount and when. The day is the
+/// civil date in the user's time zone, so a log after midnight counts on the new day.
+model WaterLog {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  date      DateTime @db.Date
+  amountMl  Int      @map("amount_ml")
+  loggedAt  DateTime @default(now()) @map("logged_at") @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([id, userId])
+  @@index([userId, date])
+  @@map("water_logs")
+}
+
+/// The user's Telegram chat (stage 7): one chat per user and one user per chat.
+model TelegramLink {
+  userId   String   @id @map("user_id") @db.Uuid
+  chatId   BigInt   @unique @map("chat_id")
+  /// Telegram @username when it has one (shown in Configurações).
+  username String?
+  linkedAt DateTime @default(now()) @map("linked_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("telegram_links")
+}
+
+/// A draft weekly routine to play with (Simulações): blocks as JSON, no dates,
+/// never touches the days or reports until applied. See SimulationService.
+model Simulation {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  name      String
+  blocks    Json     @default("[]")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("simulations")
 }

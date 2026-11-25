@@ -193,7 +193,9 @@ class AuthService {
 
     let user;
     try {
-      user = await UserService.create({ email, name, password, verified: false, approved: false });
+      // No admin yet (a fresh install): nobody could approve, so the first account is the admin, already approved.
+      const first = (await UserDao.count({ where: { role: "ADMIN" } })) === 0;
+      user = await UserService.create({ email, name, password, verified: false, approved: first, role: first ? "ADMIN" : "USER" });
     } catch (error) {
       // Two sign-ups for the same address at once: answer like any other.
       if (error instanceof ConflictError) return { email };

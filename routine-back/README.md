@@ -21,6 +21,8 @@ Erros: `{ meta: { success: false }, code, message, fields? }`. `fields` traz a m
 
 ## Pastas
 
+Metas, relatórios e revisão de dias pendentes entram por [routes/reports.js](src/routes/reports.js). O [teste de integração](__tests__/integration/reports.test.js) cobre isolamento, cálculo e revisão.
+
 | Pasta | Responsabilidade |
 | --- | --- |
 | `server.js` | sobe o servidor (entrypoint) |
@@ -37,7 +39,7 @@ Erros: `{ meta: { success: false }, code, message, fields? }`. `fields` traz a m
 | `src/shared/` | erros e constantes de domínio |
 | `prisma/` | schema e migrations |
 | `scripts/` | criar usuário, e-mail de teste, copiar dados, desligar 2FA |
-| `__tests__/` | unitários e de integração (Vitest + Supertest) |
+| [`__tests__/`](__tests__/README.md) | unitários e de integração (Vitest + Supertest) |
 
 ## Módulos
 
@@ -46,6 +48,7 @@ Erros: `{ meta: { success: false }, code, message, fields? }`. `fields` traz a m
 | `/api/v1/auth`, `/api/v1/me` | login (com verificação em duas etapas), logout, sessão, `POST /auth/demo` (demonstração, pública), criar conta, confirmar e-mail, esqueci a senha, trocar e-mail, perfil, senha |
 | `/api/v1/me/sessions`, `/api/v1/me/two-factor`, `/api/v1/me/export`, `DELETE /api/v1/me` | segurança: aparelhos conectados, verificação em duas etapas e códigos de recuperação, baixar meus dados, excluir conta |
 | `/api/v1/admin/users` | só admins: lista as contas, libera (`POST /:id/approve`) e exclui (`DELETE /:id`) |
+| `/api/v1/categories`, `/rules`, `/days`, `/weeks`, `/day-items`, `/tasks`, `/routine-settings` | a rotina: categorias, itens fixos, o dia e a semana, itens do dia (status, afazeres, editar, remarcar), tarefas sem data, dias presenciais e tipos de treino. Contrato em [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) → "API (etapa 2)" e "API (etapa 3)" |
 
 ## Scripts
 

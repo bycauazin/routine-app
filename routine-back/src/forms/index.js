@@ -16,11 +16,13 @@ import SecurityCurrentPassword from "./security/CurrentPassword.js";
 import SecurityDeleteAccount from "./security/DeleteAccount.js";
 import SecurityPasswordAndCode from "./security/PasswordAndCode.js";
 import SecuritySessionById from "./security/SessionById.js";
+import * as routine from "./routine/index.js";
 import ById from "./shared/ById.js";
 
 const forms = {
   shared: { ById },
   auth: { Login, LoginTwoFactor, Register, EmailOnly, TokenOnly, ResetPassword, UpdateProfile, ChangePassword, ChangeEmail },
+  routine,
   security: {
     CurrentPassword: SecurityCurrentPassword,
     Code: SecurityCode,

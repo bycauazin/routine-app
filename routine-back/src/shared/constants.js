@@ -61,3 +61,34 @@ export const EMAIL_ACTION_MAX_PER_IP = 20;
 export const SIGNUP_WINDOW_MINUTES = 60;
 export const SIGNUP_MAX_PER_IP = 5;
 export const PASSWORD_MAX_LENGTH = 128;
+
+// ───────────── Routine ─────────────
+
+/** Tints of the front (--cat-* tokens) a category may use. Never a hex: the colors live in the front's tokens. */
+export const CATEGORY_COLOR_KEYS = ["daily", "work", "commute", "study", "class", "workout", "meal", "personal"];
+
+/** Categories every user starts with (editable). */
+export const DEFAULT_CATEGORIES = Object.freeze([
+  // Small things done every day, usually without a set time: read 2 pages, review flashcards.
+  { name: "Rotina diária", colorKey: "daily", icon: "repeat", sortOrder: 0 },
+  { name: "Trabalho", colorKey: "work", icon: "briefcase", sortOrder: 1 },
+  { name: "Condução", colorKey: "commute", icon: "bus", sortOrder: 2 },
+  { name: "Estudo", colorKey: "study", icon: "book-open", sortOrder: 3 },
+  { name: "Aulas", colorKey: "class", icon: "graduation-cap", sortOrder: 4 },
+  { name: "Treino", colorKey: "workout", icon: "dumbbell", sortOrder: 5 },
+  { name: "Refeição", colorKey: "meal", icon: "utensils", sortOrder: 6 },
+  { name: "Pessoal", colorKey: "personal", icon: "sparkles", sortOrder: 7 },
+]);
+
+/** Kinds a fixed rule may have now (HABIT comes in stage 3, CLASS in stage 4). */
+/** Every fixed item is a block of the routine (with optional steps). */
+export const RULE_KINDS = ["ROUTINE"];
+/** Kinds that can be added just for one day. */
+export const ONE_OFF_KINDS = ["TASK", "APPOINTMENT"];
+/** Parts of the day (enum DayPeriod) and office/home (enum WorkMode). */
+export const DAY_PERIODS = ["MORNING", "AFTERNOON", "EVENING"];
+export const WORK_MODES = ["OFFICE", "HOME"];
+/** Workout types a user may list in settings. */
+export const MAX_WORKOUT_TYPES = 12;
+/** "Atrasar": the largest move at once, in minutes. */
+export const SHIFT_MINUTES_MAX = 720;

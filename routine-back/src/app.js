@@ -1,3 +1,4 @@
+import TelegramController from "./controllers/TelegramController.js";
 import cookieParser from "cookie-parser";
 import express from "express";
 import helmet from "helmet";
@@ -30,6 +31,8 @@ export function createApp() {
   app.use(cookieParser());
 
   app.get("/api/health", (_req, res) => res.json({ meta: { success: true }, data: { status: "ok" } }));
+  // Called by Telegram's servers (secret header, no session or CSRF): see TelegramController.webhook.
+  app.post("/api/telegram/webhook", TelegramController.webhook());
   app.use("/api/v1", noStore, apiRateLimit, csrfProtection, loadSession, routes);
 
   app.use(notFoundHandler);

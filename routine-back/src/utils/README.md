@@ -7,6 +7,7 @@ Funções **puras** e reutilizáveis: mesma entrada → mesma saída, sem I/O, s
 | Arquivo | Conteúdo |
 | --- | --- |
 | `dateUtils.js` | datas civis e meses (`AAAA-MM`), "hoje" em America/Sao_Paulo, somar dias e meses sem "somar 30 dias" |
+| [`reportUtils.js`](reportUtils.js) | nota, janelas de metas, progresso por categoria, água e mapa de atrasos |
 | `keepAlive.js` | mantém a conexão com o banco acordada |
 
 ## 2. Contrato

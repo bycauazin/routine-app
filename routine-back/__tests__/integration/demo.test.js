@@ -25,6 +25,17 @@ describe("demonstration accounts", () => {
     expect(me.body.data.user.onboardingCompletedAt).not.toBeNull();
     const demo = await prisma.user.findUnique({ where: { email: res.body.data.user.email } });
     expect(Date.now() - demo.createdAt.getTime()).toBeGreaterThan(14 * 86_400_000);
+
+    // Her routine: fixed items, weeks of history (mostly done), and today with a late task.
+    expect((await agent.get("/api/v1/rules")).body.data.length).toBeGreaterThanOrEqual(8);
+    const past = await prisma.dayItem.groupBy({ by: ["status"], where: { userId: demo.id }, _count: true });
+    const count = Object.fromEntries(past.map((p) => [p.status, p._count]));
+    expect(count.DONE).toBeGreaterThan(count.PENDING);
+    expect(count.SKIPPED).toBeGreaterThan(0);
+    const { todayIn } = await import("../../src/utils/dateUtils.js");
+    const today = (await agent.get(`/api/v1/days/${todayIn()}`)).body.data;
+    expect(today.overdue.map((i) => i.name)).toContain("Marcar dentista");
+    expect(today.anytime.map((i) => i.name)).toContain("Comprar presente da Ju");
   });
 
   it("gives each visitor their own copy, and leaving deletes it", { timeout: 90_000 }, async () => {

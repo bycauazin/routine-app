@@ -46,6 +46,11 @@ const schema = z
     RESEND_API_KEY: z.string().optional(),
     /** Sender shown in the e-mails. Default: "Routine <GMAIL_USER>" with Gmail. */
     MAIL_FROM: z.string().optional(),
+    /** Telegram bot (stage 7), from @BotFather. Without both, the bot is off. */
+    TELEGRAM_BOT_TOKEN: z.string().optional(),
+    TELEGRAM_BOT_USERNAME: z.string().optional(),
+    /** Sent by Telegram in X-Telegram-Bot-Api-Secret-Token on every webhook call (set by `npm run telegram:setup`). */
+    TELEGRAM_WEBHOOK_SECRET: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.NODE_ENV !== "test" && (!data.AUTH_SECRET || data.AUTH_SECRET.length < 32)) {

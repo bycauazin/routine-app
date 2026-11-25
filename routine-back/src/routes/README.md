@@ -4,6 +4,8 @@
 
 Definição das rotas HTTP (Express Router): URL + método → cadeia de middlewares → handler do controller.
 
+[reports.js](reports.js) expõe as rotas autenticadas de relatórios, metas e revisão de dias pendentes.
+
 > Regra prática: Route só "conecta peças". Não implementa regra de negócio.
 
 ## 2. Contrato

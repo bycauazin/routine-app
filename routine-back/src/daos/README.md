@@ -4,6 +4,8 @@
 
 Camada de acesso a dados (Prisma). **Toda** leitura e escrita no banco passa por um DAO.
 
+[PersonalGoalDao.js](PersonalGoalDao.js) usa o contrato de propriedade do BaseDao. A apuração usa [DayItemDao.js](DayItemDao.js) e [WaterLogDao.js](WaterLogDao.js). [UserDataDao.js](UserDataDao.js) inclui metas na exportação de dados.
+
 ## 2. Contrato
 
 - Recebe parâmetros de domínio e `options = { tx }` opcional (transação aberta pelo Service).

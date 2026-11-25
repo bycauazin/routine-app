@@ -1,9 +1,14 @@
 import { prisma } from "../database/prisma.js";
+import { DEFAULT_CATEGORIES } from "../shared/constants.js";
 
 /** Users. Not user-owned (it *is* the owner), so it does not extend BaseDao. */
 class UserDao {
   db(options = {}) {
     return options.tx ?? prisma;
+  }
+
+  count(args = {}, options = {}) {
+    return this.db(options).user.count(args);
   }
 
   findById(id, options = {}) {
@@ -17,7 +22,7 @@ class UserDao {
 
   /** Creates the user together with default settings. */
   createWithSettings(data, options = {}) {
-    return this.db(options).user.create({ data: { ...data, settings: { create: {} } } });
+    return this.db(options).user.create({ data: { ...data, settings: { create: {} }, categories: { create: DEFAULT_CATEGORIES.map((c) => ({ ...c })) } } });
   }
 
   updateById(id, data, options = {}) {

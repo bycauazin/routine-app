@@ -4,6 +4,8 @@
 
 Apenas handlers HTTP: traduzem Request → Service → Response. Controllers são **finos**.
 
+[ReportController.js](ReportController.js) atende as consultas, as metas e a revisão histórica.
+
 > Regra prática: se a função faz sentido num script ou job sem Express, ela não pertence ao controller.
 
 ## 2. Contrato

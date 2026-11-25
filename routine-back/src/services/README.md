@@ -26,5 +26,10 @@ Regras de negócio e orquestração dos casos de uso: o "como" e o "quando" da r
 | `AccountSecurityService` | 2FA, aparelhos conectados, baixar dados, excluir conta |
 | `AdminService` | aprovação de cadastros |
 | `DemoService` | contas de demonstração (pessoa fictícia, uma por visitante) |
+| [`DayService`](DayService.js) | materialização do Dia e da Semana, afazeres e listas vinculadas por data |
+| [`GoalService`](GoalService.js) | metas pessoais e alvos da própria conta |
+| [`ReportService`](ReportService.js) | apuração por período, sequências e dias pendentes |
 | `AuditService` | trilha de auditoria |
 | `logger` | log estruturado (o único lugar que escreve no console) |
+
+Os cenários de Dia e Semana estão em [day-week.test.js](../../__tests__/integration/day-week.test.js).

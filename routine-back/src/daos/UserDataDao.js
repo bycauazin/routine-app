@@ -9,7 +9,7 @@ class UserDataDao {
   async exportAll(userId) {
     const where = { where: { userId } };
     const byDate = { ...where, orderBy: { createdAt: "asc" } };
-    const [user, settings, auditLogs] = await prisma.$transaction([
+    const [user, settings, categories, routineRules, dayItems, dayItemSteps, dayModes, waterLogs, auditLogs, personalGoals, telegram, simulations] = await prisma.$transaction([
       prisma.user.findUnique({
         where: { id: userId },
         select: {
@@ -24,9 +24,18 @@ class UserDataDao {
         },
       }),
       prisma.userSettings.findUnique(where),
+      prisma.category.findMany(byDate),
+      prisma.routineRule.findMany(byDate),
+      prisma.dayItem.findMany({ ...where, orderBy: [{ date: "asc" }, { createdAt: "asc" }] }),
+      prisma.dayItemStep.findMany({ ...where, orderBy: [{ dayItemId: "asc" }, { sortOrder: "asc" }] }),
+      prisma.dayMode.findMany({ ...where, orderBy: { date: "asc" } }),
+      prisma.waterLog.findMany({ ...where, orderBy: { loggedAt: "asc" } }),
       prisma.auditLog.findMany(byDate),
+      prisma.personalGoal.findMany(byDate),
+      prisma.telegramLink.findMany({ ...where, select: { username: true, linkedAt: true } }),
+      prisma.simulation.findMany(byDate),
     ]);
-    return { user, settings, auditLogs };
+    return { user, settings, categories, routineRules, dayItems, dayItemSteps, dayModes, waterLogs, auditLogs, personalGoals, telegram, simulations };
   }
 }
 

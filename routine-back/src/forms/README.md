@@ -4,6 +4,8 @@
 
 Validação e normalização da entrada de cada rota.
 
+[reports.js](reports.js) valida períodos, metas e ações de revisão em lote.
+
 > Regra prática: controllers consomem `req.validated`, nunca `req.body`.
 
 ## 2. Contrato
