@@ -16,5 +16,16 @@ Durante o trabalho:
 3. Rode os testes pelo registrador, para o outro agente ver o resultado: `node C:/Users/cauas/OneDrive/Documentos/Projetos/agent-handoff/handoff.mjs tests --agent <claude|codex> -- npm test`.
 4. Se o resumo avisar que o outro agente está ativo, não edite os mesmos arquivos; combine com o usuário.
 
+## README por pasta
+
+- Ao criar ou alterar uma pasta mantida pelo projeto, crie ou atualize seu `README.md` na mesma tarefa. Isso vale para a raiz e as subpastas de código, testes e documentação envolvidas. Pastas geradas, dependências, caches e metadados de ferramentas ficam fora dessa regra.
+- Escreva um mapa curto: para que serve a pasta, onde começar (arquivos e subpastas principais), quais regras ou dependências locais importam e onde estão os testes. Use links relativos. Atualize o mapa quando o conteúdo, os caminhos ou os comandos mudarem.
+- Antes de explorar uma pasta, leia primeiro seu `README.md`. Siga os links relevantes e abra apenas o código e os testes necessários para a tarefa. Se o README faltar ou estiver desatualizado, use busca direcionada e complete o mapa. Evite ler todos os arquivos por padrão.
+
 Nunca: commit, push, reset, checkout de arquivos ou apagar mudanças não commitadas sem o usuário pedir. Nunca grave tokens, senhas ou dados pessoais em `.agents/`.
 <!-- agent-handoff:end -->
+
+## Credenciais
+
+- Exclua das buscas e leituras arquivos `.env`, `.env.*`, pastas `.envs` e outros arquivos que guardem senhas, tokens, chaves privadas ou credenciais. Não abra, altere, exiba nem carregue esses arquivos por comandos ou scripts.
+- Use `.env.example` como referência quando ele contiver apenas nomes de variáveis e valores fictícios.

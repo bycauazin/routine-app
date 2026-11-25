@@ -103,6 +103,97 @@ Detalhes:
   **Sem dinheiro.** O que importa são as mudanças do dia a dia: **atrasar** (ex.: +30 min), **remarcar** para
   outro dia/horário e **cancelar** só aquela aula. A aula original fica registrada como remarcada.
 
+### Controle de água
+
+Pedido do usuário em 2026-11-23, revisto em 2026-11-24: **tela própria** (etapa 4).
+
+- **Meta diária em ml** (padrão 2.000 ml, ajustável; é uma das metas pessoais, ver "Metas").
+- **Registro só por número**: um campo onde digito quanto bebi ("200", "1000"). **Sem botões de copo.** Cada
+  registro guarda a quantidade e a hora (`water_logs`), para poder **desfazer o último** e ver a lista do dia.
+- No resumo do **Dia**: uma linha pequena "1,2 de 2 L" que leva para a tela da água.
+- **Sequência** de dias batendo a meta (atual e recorde). Dia sem registro conta como meta não batida, mas só
+  a partir do primeiro registro.
+- Pelo **bot**: "bebi 500" registra.
+
+### Revisão de 2026-11-24 (conversa com o usuário)
+
+**Plano × real.** Tudo o que está cadastrado é o **plano**. Eu vou marcando se segui ou não. O app (pelo bot)
+me cobra quando eu deixo de marcar.
+
+**Rotinas (listas de afazeres).** Uma rotina é um item fixo com uma **lista de pequenos afazeres** que eu
+configuro. Exemplos:
+- **Rotina diária**: ler 2 páginas, revisar flashcards (2 min), uma lição do Duolingo, um episódio de série,
+  abrir a faculdade EAD.
+- **Rotina de dormir** (das 23h em diante): tirar as telas, ler, desacelerar, banho, algo leve (leite com Nescau).
+
+Rotina **com horário** vira um cartão na Semana. Rotina **sem horário** fica só na lista do Dia. O progresso é
+"3 de 5 afazeres". Cada afazer pode ter sequência própria, como os hábitos.
+
+**Modo do dia: presencial ou home.** Trabalho CLT às vezes presencial, às vezes home. Cada dia da semana tem um
+modo padrão (configurável), e no Dia há o botão **"Hoje é home"** (ou "Hoje é presencial"). Itens marcados como
+**"só presencial"** (condução, por exemplo) somem do dia quando ele é home, e voltam se eu trocar de novo.
+
+**Treino variável.** Às vezes corro, às vezes muay thai, às vezes academia. O horário de **Treino** é fixo, e na
+hora de marcar feito eu escolho qual fiz. Também posso planejar um tipo para cada dia e trocar na hora. Os
+relatórios mostram quantas vezes fiz cada um.
+
+**Aulas.** Dou aula EAD (programação, Power BI…). A aula é um compromisso com um aluno e um horário (etapa 5).
+Sem link da chamada no cartão (sugestão recusada).
+
+**Tarefas avulsas: três casos.**
+- **Sem data**: fica na lista **"A fazer"** do Dia até eu fazer ou descartar.
+- **Com data**: aparece na lista daquele dia, não na grade.
+- **Com data e período** (Manhã / Tarde / Noite), ex.: "fazer comida sábado de manhã": aparece numa faixa no
+  topo da coluna daquele dia na Semana, sem ocupar um horário exato.
+- Com data **e hora** já é um **compromisso avulso**.
+
+**"Fiz em outro horário".** Ao marcar feito, posso informar a hora real. Isso alimenta o relatório de
+procrastinação.
+
+**Revisar dias pendentes.** Uma tela lista os dias com itens sem marcar (ex.: o fim de semana inteiro), para
+resolver tudo de uma vez: feito, não feito ou não houve.
+
+**Metas pessoais.** Todas personalizáveis de um jeito simples e mobile-first (o Finance tem metas, mas aqui há
+muito mais opções). Exemplos: treinar 3x por semana, beber 2 L de água por dia, ler todo dia, cumprir 80% da rotina
+diária. Cada meta tem: **o quê** (um item/afazer, uma categoria, o treino, a água ou a rotina inteira), **quanto**
+(vezes, ml, %, minutos) e **por período** (dia, semana, mês). Os relatórios mostram se estou batendo cada meta.
+
+**Bot do Telegram** (mesma pegada do bot do Finance: `../finance-app/finance-back/src/services/telegram/`,
+regras + IA de reserva, nada é salvo sem eu confirmar):
+- registrar água ("bebi 500");
+- marcar item como feito;
+- criar tarefa: "anotar em tarefas fazer X sábado de manhã", "anotar fazer X amanhã" ou só "anotar fazer X"
+  (sem data vai para "A fazer");
+- resumo do dia pela manhã;
+- **lembretes e cobranças**: "ontem ficaram 4 itens sem marcar", "o fim de semana ficou sem registro". O PWA não
+  tem notificações, então os avisos vêm pelo bot.
+
+**Ideias para o futuro (não entram agora).**
+- **Refeições**: plano por horário (o que comer em cada uma), com "comi / não comi" no Dia. Saiu das etapas em 2026-11-25.
+- **Sono**: hora em que dormi e acordei, ligada à rotina de dormir; talvez integração com a Mi Band 8 (ainda não
+  tenho o hábito de dormir com ela).
+
+### Revisão de 2026-11-24 (noite): blocos, afazeres e listas
+
+Pedido do usuário, aprovado com "ok". Vale sobre o que estiver escrito antes.
+
+- **Adicionar no Hoje:** dois botões, **Fixo** (se repete: regra com dias, horário/período/sem horário e
+  início) e **Avulso** (uma vez; data, período e horário opcionais; sem data vai para "Quando der"; com
+  horário pode ser "compromisso", que não fica atrasado).
+- **Sem presencial/home.** Condução só em certos dias = um fixo com esses dias da semana.
+- **Todo fixo é um bloco** (nome, dias, horário, categoria, ícone, afazeres opcionais). Sem tipo
+  Treino/Tarefa fixa/Compromisso fixo e sem "qual treino fiz"/tipos de treino.
+- **Ícone por item**, sugerido pelo nome (ou escolhido), na cor da categoria.
+- **Afazeres editáveis no Dia** ("Afazeres…"): só neste dia ou daqui pra frente; cada afazer com hora
+  opcional (ex.: "Reunião com cliente 15:00" dentro do Trabalho).
+- **Parte 3 (feita): Listas** ("Rotina diária", "Rotina do trabalho"): afazeres sem horário próprio que
+  aparecem dentro dos blocos escolhidos (Condução ida e volta, Almoço, Trabalho manhã e tarde). Marcar num
+  lugar marca em todos; a lista também aparece como cartão próprio em "Para hoje, sem horário".
+- **Parte 4 (feita): Avulso dentro de um bloco**: com data, "Colocar dentro de: Trabalho (13h–17h)" vira
+  um afazer daquele bloco só naquele dia.
+- **Seções do Dia:** Atrasadas → Para hoje, sem horário → Quando der (sem dia marcado) → Linha do tempo
+  (hora grande à esquerda).
+
 ### O dia (centro do app)
 
 Funciona como o mês do Finance:
@@ -145,11 +236,25 @@ app; **sem notificações** nesta versão).
   sem horário. Tarefas atrasadas de dias anteriores aparecem no topo. Ações rápidas: **+ Tarefa**,
   **+ Compromisso**, **Marcar dia** (feriado etc.). No item: feito, não houve, atrasar, remarcar, editar só
   hoje / daqui pra frente. Navegação para ontem e amanhã.
-- **Semana**: a grade da planilha (dias × horários), colorida por categoria e com o status de cada bloco. Serve
-  para ver o todo e tocar num dia.
-- **Relatórios**: % cumprido, nota, sequências, aulas por aluno, horas por categoria, comparando semanas e
-  meses.
-- **Configurações**: Rotina fixa, Hábitos, Alunos, Categorias, Dias especiais, Perfil e senha, Segurança,
+- **Revisão de 2026-11-24: duas abas no topo, no celular e no computador.**
+  - **Dia** (o resumo): a lista do dia descrita acima, mais rotinas com seus afazeres, "A fazer" (tarefas sem
+    data), o modo presencial/home e a linha da água.
+  - **Semana**: agenda como Google Agenda / Outlook. **Horas à esquerda (de 1 em 1 hora), dias em cima.** Cada
+    cartão ocupa o espaço exato do horário (um compromisso das 1h30 às 2h30 começa no meio da linha da 1h e
+    termina no meio da das 2h). Itens no mesmo horário ficam **lado a lado**, dividindo a largura, sem um cobrir o
+    outro. Grade visível das 6h às 24h, rolando para ver o resto. Faixa Manhã / Tarde / Noite no topo de cada dia.
+    Itens sem horário não aparecem na grade.
+- **Água**: tela própria (ver "Controle de água").
+- **Revisar dias pendentes**: ver a revisão acima.
+- **Relatórios**: filtro de período que começa em **Hoje**, com os botões **7 dias** e **1 mês** e datas de
+  início e fim livres. Mostra:
+  - % cumprido, nota, sequências, aulas por aluno, horas por categoria;
+  - **metas pessoais** batidas ou não;
+  - **água**: média, dias com a meta batida;
+  - **treinos** por tipo;
+  - **quando eu mais procrastino**: mapa de calor dia da semana × horário que junta (a) itens não feitos,
+    (b) diferença entre a hora planejada e a hora real e (c) itens atrasados ou remarcados.
+- **Configurações**: Rotina fixa, Hábitos, Água, Alunos, Categorias, Dias especiais, Perfil e senha, Segurança,
   Usuários (admins).
 - **Primeiros passos**: checklist até o usuário fechar, igual ao Finance.
 - **Landing page** pública e **demonstração**, iguais às do Finance, com o conteúdo de rotina.
@@ -214,13 +319,20 @@ me mostra o que ficou pronto e espera eu aprovar antes de começar a próxima.
    horário, materialização do dia, tela Hoje com linha do tempo e checks, "só hoje" / "daqui pra frente",
    "não houve", tarefas avulsas (com e sem horário, atrasadas). Script que cadastra a minha rotina da
    planilha.
-3. **Hábitos**: meta e quantidade opcionais, horário sugerido, "A qualquer hora", sequências.
-4. **Aulas e alunos**: cadastro de alunos, aulas fixas, atrasar, remarcar e cancelar.
-5. **Semana + dias especiais**: grade semanal estilo planilha, feriados/férias/folga com "pula em feriados".
-6. **Relatórios e nota**: % cumprido, nota do dia/semana, sequências, aulas por aluno, horas por categoria.
-7. **Qualidade e publicação**: PWA instalável, demonstração com pessoa fictícia, primeiros passos, testes
+Nova ordem aprovada em 2026-11-24:
+
+3. **Dia + Semana**: abas Dia e Semana (agenda com horas × dias, cartões proporcionais, lado a lado quando
+   batem); hábitos e **rotinas com afazeres** (diária, de dormir); tarefas sem data, com data e com período;
+   modo presencial/home; treino variável; "fiz em outro horário".
+4. **Água**: tela própria, registro por número, desfazer, sequência, linha no resumo do Dia.
+5. **Dias especiais (adiada)**: feriado, férias e folga, com "pula em feriados". Aulas usam Avulso ou Fixo e
+   podem ter afazeres só na ocorrência. Cadastro dedicado de alunos e relatórios por aluno saíram do escopo.
+6. **Metas e relatórios**: metas pessoais configuráveis, filtro Hoje / 7 dias / 1 mês / datas livres, nota,
+   procrastinação, água, treinos; tela "Revisar dias pendentes".
+7. **Bot do Telegram**: água, marcar feito, criar tarefa ("anotar…"), resumo da manhã, lembretes e cobranças.
+8. **Qualidade e publicação**: PWA instalável, demonstração com pessoa fictícia, primeiros passos, testes
    E2E, backups, deploy final.
-8. **Refeições**: plano de refeições por horário (o que comer em cada uma), com "comi / não comi" no Hoje.
+9. ~~Refeições~~ **Fora do plano (usuário, 2026-11-25):** controle demais por agora; fica nas ideias para o futuro.
 
 ## Como trabalhar
 
