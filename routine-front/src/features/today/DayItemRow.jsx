@@ -114,7 +114,9 @@ export function DayItemRow({ item, missed, showDate, timeAside, busy, onStatus, 
   return (
     <li className="flex items-start gap-2.5 sm:gap-3">
       {timeAside && <TimeAside item={item} />}
-      <div className={cn("sheet flex min-w-0 flex-1 items-start gap-3 px-3 py-2.5 sm:px-4", done && !item.isUnplanned && "bg-paper/70", skipped && "opacity-70", item.isUnplanned && "border-dashed border-[#d97706]")}>
+      <div className={cn("sheet flex min-w-0 flex-1 flex-col px-3 py-2.5 sm:px-4", done && !item.isUnplanned && "bg-paper/70", skipped && "opacity-70", item.isUnplanned && "border-dashed border-[#d97706]")}>
+      {/* The item's own line; its afazeres and linked lists go below, full width on phones. */}
+      <div className="flex items-start gap-3">
       {item.isUnplanned ? (
         <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#d97706]/15 text-[#d97706]" aria-hidden>
           <Zap className="size-5" />
@@ -168,16 +170,6 @@ export function DayItemRow({ item, missed, showDate, timeAside, busy, onStatus, 
             <ChevronDown className={cn("size-4 transition-transform", open && "rotate-180")} aria-hidden /> {open ? "Fechar" : "Ver afazeres"}
           </button>
         )}
-        {steps.length > 0 && open && (
-          <ul className="-ml-1.5 mt-1.5 flex flex-col" aria-label={`Afazeres de ${item.name}`}>
-            {steps.map((step) => (
-              <StepRow key={step.id} step={step} disabled={busy || skipped} onToggle={() => onStep(step, !step.doneAt)} />
-            ))}
-          </ul>
-        )}
-        {(item.lists ?? []).map((list) => (
-          <LinkedList key={list.itemId} list={list} blockName={item.name} busy={busy} onStep={onListStep} />
-        ))}
       </div>
 
       <Menu
@@ -200,6 +192,22 @@ export function DayItemRow({ item, missed, showDate, timeAside, busy, onStatus, 
           { label: item.ruleId ? "Tirar da rotina…" : "Excluir", icon: Trash2, onSelect: onRemove, danger: true },
         ]}
       />
+      </div>
+      {((steps.length > 0 && open) || (item.lists ?? []).length > 0) && (
+        // Phones: the whole card width, starting under the check. From sm up: under the text, as before.
+        <div className="min-w-0 sm:pl-[104px]">
+          {steps.length > 0 && open && (
+            <ul className="-ml-1.5 mt-1.5 flex flex-col" aria-label={`Afazeres de ${item.name}`}>
+              {steps.map((step) => (
+                <StepRow key={step.id} step={step} disabled={busy || skipped} onToggle={() => onStep(step, !step.doneAt)} />
+              ))}
+            </ul>
+          )}
+          {(item.lists ?? []).map((list) => (
+            <LinkedList key={list.itemId} list={list} blockName={item.name} busy={busy} onStep={onListStep} />
+          ))}
+        </div>
+      )}
       </div>
     </li>
   );
