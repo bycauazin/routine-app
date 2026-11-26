@@ -63,6 +63,7 @@ model User {
   telegram      TelegramLink?
   simulations   Simulation[]
   specialDays   SpecialDay[]
+  telegramDrafts TelegramDraft[]
   personalGoals PersonalGoal[]
 
   @@index([demoExpiresAt])
@@ -442,10 +443,26 @@ model TelegramLink {
   /// Telegram @username when it has one (shown in Configurações).
   username String?
   linkedAt DateTime @default(now()) @map("linked_at") @db.Timestamptz(3)
+  /// Day the morning summary was last sent (once a day, at the Acordar time).
+  morningSentOn DateTime? @map("morning_sent_on") @db.Date
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("telegram_links")
+}
+
+/// What the bot understood and waits for "Salvar" or "Cancelar" (stage 7B).
+/// The buttons carry only the id; old drafts are cleaned on each new one.
+model TelegramDraft {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  payload   Json
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("telegram_drafts")
 }
 
 /// A draft weekly routine to play with (Simulações): blocks as JSON, no dates,

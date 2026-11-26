@@ -51,6 +51,16 @@ const schema = z
     TELEGRAM_BOT_USERNAME: z.string().optional(),
     /** Sent by Telegram in X-Telegram-Bot-Api-Secret-Token on every webhook call (set by `npm run telegram:setup`). */
     TELEGRAM_WEBHOOK_SECRET: z.string().optional(),
+    /** Google Gemini API key (aistudio.google.com, free tier). When set, the bot's AI fallback uses Gemini. Optional. */
+    GEMINI_API_KEY: z.string().optional(),
+    /** Gemini model for the bot. Default: gemini-3.5-flash-lite. */
+    GEMINI_MODEL: z.string().optional(),
+    /** Claude API key: used for the bot's AI fallback when there is no GEMINI_API_KEY. Optional. */
+    ANTHROPIC_API_KEY: z.string().optional(),
+    /** Model for the bot's AI fallback. Default: claude-haiku-5-5. */
+    ANTHROPIC_MODEL: z.string().optional(),
+    /** Secret of GET /api/cron/morning (Authorization: Bearer …). Without it the endpoint is off. */
+    CRON_SECRET: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.NODE_ENV !== "test" && (!data.AUTH_SECRET || data.AUTH_SECRET.length < 32)) {

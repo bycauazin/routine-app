@@ -43,6 +43,18 @@ class TelegramController extends BaseController {
       return res.status(200).json({ ok: true });
     };
   }
+
+  /**
+   * GET /api/cron/morning: called by a scheduler every 15 minutes with
+   * "Authorization: Bearer CRON_SECRET". Sends the morning summary to whoever
+   * reached their Acordar time and did not get it today. Off without the secret.
+   */
+  morning() {
+    return async (req, res) => {
+      if (!env.CRON_SECRET || !sameSecret(req.get("authorization"), `Bearer ${env.CRON_SECRET}`)) return res.status(401).end();
+      return res.status(200).json({ ok: true, ...(await TelegramService.morning()) });
+    };
+  }
 }
 
 export default new TelegramController();
