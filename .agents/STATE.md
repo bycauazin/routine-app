@@ -2,6 +2,18 @@
 
 <!-- Fonte da verdade da tarefa em andamento. Atualize ao mudar de etapa; um agente continua daqui. -->
 
+## Tarefa atual (2026-11-26) · revisão antes de publicar + marca nuCorre
+
+Plano aprovado (prompt do usuário), uma etapa por vez, esperando o "ok":
+0. ✅ Ponto de restauração: commits 8611884 (back), c83c857 (front), 2bfb6ae (docs). Sem push.
+1. ✅ Dependências: nenhuma falha direta; alertas só em effect (prisma CLI) e glob/minimatch (build).
+2. ✅ OWASP no back: nada explorável.
+3. ✅ Limite de IA no bot (TELEGRAM_AI_PER_HOUR=30) + teste. Back 139+1 antes do rename.
+4. ✅ (2026-11-26, não commitado) nuCorre no nome visível, logo, ícones, abertura e tela de carregamento. Front 28, build e lint OK. **Falta:** rodar os testes do back depois do rename (signup/totp atualizados) e commitar.
+**Adiado pelo usuário:** revisão da LandingPage com design-taste-frontend e o differential-review (etapa 5).
+4. Marca e visual: **renomear para nuCorre** (só o nome visível: aba, PWA, página inicial, login, e-mails, bot, emissor do 2FA; código, rotas, banco e pastas ficam iguais). **Logo bycauazin**: contorno creme `#faf3e8`, fita marinho `#253b57`, interior rosa `#f4a6c1` (gerar com `landing-page/brand/make-logo.mjs`; ver `landing-page/brand/README.md`). Nome "nuCorre" em Inter mais forte ao lado de `<bycauazin/>`. **Abertura animada** igual à do portfólio e do Cacau (`landing-page/app/components/site-intro.js`) e tela de carregamento. Revisar a LandingPage com design-taste-frontend. Telas internas não mudam.
+5. differential-review do diff final + checkpoint.
+
 ## Anotações do usuário (2026-11-25) · a fazer
 
 1. **Escolher a logo.** Decidir estilo e paleta na página de estudo (https://claude.ai/artifact/DReu3JXyue83X4RCfkNGvs): selo com cor fixa x seguir o site, traçado/fita engrossada, nome "bycauazin" e monograma "BC". O usuário cola a escolha no chat e aí aplica nos projetos.
