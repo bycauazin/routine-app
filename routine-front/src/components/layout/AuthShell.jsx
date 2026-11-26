@@ -1,4 +1,5 @@
 import { AlertCircle, ArrowLeft, CircleCheck, MailCheck } from "lucide-react";
+import { Brand } from "@/components/layout/Brand";
 import { GridLink } from "@/components/layout/GridLink";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { cn } from "@/lib/cn";
@@ -25,9 +26,8 @@ export function AuthShell({ eyebrow, title, children }) {
       </div>
 
       <header className="flex items-center justify-between px-5 pt-5 sm:px-8">
-        <GridLink to="/" data-calm aria-label="Routine — início" className="flex items-center gap-2.5 text-[16px] font-[680] tracking-[-0.02em]">
-          <img src="/logo.svg" alt="" className="size-8 rounded-[9px]" />
-          Routine
+        <GridLink to="/" data-calm aria-label="nuCorre — início" className="flex items-center">
+          <Brand />
         </GridLink>
         <ThemeToggle className="size-10" />
       </header>

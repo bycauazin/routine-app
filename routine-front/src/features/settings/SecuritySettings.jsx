@@ -55,7 +55,7 @@ const passwordAndCodeSchema = passwordSchema.extend(codeSchema.shape);
 /** Shown once, right after turning 2FA on or asking for new codes. */
 function RecoveryCodes({ codes, onDone }) {
   const toast = useToast();
-  const text = `Routine: códigos de recuperação (cada um funciona uma vez)\n\n${codes.join("\n")}\n`;
+  const text = `nuCorre: códigos de recuperação (cada um funciona uma vez)\n\n${codes.join("\n")}\n`;
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm">
@@ -229,7 +229,7 @@ function TwoFactorCard() {
     <Card>
       <SectionHead
         title="Verificação em duas etapas"
-        help="Além da senha, o Routine pede um código de 6 dígitos que muda a cada 30 segundos no app autenticador do seu celular. Mesmo que alguém descubra sua senha, não entra sem o seu celular. Se perder o celular, use um dos códigos de recuperação."
+        help="Além da senha, o nuCorre pede um código de 6 dígitos que muda a cada 30 segundos no app autenticador do seu celular. Mesmo que alguém descubra sua senha, não entra sem o seu celular. Se perder o celular, use um dos códigos de recuperação."
         actions={enabled !== undefined && <Badge tone={enabled ? "positive" : "neutral"}>{enabled ? "Ativada" : "Desativada"}</Badge>}
       />
       <div className="flex flex-col gap-4 p-5">
@@ -241,7 +241,7 @@ function TwoFactorCard() {
           <>
             <p className="flex items-center gap-2 text-sm">
               <ShieldCheck className="size-[18px] text-done" aria-hidden />
-              Ao entrar, o Routine pede o código do app.
+              Ao entrar, o nuCorre pede o código do app.
               <span className="text-muted">
                 {status.data.recoveryCodesLeft} código(s) de recuperação restante(s).
               </span>
@@ -462,7 +462,7 @@ function DataCard() {
     <Card>
       <SectionHead
         title="Seus dados"
-        help="Pela LGPD, você pode baixar tudo o que o Routine guarda sobre você (um arquivo .json, que abre em qualquer editor de texto) e excluir sua conta quando quiser."
+        help="Pela LGPD, você pode baixar tudo o que o nuCorre guarda sobre você (um arquivo .json, que abre em qualquer editor de texto) e excluir sua conta quando quiser."
       />
       <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
         <Button variant="secondary" loading={downloading} onClick={download}>

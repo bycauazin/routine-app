@@ -1,8 +1,9 @@
 @import "@fontsource-variable/inter";
+@import "@fontsource/major-mono-display/latin-400.css";
 @import "tailwindcss";
 
 /*
- * Routine — visual system "Cream Routine"
+ * nuCorre — visual system "Cream nuCorre"
  * Made for the phone first, 60-30-10 color rule: creme (light) or navy (dark)
  * is the 60% base, the other one is the 30% of text, navigation and lines,
  * and soft pink is the 10% reserved for main actions, selected states and
@@ -288,6 +289,30 @@
 }
 
 @layer components {
+  /* <bycauazin/>: Major Mono Display has one thin weight; a stroke of its own color
+     thickens the letters at small sizes (same as the landing page and Cacau). */
+  .brand-signature {
+    font-family: "Major Mono Display", var(--font-mono);
+    font-size: 1.18em;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    -webkit-text-stroke: 0.08em currentColor;
+    paint-order: stroke fill;
+  }
+  .brand-signature i {
+    font-style: normal;
+  }
+
+  /* nuCorre wordmark (chosen by the user on 2026-11-26): Inter, heavier and tighter than the UI. */
+  .brand-word {
+    font-family: var(--font-sans);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    color: var(--ink);
+  }
+
   /* Key figures: tight, semibold, aligned digits. */
   .display {
     font-family: var(--font-sans);

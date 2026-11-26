@@ -1,8 +1,8 @@
-# Routine · bycauazin
+# nuCorre · bycauazin
 
 Controle de rotina no formato da planilha da semana: blocos fixos com dia e horário (trabalho, condução, estudo,
 treino), aulas com cada aluno, hábitos diários com sequência, tarefas avulsas e refeições. Todo dia vira uma lista
-em ordem de horário, com um check para cada coisa feita. Irmão do Finance, com a mesma estrutura.
+em ordem de horário, com um check para cada coisa feita. Irmão do Cacau (antigo Finance), com a mesma estrutura. Antes se chamava Routine: pastas, banco e código ainda usam esse nome.
 
 ```
 routine-app/

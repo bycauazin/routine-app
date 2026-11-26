@@ -2,7 +2,7 @@ import { Flame } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 /**
- * Pictures of the Routine reports for the public pages (fictional data, drawn
+ * Pictures of the nuCorre reports for the public pages (fictional data, drawn
  * with the theme tokens). Chart rules (dataviz): one hue for a single series,
  * the validated --chart-* colors in fixed order for categories, 2px gaps
  * between fills, rounded data ends on the baseline, direct labels instead of

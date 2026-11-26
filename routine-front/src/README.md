@@ -4,4 +4,4 @@
 
 O [menu do aplicativo](components/layout/navigation.js) dá acesso aos Relatórios e à revisão histórica.
 
-As [páginas públicas](pages/README.md) apresentam o Routine e dão acesso ao login e à demonstração.
+As [páginas públicas](pages/README.md) apresentam o nuCorre e dão acesso ao login e à demonstração.

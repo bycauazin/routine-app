@@ -177,7 +177,7 @@ export function AppLayout() {
 
       <header className="sticky top-0 z-30 border-b border-rule bg-bg">
         <div className="mx-auto flex h-14 max-w-[1080px] items-center gap-6 px-4 sm:px-6 md:h-16">
-          <NavLink to="/hoje" aria-label="Routine — hoje">
+          <NavLink to="/hoje" aria-label="nuCorre — hoje">
             <Brand />
           </NavLink>
 

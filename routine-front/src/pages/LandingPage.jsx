@@ -71,7 +71,7 @@ function Hero() {
               </span>
             </h1>
             <p className="mt-5 max-w-[540px] animate-[fade-up_700ms_ease_360ms_backwards] text-[16.5px] leading-relaxed text-muted sm:text-[18px]">
-              Cadastre uma vez o trabalho, as aulas, o treino e os hábitos. O Routine monta a lista de cada dia em ordem de horário, você marca o que fez e vê nos
+              Cadastre uma vez o trabalho, as aulas, o treino e os hábitos. O nuCorre monta a lista de cada dia em ordem de horário, você marca o que fez e vê nos
               relatórios como foi a semana.
             </p>
             <div className="mt-7 flex flex-wrap items-start gap-2.5 animate-[fade-up_700ms_ease_460ms_backwards] sm:gap-3">
@@ -328,7 +328,7 @@ function FinalCall() {
             <path className="todo-check" d="M3.5 8.5l3 3 6-7" />
           </svg>
         </span>
-        <span className="flex-1 text-[20px] font-[660] tracking-[-0.01em] sm:text-[26px]">{signedIn ? "Abrir o Routine" : "Criar minha conta"}</span>
+        <span className="flex-1 text-[20px] font-[660] tracking-[-0.01em] sm:text-[26px]">{signedIn ? "Abrir o nuCorre" : "Criar minha conta"}</span>
         <span className="hidden items-center gap-1.5 text-[13px] text-muted sm:flex">
           agora <MoveRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
         </span>

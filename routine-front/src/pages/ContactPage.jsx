@@ -32,7 +32,7 @@ export function ContactPage() {
       return;
     }
     setError("");
-    const text = `Olá, Cauã! ${name.trim() ? `Aqui é ${name.trim()}. ` : ""}[Routine · ${topic}]\n\n${message.trim()}`;
+    const text = `Olá, Cauã! ${name.trim() ? `Aqui é ${name.trim()}. ` : ""}[nuCorre · ${topic}]\n\n${message.trim()}`;
     window.open(`${WHATSAPP}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
   };
 
@@ -52,7 +52,7 @@ export function ContactPage() {
               </span>
             </h1>
             <p data-calm className="mt-6 w-fit max-w-[480px] animate-[fade-up_700ms_ease_400ms_backwards] text-[16.5px] leading-relaxed text-muted">
-              Quem responde é o Cauã, que fez o Routine. Normalmente no mesmo dia.
+              Quem responde é o Cauã, que fez o nuCorre. Normalmente no mesmo dia.
             </p>
           </div>
         </section>
@@ -89,7 +89,7 @@ export function ContactPage() {
                 onChange={(e) => setMessage(e.target.value)}
                 rows={6}
                 maxLength={1500}
-                placeholder="Conte o que aconteceu ou o que você gostaria de ver no Routine."
+                placeholder="Conte o que aconteceu ou o que você gostaria de ver no nuCorre."
                 className={cn(field, "resize-y")}
                 aria-invalid={!!error}
                 aria-describedby={error ? "contact-error" : undefined}

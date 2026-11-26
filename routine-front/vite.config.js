@@ -15,10 +15,10 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "auto",
-      includeAssets: ["favicon.ico", "favicon.svg", "apple-touch-icon.png"],
+      includeAssets: ["favicon.ico", "favicon.svg", "apple-touch-icon-180x180.png"],
       manifest: {
-        name: "Routine",
-        short_name: "Routine",
+        name: "nuCorre",
+        short_name: "nuCorre",
         description: "Sua rotina do dia, da semana e o que aconteceu de verdade.",
         lang: "pt-BR",
         start_url: "/hoje",

@@ -1,0 +1,234 @@
+/* Opening of the app (SiteIntro.jsx). Shown only while <html data-intro> is set by the inline
+   script in index.html. Always the nuCorre navy #253b57 with a pink glow, the sticker logo, "nuCorre"
+   typed in creme (Inter 800, like .brand-word), pink caret, grid line and progress. Ported from
+   Cacau (finance-app) and ../landing-page/app/components/site-intro.module.css. */
+
+.intro {
+  --intro-word: #faf3e8;
+  --intro-accent: #f4a6c1;
+  --intro-ink: #faf3e8;
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: none;
+  place-items: center;
+  color: var(--intro-ink);
+  background:
+    radial-gradient(circle at 50% 46%, rgb(244 166 193 / 0.14), transparent 42%),
+    #253b57;
+  font-family: var(--font-mono);
+  cursor: progress;
+  user-select: none;
+  will-change: transform;
+}
+
+:root[data-intro] .intro {
+  display: grid;
+}
+
+:root[data-intro="on"] body {
+  overflow: hidden;
+}
+
+/* Grid in the background, fading at the edges. */
+.intro::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background-image:
+    linear-gradient(rgb(250 243 232 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(250 243 232 / 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  background-position: center;
+  mask-image: radial-gradient(circle at 50% 50%, #000 0, transparent 62%);
+  animation: intro-grid-in 1.2s ease-out both;
+  pointer-events: none;
+}
+
+/* Curved edge that follows the curtain when it lifts. */
+.intro::after {
+  position: absolute;
+  top: calc(100% - 1px);
+  left: -10%;
+  width: 120%;
+  height: 16vh;
+  content: "";
+  background: #253b57;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  box-shadow: 0 6px 0 -2px rgb(244 166 193 / 0.85);
+  transform: scaleY(0);
+  transform-origin: 50% 0;
+  pointer-events: none;
+}
+
+.intro-stack {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  transition: transform 0.9s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.6s ease;
+}
+
+.intro-mark-wrap {
+  position: relative;
+  transform: translateY(calc(0.625em + 30px));
+  font-size: clamp(30px, 7vw, 54px);
+  transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.intro-mark {
+  display: block;
+  max-height: 22vh;
+  animation: intro-mark-in 0.85s cubic-bezier(0.2, 1.25, 0.35, 1) both;
+}
+
+.intro-word {
+  display: flex;
+  align-items: center;
+  height: 1.25em;
+  /* Same wordmark as the app (.brand-word): Inter 800, tight, in creme. */
+  color: var(--intro-word);
+  font-family: var(--font-sans);
+  font-size: clamp(42px, 10vw, 80px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  white-space: pre;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.intro-word > span {
+  display: inline-block;
+}
+
+.intro-enter {
+  animation: intro-enter 0.24s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.intro-caret {
+  width: 0.08em;
+  height: 0.86em;
+  margin-left: 0.08em;
+  background: var(--intro-accent);
+  border-radius: 2px;
+  animation: intro-blink 1s steps(1) infinite;
+}
+
+.intro-tagline {
+  color: rgb(250 243 232 / 0.88);
+  font-size: clamp(16px, 3.4vw, 20px);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.intro-corner,
+.intro-hint {
+  position: absolute;
+  color: rgb(250 243 232 / 0.4);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  animation: intro-fade-in 0.6s 0.4s ease both;
+}
+
+.intro-corner {
+  top: calc(24px + env(safe-area-inset-top));
+  left: 26px;
+}
+
+.intro-hint {
+  right: 26px;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+}
+
+/* Thin loading bar at the bottom, full when the curtain lifts. */
+.intro-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--intro-accent);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  animation: intro-progress 2.6s cubic-bezier(0.5, 0, 0.2, 1) both;
+}
+
+/* Phases (data-phase): logo → type → done → lift. */
+.intro:not([data-phase="logo"]) .intro-mark-wrap {
+  transform: none;
+}
+
+.intro:not([data-phase="logo"]) .intro-word {
+  opacity: 1;
+}
+
+.intro[data-phase="done"] .intro-tagline,
+.intro[data-phase="lift"] .intro-tagline {
+  opacity: 1;
+  transform: none;
+}
+
+.intro[data-phase="lift"] {
+  transform: translateY(calc(-100% - 16vh));
+  transition: transform 0.9s cubic-bezier(0.76, 0, 0.24, 1);
+  pointer-events: none;
+}
+
+.intro[data-phase="lift"]::after {
+  animation: intro-curve 0.9s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+.intro[data-phase="lift"] .intro-stack {
+  opacity: 0;
+  transform: translateY(-14vh) scale(0.96);
+}
+
+.intro[data-phase="lift"] .intro-progress {
+  animation: none;
+  transform: scaleX(1);
+}
+
+@keyframes intro-mark-in {
+  from { opacity: 0; transform: scale(0.45) rotate(-110deg); filter: blur(10px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+@keyframes intro-enter {
+  from { opacity: 0; transform: translateY(0.32em); filter: blur(3px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+@keyframes intro-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes intro-grid-in {
+  from { opacity: 0; transform: scale(1.08); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes intro-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes intro-progress {
+  to { transform: scaleX(0.92); }
+}
+
+@keyframes intro-curve {
+  0% { transform: scaleY(0); }
+  45% { transform: scaleY(1); }
+  100% { transform: scaleY(0.35); }
+}
+
+@media (max-width: 560px) {
+  .intro-hint {
+    right: 50%;
+    transform: translateX(50%);
+  }
+}

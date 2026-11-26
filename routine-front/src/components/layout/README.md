@@ -2,6 +2,8 @@
 
 [AppLayout.jsx](AppLayout.jsx) monta a moldura autenticada com o menu definido em [navigation.js](navigation.js). O menu aponta para Hoje, Água, Relatórios e Configurações. A [API de relatórios](../../../../routine-back/__tests__/integration/reports.test.js) tem testes de integração.
 
+[Brand.jsx](Brand.jsx) tem a logo, o nome nuCorre e a assinatura `<bycauazin/>`. [SiteIntro.jsx](SiteIntro.jsx) e [site-intro.css](site-intro.css) são a abertura animada (ver o [README da interface](../../../README.md#marca-abertura-e-carregamento)).
+
 [DemoButton.jsx](DemoButton.jsx) inicia a sessão fictícia a partir da [landing](../../pages/LandingPage.jsx) ou do [login](../../pages/LoginPage.jsx), usando o [fluxo de demonstração da API](../../../../routine-back/__tests__/integration/demo.test.js).
 
 ## Barra lateral de seções

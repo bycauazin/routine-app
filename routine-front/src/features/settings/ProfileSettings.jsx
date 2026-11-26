@@ -52,7 +52,7 @@ function ProfileCard() {
 
   return (
     <Card>
-      <CardHeader title="Perfil" description="Como você aparece no Routine." />
+      <CardHeader title="Perfil" description="Como você aparece no nuCorre." />
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-5 p-5 sm:grid-cols-2">
         <Field label="Nome" error={errors.name?.message}>
           {(a11y) => <Input {...a11y} autoComplete="name" {...register("name")} />}

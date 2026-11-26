@@ -35,7 +35,7 @@ const DAY = [
 /** The Hoje screen inside a phone. */
 export function TodayMock({ className }) {
   return (
-    <div className={cn("w-full max-w-[340px] rounded-[38px] bg-ink p-2.5 shadow-lg", className)} role="img" aria-label="Tela Hoje do Routine: a linha do tempo do dia com os itens feitos marcados">
+    <div className={cn("w-full max-w-[340px] rounded-[38px] bg-ink p-2.5 shadow-lg", className)} role="img" aria-label="Tela Hoje do nuCorre: a linha do tempo do dia com os itens feitos marcados">
       <div className="flex flex-col gap-3.5 overflow-hidden rounded-[30px] bg-bg px-4 pt-5 pb-4 tabular-nums">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -195,7 +195,7 @@ const DESK_DAY = [
 ];
 
 /**
- * The Routine app on a computer (top bar, the day, the week and a report).
+ * The nuCorre app on a computer (top bar, the day, the week and a report).
  * Fixed 1120px wide as the blurred picture behind the hero (decorative,
  * hidden from screen readers); `fluid` fits the width of its column and is
  * described for screen readers.
@@ -204,11 +204,11 @@ export function DesktopAppShot({ className, fluid = false }) {
   return (
     <div
       className={cn("overflow-hidden rounded-[22px] bg-bg shadow-lg", fluid ? "w-full border-2 border-ink" : "w-[1120px] border border-rule-strong", className)}
-      {...(fluid ? { role: "img", "aria-label": "O Routine no computador: a lista do dia, a semana em grade e os números da semana" } : { "aria-hidden": true })}
+      {...(fluid ? { role: "img", "aria-label": "O nuCorre no computador: a lista do dia, a semana em grade e os números da semana" } : { "aria-hidden": true })}
     >
       <div className="flex h-12 items-center gap-6 border-b border-rule bg-paper px-5 text-[13px]">
         <span className="flex items-center gap-2 font-[700]">
-          <span className="size-6 rounded-[7px] bg-ink" /> Routine
+          <span className="size-6 rounded-[7px] bg-ink" /> nuCorre
         </span>
         <span className="font-[650]">Hoje</span>
         <span className="text-muted">Semana</span>

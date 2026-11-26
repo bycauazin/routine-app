@@ -2,6 +2,7 @@ import { ArrowRight, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { useAuth } from "@/auth/AuthProvider";
+import { Brand } from "@/components/layout/Brand";
 import { GridLink } from "@/components/layout/GridLink";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { cn } from "@/lib/cn";
@@ -14,17 +15,13 @@ const SECTIONS = [
   ["/#seus-dados", "Seus dados"],
 ];
 
-export function Logo({ className }) {
-  return <img src="/logo.svg" alt="" className={cn("size-8 rounded-[9px]", className)} />;
-}
-
-/** "Entrar" for visitors, "Abrir o Routine" when signed in. */
+/** "Entrar" for visitors, "Abrir o nuCorre" when signed in. */
 export function StartButton({ className, label, compact }) {
   const { status } = useAuth();
   const signedIn = status === "authenticated";
   return (
     <GridLink to={signedIn ? "/hoje" : "/login"} className={cn(btnPrimary, compact ? "h-11 px-4 text-[14px] sm:h-12 sm:px-5 sm:text-[14.5px]" : "h-12 text-[14.5px]", className)}>
-      {signedIn ? "Abrir o Routine" : (label ?? "Entrar")}
+      {signedIn ? "Abrir o nuCorre" : (label ?? "Entrar")}
       <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
     </GridLink>
   );
@@ -49,9 +46,8 @@ export function PublicHeader() {
   return (
     <header className={cn("fixed inset-x-0 top-0 z-40 border-b transition-[background-color,border-color] duration-300", scrolled || open ? "border-rule bg-bg/95 backdrop-blur" : "border-transparent")}>
       <div data-calm className="mx-auto flex h-16 max-w-[1180px] items-center gap-8 px-5 sm:px-8">
-        <Link to="/" className="flex items-center gap-2.5 text-[16px] font-[680] tracking-[-0.02em]" aria-label="Routine — início">
-          <Logo />
-          Routine
+        <Link to="/" className="flex items-center" aria-label="nuCorre — início">
+          <Brand />
         </Link>
         <nav aria-label="Seções" className="hidden items-center gap-6 text-[14px] md:flex">
           {SECTIONS.map(([to, label]) => (
@@ -117,8 +113,8 @@ export function PublicFooter() {
   return (
     <footer className="border-t border-rule">
       <div className="mx-auto flex max-w-[1180px] flex-col gap-5 px-5 py-9 text-[13.5px] sm:px-8 md:flex-row md:items-center md:justify-between">
-        <Link to="/" className="flex items-center gap-2.5 font-[680]">
-          <Logo className="size-7" /> Routine
+        <Link to="/" className="flex items-center" aria-label="nuCorre — início">
+          <Brand signature={false} size="text-[16px]" />
         </Link>
         <nav aria-label="Rodapé" className="flex flex-wrap gap-x-5 gap-y-2 text-ink-2">
           <GridLink to="/contato" className="hover:text-accent-text">

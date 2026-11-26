@@ -91,7 +91,7 @@ function CodeStep({ ticket, onDone, onExpired, onBack }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-8 flex flex-col gap-5">
       <AuthNotice tone="mail">
-        {useRecovery ? "Digite um dos códigos de recuperação que você guardou. Cada um funciona uma vez só." : "Abra o app autenticador no celular e digite o código de 6 dígitos do Routine."}
+        {useRecovery ? "Digite um dos códigos de recuperação que você guardou. Cada um funciona uma vez só." : "Abra o app autenticador no celular e digite o código de 6 dígitos do nuCorre."}
       </AuthNotice>
       <Field label={useRecovery ? "Código de recuperação" : "Código do app"} error={errors.code?.message}>
         {(a11y) =>

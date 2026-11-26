@@ -1,12 +1,8 @@
 import { defineConfig, minimal2023Preset } from "@vite-pwa/assets-generator/config";
 
-// Icons of the installed app (PWA), made from public/logo.svg: `npm run pwa:icons`.
-// favicon.ico and apple-touch-icon.png are hand-made and stay as they are.
+// Every icon made from public/logo.svg (the nuCorre sticker on a navy square): `npm run pwa:icons`.
+// Out come pwa-64/192/512, maskable-icon-512x512, favicon.ico and apple-touch-icon-180x180.png.
 export default defineConfig({
-  preset: {
-    ...minimal2023Preset,
-    transparent: { ...minimal2023Preset.transparent, favicons: [] },
-    apple: { ...minimal2023Preset.apple, sizes: [] },
-  },
+  preset: minimal2023Preset,
   images: ["public/logo.svg"],
 });
