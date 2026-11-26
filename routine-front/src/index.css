@@ -601,3 +601,16 @@ input::-ms-clear {
   50% { transform: translateY(-8px); }
 }
 
+
+/* Section rail (components/ui/SectionRail.jsx): entrance, sliding marker, pop. */
+.section-rail { animation: rail-in 700ms cubic-bezier(.2, .8, .2, 1) both; }
+.section-rail-item { animation: rail-icon-in 520ms cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(180ms + var(--i) * 45ms); }
+.section-rail-marker { transform: translateY(calc(var(--active) * var(--step))); transition: transform 420ms cubic-bezier(.3, 1.3, .5, 1); }
+.section-rail-pop { animation: rail-pop 420ms cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes rail-in { from { opacity: 0; transform: translateX(24px); } } /* Tailwind centers with `translate`, this adds on top */
+@keyframes rail-icon-in { from { opacity: 0; transform: translateX(14px); } }
+@keyframes rail-pop { 0% { transform: scale(.8); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .section-rail, .section-rail-item, .section-rail-pop { animation: none !important; }
+  .section-rail-marker { transition: none; }
+}

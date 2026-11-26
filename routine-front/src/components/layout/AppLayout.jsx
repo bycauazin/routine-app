@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { Menu } from "@/components/ui/Menu";
+import { SectionRail } from "@/components/ui/SectionRail";
 import { cn } from "@/lib/cn";
 import { useTheme } from "@/lib/theme";
 import { Brand } from "./Brand";
@@ -166,6 +167,7 @@ export function AppLayout() {
   // Only a new section replays the entrance cascade.
   const section = pathname.split("/").slice(0, pathname.startsWith("/configuracoes") ? 3 : 2).join("/");
   const { user } = useAuth();
+  const mainRef = useRef(null);
   return (
     <div className="min-h-dvh">
       {user?.demo && <DemoBanner />}
@@ -188,11 +190,12 @@ export function AppLayout() {
         </div>
       </header>
 
-      <main id="conteudo" className="mx-auto w-full max-w-[1080px] px-4 pt-5 pb-[calc(8rem+env(safe-area-inset-bottom))] sm:px-6 md:pt-9 md:pb-20">
+      <main ref={mainRef} id="conteudo" className="mx-auto w-full max-w-[1080px] px-4 pt-5 pb-[calc(8rem+env(safe-area-inset-bottom))] sm:px-6 md:pt-9 md:pb-20">
         <div key={section} className="page-enter">
           <Outlet />
         </div>
       </main>
+      <SectionRail rootRef={mainRef} />
 
       {/* Phone navigation: tab bar docked at the bottom */}
       <nav aria-label="Principal" className="fixed inset-x-0 bottom-0 z-30 border-t border-rule bg-paper md:hidden">

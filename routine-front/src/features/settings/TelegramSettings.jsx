@@ -56,7 +56,7 @@ export function TelegramSettings() {
         {data?.enabled && !data.linked && (
           <>
             <p className="text-[14px] text-muted">
-              Com o bot você registra água (“bebi 500”) e pede o resumo do dia direto pelo Telegram. Toque em Conectar, abra o <b>@{data.botUsername}</b> e toque em <b>Começar</b>.
+              Com o bot você anota tarefas (“anotar comprar pão amanhã”), marca o que fez (“fiz treino”), registra imprevistos (“freelance sábado 14h às 21h”) e água (“bebi 500”), e recebe o resumo do dia na hora do Acordar. Toque em Conectar, abra o <b>@{data.botUsername}</b> e toque em <b>Começar</b>.
             </p>
             <Button className="justify-self-start" onClick={connect} loading={busy}>
               <Send className="size-4" aria-hidden /> Conectar

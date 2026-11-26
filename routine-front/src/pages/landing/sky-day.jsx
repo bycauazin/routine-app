@@ -41,8 +41,9 @@ function hourNow() {
 }
 
 /**
- * "Céu do dia", a window on the right of the hero: its light follows the hour
- * of the pointer over the hero, from dawn (left edge) to night (right edge).
+ * "Céu do dia", a window on the right of the hero: the sun (or moon) follows
+ * the pointer along its arc, by direction from the arc's center, and the light
+ * follows the hour it lands on (dawn on the left, night on the right).
  * The sun travels an arc and turns into the moon after dark; at the bottom the
  * blocks of a day stand like a skyline with navy windows (creme in the dark
  * theme), the block of "now" in pink. With no pointer for a while, the day
@@ -206,7 +207,15 @@ export function SkyDay({ className }) {
       const area = (canvas.closest(".hero-panel") ?? canvas).getBoundingClientRect();
       const inside = e.clientX >= area.left && e.clientX <= area.right && e.clientY >= area.top && e.clientY <= area.bottom;
       if (!inside) return;
-      ptr.x = (e.clientX - area.left) / area.width;
+      // The sun goes to the point of its arc in the pointer's direction, seen from
+      // the arc's center: it follows the cursor, and a small circle around the
+      // window shows the whole day (no need to cross the whole hero).
+      const r = canvas.getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width * 0.5);
+      const dy = Math.min(0, e.clientY - (r.top + r.height * 0.66));
+      // In the ellipse's own proportions (rx = 38% of the width, ry = 50% of the height, as in paint).
+      const angle = dy === 0 ? (dx < 0 ? Math.PI : 0) : Math.atan2(-dy / (r.height * 0.5), dx / (r.width * 0.38)); // 0 = right (night) … π = left (dawn)
+      ptr.x = 1 - angle / Math.PI;
       ptr.last = performance.now();
     };
 

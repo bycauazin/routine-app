@@ -1,3 +1,4 @@
+import { SectionRail } from "@/components/ui/SectionRail";
 import { Check, Clock3, MoveRight } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/auth/AuthProvider";
@@ -51,7 +52,7 @@ const H2 = "text-[30px] leading-[1.08] font-[660] tracking-[-0.03em] sm:text-[40
  */
 function Hero() {
   return (
-    <section className="px-3 pt-[72px] pb-3 sm:px-5 sm:pt-[76px]" aria-labelledby="hero-title">
+    <section data-rail="Início" data-rail-icon="start" className="px-3 pt-[72px] pb-3 sm:px-5 sm:pt-[76px]" aria-labelledby="hero-title">
       <div className="hero-panel relative isolate flex min-h-[calc(100dvh-84px)] flex-col overflow-hidden rounded-[28px] border-2 border-ink bg-bg">
         <div className="hero-shot" aria-hidden>
           <DesktopAppShot />
@@ -86,7 +87,7 @@ function Hero() {
                 <SkyDay />
               </div>
             </div>
-            <figcaption className="text-[13px] text-muted">Passe o mouse pela abertura: o céu acompanha a hora do dia, e a cidade são os blocos da sua rotina.</figcaption>
+            <figcaption className="text-[13px] text-muted">Mova o mouse: o sol segue o cursor e o céu mostra a hora em que ele está. A cidade são os blocos da sua rotina.</figcaption>
           </figure>
         </div>
       </div>
@@ -97,7 +98,7 @@ function Hero() {
 /** Right below the opening: the app on a phone and on a computer, the same account on both. */
 function Devices() {
   return (
-    <section id="no-celular" className="lazy-section mx-auto max-w-[1180px] px-5 py-16 sm:px-8 md:py-24">
+    <section id="no-celular" data-rail="No celular" data-rail-icon="devices" className="lazy-section mx-auto max-w-[1180px] px-5 py-16 sm:px-8 md:py-24">
       <h2 className={H2}>No celular e no computador</h2>
       <p className="mt-4 max-w-[620px] text-[16px] leading-relaxed text-muted">
         O dia a dia fica no celular: a lista de hoje, em ordem de horário, para ir marcando. No computador dá para ver a semana inteira e os relatórios. É a
@@ -206,7 +207,7 @@ const STEPS = [
 
 function HowItWorks() {
   return (
-    <section id="como-funciona" className="lazy-section mx-auto max-w-[1180px] px-5 py-16 sm:px-8 md:py-24">
+    <section id="como-funciona" data-rail="Como funciona" data-rail-icon="how" className="lazy-section mx-auto max-w-[1180px] px-5 py-16 sm:px-8 md:py-24">
       <h2 className={H2}>Como funciona</h2>
       <ol className="mt-10 grid gap-8 md:grid-cols-3 md:gap-6">
         {STEPS.map((s, i) => (
@@ -238,7 +239,7 @@ const KINDS = [
 
 function Kinds() {
   return (
-    <section id="recursos" className="lazy-section bg-ink text-bg">
+    <section id="recursos" data-rail="Recursos" data-rail-icon="features" className="lazy-section bg-ink text-bg">
       <div className="mx-auto max-w-[1180px] px-5 py-16 sm:px-8 md:py-24">
         <h2 className={H2}>O que dá para cadastrar</h2>
         <dl className="mt-10 border-t border-bg/20">
@@ -264,7 +265,7 @@ const REPORTS = [
 
 function Reports() {
   return (
-    <section id="relatorios" className="lazy-section mx-auto max-w-[1180px] px-5 py-16 sm:px-8 md:py-24">
+    <section id="relatorios" data-rail="Relatórios" data-rail-icon="reports" className="lazy-section mx-auto max-w-[1180px] px-5 py-16 sm:px-8 md:py-24">
       <h2 className={H2}>Relatórios</h2>
       <p className="mt-4 max-w-[600px] text-[16px] leading-relaxed text-muted">
         Calculados a partir do que você marca no dia a dia, sem preencher nada a mais. Os números abaixo são de exemplo.
@@ -294,7 +295,7 @@ const DATA_FACTS = [
 
 function YourData() {
   return (
-    <section id="seus-dados" className="lazy-section border-y border-rule bg-sunk/60">
+    <section id="seus-dados" data-rail="Seus dados" data-rail-icon="data" className="lazy-section border-y border-rule bg-sunk/60">
       <div className="mx-auto grid max-w-[1180px] gap-8 px-5 py-14 sm:px-8 md:grid-cols-[240px_minmax(0,1fr)] md:py-16">
         <h2 className="text-[24px] leading-tight font-[660] tracking-[-0.02em]">Seus dados</h2>
         <ul className="grid gap-x-10 gap-y-5 sm:grid-cols-2">
@@ -315,7 +316,7 @@ function FinalCall() {
   const { status } = useAuth();
   const signedIn = status === "authenticated";
   return (
-    <section className="mx-auto max-w-[1180px] px-5 py-16 sm:px-8 md:py-24">
+    <section data-rail="Comece agora" data-rail-icon="start2" className="mx-auto max-w-[1180px] px-5 py-16 sm:px-8 md:py-24">
       <h2 className={H2}>{signedIn ? "Sua rotina está esperando." : "Sua próxima tarefa:"}</h2>
       <GridLink
         to={signedIn ? "/hoje" : "/criar-conta"}
@@ -349,11 +350,15 @@ export function LandingPage() {
   useTheme();
   useHashScroll();
   const ref = useReveal();
+  const mainRef = useRef(null);
+  const fitRef = useRef(null);
 
   return (
     <div ref={ref} className="min-h-dvh overflow-x-clip bg-bg text-ink">
       <PublicHeader />
-      <main>
+      <main ref={mainRef}>
+        {/* The width of the page's content: the rail only shows where it fits beside it. */}
+        <div ref={fitRef} aria-hidden className="pointer-events-none mx-auto h-0 max-w-[1180px] px-5 sm:px-8" />
         <Hero />
         <StreakRun />
         <Devices />
@@ -368,6 +373,8 @@ export function LandingPage() {
         <FinalCall />
       </main>
       <PublicFooter />
+      {/* 32px: inside the line of the opening frame, which is 20px from the edge. */}
+      <SectionRail rootRef={mainRef} fitRef={fitRef} right={32} />
       <FloatingActions />
       <SnapCursor />
     </div>
