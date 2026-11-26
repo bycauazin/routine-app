@@ -639,3 +639,18 @@ input::-ms-clear {
   .section-rail, .section-rail-item, .section-rail-pop { animation: none !important; }
   .section-rail-marker { transition: none; }
 }
+
+/* Phones (same as Cacau): fields at 16px, or iOS Safari zooms in on every tap into a field
+   (the dialogs then jump around while typing). Unlayered so it wins over text-sm on the fields. */
+@media (max-width: 639px), (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* An open dialog freezes the page behind it (no scroll chaining dragging the sheet). */
+html:has(dialog[open]) {
+  overflow: hidden;
+}

@@ -65,7 +65,7 @@ export function SkyDay({ className }) {
     let h = 0;
     let c = { stops: [], moon: [0, 0, 0], page: [0, 0, 0], pink: "", deep: "", ink: "", rule: "", edge: "", cats: [] };
     let hour = Math.min(END - 0.02, Math.max(START, hourNow()));
-    const ptr = { x: -1, last: -1e9 };
+    const ptr = { x: -1, last: -1e9, hold: 2500 };
     let visible = true;
     let raf = 0;
     let prev = performance.now();
@@ -195,7 +195,7 @@ export function SkyDay({ className }) {
       const dt = Math.min(0.05, (t - prev) / 1000);
       prev = t;
       if (!visible || document.hidden) return;
-      const idle = t - ptr.last > 2500 || ptr.x < 0;
+      const idle = t - ptr.last > ptr.hold || ptr.x < 0;
       // with the pointer: the hour under it; alone: the day goes by, from dawn to night and back
       const p = idle ? 0.5 * (1 - Math.cos((t / 1000) * 0.16)) : Math.min(1, Math.max(0, ptr.x));
       const target = hourAt(Math.min(0.999, p));
@@ -217,6 +217,14 @@ export function SkyDay({ className }) {
       const angle = dy === 0 ? (dx < 0 ? Math.PI : 0) : Math.atan2(-dy / (r.height * 0.5), dx / (r.width * 0.38)); // 0 = right (night) … π = left (dawn)
       ptr.x = 1 - angle / Math.PI;
       ptr.last = performance.now();
+      // a finger lifts off: the sun stays where it was touched a little longer than with a mouse
+      ptr.hold = e.pointerType === "mouse" ? 2500 : 6000;
+    };
+    // Phones: a tap (pointerdown) or a finger sliding (touchmove, which keeps coming while the
+    // page scrolls, unlike pointermove) moves the sun or the moon to where it touches.
+    const onTouch = (e) => {
+      const touch = e.touches?.[0];
+      if (touch) onMove({ clientX: touch.clientX, clientY: touch.clientY, pointerType: "touch" });
     };
 
     readColors();
@@ -239,6 +247,8 @@ export function SkyDay({ className }) {
       if (started || reduced) return;
       started = true;
       window.addEventListener("pointermove", onMove, { passive: true });
+      window.addEventListener("pointerdown", onMove, { passive: true });
+      window.addEventListener("touchmove", onTouch, { passive: true });
       prev = performance.now();
       raf = requestAnimationFrame(frame);
     };
@@ -249,6 +259,8 @@ export function SkyDay({ className }) {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerdown", onMove);
+      window.removeEventListener("touchmove", onTouch);
       window.removeEventListener("load", whenIdle);
       ro.disconnect();
       io.disconnect();

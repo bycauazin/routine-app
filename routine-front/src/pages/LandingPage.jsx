@@ -87,7 +87,10 @@ function Hero() {
                 <SkyDay />
               </div>
             </div>
-            <figcaption className="text-[13px] text-muted">Mova o mouse: o sol segue o cursor e o céu mostra a hora em que ele está. A cidade são os blocos da sua rotina.</figcaption>
+            <figcaption className="text-[13px] text-muted">
+              <span className="pointer-coarse:hidden">Mova o mouse: o sol segue o cursor</span>
+              <span className="hidden pointer-coarse:inline">Toque ou deslize o dedo: o sol vai até onde você toca</span> e o céu mostra a hora em que ele está. A cidade são os blocos da sua rotina.
+            </figcaption>
           </figure>
         </div>
       </div>
@@ -316,12 +319,12 @@ function FinalCall() {
   const { status } = useAuth();
   const signedIn = status === "authenticated";
   return (
-    <section data-rail="Comece agora" data-rail-icon="start2" className="mx-auto max-w-[1180px] px-5 py-16 sm:px-8 md:py-24">
+    <section data-rail="Comece agora" data-rail-icon="start2" className="mx-auto flex max-w-[1180px] flex-col items-center px-5 py-16 text-center sm:px-8 md:py-24">
       <h2 className={H2}>{signedIn ? "Sua rotina está esperando." : "Sua próxima tarefa:"}</h2>
       <GridLink
         to={signedIn ? "/hoje" : "/criar-conta"}
         data-reveal
-        className="todo-cta group mt-8 flex w-full max-w-[680px] items-center gap-4 rounded-[18px] border-2 border-ink bg-paper px-5 py-5 transition-colors hover:bg-selected sm:px-7 sm:py-6"
+        className="todo-cta group mt-8 flex w-full max-w-[680px] items-center gap-4 text-left rounded-[18px] border-2 border-ink bg-paper px-5 py-5 transition-colors hover:bg-selected sm:px-7 sm:py-6"
       >
         <span className="todo-box grid size-9 shrink-0 place-items-center rounded-full border-2 border-ink transition-colors sm:size-10">
           <svg viewBox="0 0 16 16" className="size-4 sm:size-5" aria-hidden>

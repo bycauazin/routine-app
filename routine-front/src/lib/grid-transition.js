@@ -40,7 +40,9 @@ function buildOverlay() {
     const c = i % cols;
     const r = (i - c) / cols;
     // square corners and a little overlap when full, so no gap ever shows the page behind
-    Object.assign(tile.style, { background: COLORS[(i * 7 + r) % COLORS.length], transform: "scale(0)" });
+    // colors in diagonal stripes on any screen (the old i-based index went straight on 5-column phones)
+    const color = COLORS[(((c - r) % COLORS.length) + COLORS.length) % COLORS.length];
+    Object.assign(tile.style, { background: color, transform: "scale(0)" });
     tile.dataset.delay = String(((c + r) / Math.max(1, cols + rows - 2)) * WAVE);
     overlay.appendChild(tile);
     tiles.push(tile);

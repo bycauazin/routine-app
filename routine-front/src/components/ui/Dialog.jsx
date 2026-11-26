@@ -23,6 +23,43 @@ export function Dialog({ open, onClose, title, description, children, footer, si
     if (!open && dialog.open) dialog.close();
   }, [open]);
 
+  // Phones (same as Cacau): keep the bottom sheet above the on-screen keyboard. iOS does not
+  // resize the page for the keyboard, so the sheet follows the visual viewport: lifted by the
+  // covered height (--kb) and fitting the visible height (--vvh). The focused field is
+  // scrolled into view inside the sheet once the keyboard is up.
+  useEffect(() => {
+    const dialog = ref.current;
+    const vv = window.visualViewport;
+    if (!open || !dialog || !vv) return undefined;
+    const small = window.matchMedia("(max-width: 639px)");
+    const fit = () => {
+      if (!small.matches) {
+        dialog.style.removeProperty("--kb");
+        dialog.style.removeProperty("--vvh");
+        return;
+      }
+      const covered = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+      dialog.style.setProperty("--kb", `${covered}px`);
+      dialog.style.setProperty("--vvh", `${Math.round(vv.height)}px`);
+    };
+    let timer = 0;
+    const onFocus = (e) => {
+      if (!small.matches || !e.target.matches?.("input, select, textarea")) return;
+      clearTimeout(timer);
+      timer = setTimeout(() => e.target.scrollIntoView({ block: "nearest" }), 320);
+    };
+    fit();
+    vv.addEventListener("resize", fit);
+    vv.addEventListener("scroll", fit);
+    dialog.addEventListener("focusin", onFocus);
+    return () => {
+      clearTimeout(timer);
+      vv.removeEventListener("resize", fit);
+      vv.removeEventListener("scroll", fit);
+      dialog.removeEventListener("focusin", onFocus);
+    };
+  }, [open]);
+
   return (
     <dialog
       ref={ref}
@@ -35,14 +72,14 @@ export function Dialog({ open, onClose, title, description, children, footer, si
       }}
       aria-labelledby="dialog-title"
       className={cn(
-        "m-0 mt-auto w-full max-w-none rounded-t-[18px] border border-rule bg-paper text-ink shadow-lg backdrop:bg-overlay backdrop:backdrop-blur-[3px]",
+        "m-0 mt-auto mb-[var(--kb,0px)] w-full max-w-none rounded-t-[18px] border border-rule bg-paper text-ink shadow-lg backdrop:bg-overlay backdrop:backdrop-blur-[3px]",
         "sm:m-auto sm:rounded-lg",
         size === "sm" ? "sm:max-w-md" : "sm:max-w-xl",
-        "max-h-[92dvh] open:animate-[dialog-in_240ms_cubic-bezier(.2,.8,.2,1)]",
+        "max-h-[calc(var(--vvh,100dvh)*0.92)] open:animate-[dialog-in_240ms_cubic-bezier(.2,.8,.2,1)]",
       )}
     >
       {open && (
-        <div className="flex max-h-[92dvh] flex-col">
+        <div className="flex max-h-[calc(var(--vvh,100dvh)*0.92)] flex-col">
           <header className="flex items-start justify-between gap-4 border-b border-rule px-4 py-3 sm:px-6 sm:py-4">
             <div>
               <h2 id="dialog-title" className="display text-[18px]">
