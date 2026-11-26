@@ -2,6 +2,14 @@
 
 <!-- Fonte da verdade da tarefa em andamento. Atualize ao mudar de etapa; um agente continua daqui. -->
 
+## Anotações do usuário (2026-11-25) · a fazer
+
+1. **Escolher a logo.** Decidir estilo e paleta na página de estudo (https://claude.ai/artifact/DReu3JXyue83X4RCfkNGvs): selo com cor fixa x seguir o site, traçado/fita engrossada, nome "bycauazin" e monograma "BC". O usuário cola a escolha no chat e aí aplica nos projetos.
+2. **Animação de entrada no site.** Ao abrir o site, uma animação de abertura. Em aberto: cada projeto com uma animação diferente, ou a mesma animação com as cores de cada um.
+3. **Tela de carregamento.** Enquanto o site carrega, a logo no meio da tela com um indicador de carregamento animado e bonito.
+4. **Transição de janela: já existe aqui** (keyframes em `routine-front/src/index.css`). Serve de referência para criar a dos outros projetos (finance-app e landing-page). A logo nova ainda não foi aplicada neste projeto.
+
+
 ## Acesso público · concluído
 
 - A página inicial oferece Entrar e Ver demonstração. Entrar abre /login. A demonstração inicia a sessão fictícia e abre /hoje.
@@ -39,6 +47,7 @@ Dias especiais (claude): special_days (HOLIDAY/VACATION/SICK, de–até, nome), 
 Ponto de atenção agora cobre sábado/domingo também (`special: { weekends, days, missed[{name, planned, count}] }`, só fixos, SKIPPED não conta). Presencial/home: usuário já tirou da tela; limpeza do banco descartada.
 
 Imprevistos (claude): day_items.is_unplanned + displaced_by_id (migração 20261125150000_unplanned). POST /days/:date/items com `unplanned: true` (exige início e fim; nasce DONE; fora do progresso e da nota) e `displaceIds` (itens do dia que ele tirou: continuam contando na nota). Dia/Semana: `displacedBy {id,name}`; excluir o imprevisto desliga. Relatório `unplanned: { count, minutes, missed, list[{..., taken}] }`. Front: botão Imprevisto (3º em Adicionar), UnplannedDialog (marca sozinho o que cruza o horário, dá pra desmarcar), linha com raio e "tirado por X", painel Imprevistos nos Relatórios. Sem tipos (usuário pediu só nome; ícone/categoria pelo nome ou escolhidos). Bot: "freelance sábado 14h às 21h" entra no 7B. Teste: __tests__/integration/unplanned.test.js. Back 132 + 1.
+Bot 7B–7D ✅ (ver routine-back/src/services/telegram/README.md). PWA ✅ (vite-plugin-pwa, ícones de public/logo.svg, nada de /api no cache; vercel.json sem cache para sw.js/manifest). Barra lateral de seções ✅ (components/ui/SectionRail.jsx, no AppLayout e na landing; conferida em headless: aparece em 1366/1440, some em 1220; os dois temas). Falta: usuário preencher variáveis e publicar (passo a passo entregue na conversa); telas logadas não foram vistas no navegador.
 ATENÇÃO testes no Windows: rodar o Vitest com o caminho "C:\..." (maiúsculo); com "c:\" ele carrega duas cópias e todos falham com "failed to find the runner".
 
 ## Status
