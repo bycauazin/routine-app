@@ -33,9 +33,9 @@ describe("TOTP", () => {
     const url = new URL(TotpService.otpauthUrl(RFC_KEY, "ana@example.com"));
     expect(url.protocol).toBe("otpauth:");
     expect(url.host).toBe("totp");
-    expect(decodeURIComponent(url.pathname)).toBe("/Routine:ana@example.com");
+    expect(decodeURIComponent(url.pathname)).toBe("/nuCorre:ana@example.com");
     expect(url.searchParams.get("secret")).toBe(base32Encode(RFC_KEY));
-    expect(url.searchParams.get("issuer")).toBe("Routine");
+    expect(url.searchParams.get("issuer")).toBe("nuCorre");
   });
 
   it("makes recovery codes without look-alike characters", () => {

@@ -1,13 +1,15 @@
 import { env } from "../../config/env.js";
 import { prisma } from "../../database/prisma.js";
 import DayItemDao from "../../daos/DayItemDao.js";
+import RequestCounterDao from "../../daos/RequestCounterDao.js";
+import { TELEGRAM_AI_PER_HOUR } from "../../shared/constants.js";
 import { AppError } from "../../shared/errors.js";
 import { addDays, civilDateToDb, minuteOfDayIn, todayIn } from "../../utils/dateUtils.js";
 import DayService from "../DayService.js";
 import logger from "../logger.js";
 import AuthTokenService from "../security/AuthTokenService.js";
 import WaterService from "../WaterService.js";
-import { interpret } from "./ai.js";
+import { aiEnabled, interpret } from "./ai.js";
 import * as msg from "./messages.js";
 import { parseMessage } from "./parser.js";
 import { telegramApi } from "./telegramApi.js";
@@ -100,7 +102,7 @@ class TelegramService {
   /** The reply to a message: rules first, then the AI for what they did not understand. */
   async answer(user, text, today = todayIn()) {
     let parsed = parseMessage(text, today);
-    if (parsed.intent === "unknown") parsed = (await interpret(text, { today })) ?? parsed;
+    if (parsed.intent === "unknown" && (await this.aiAllowed(user.id))) parsed = (await interpret(text, { today })) ?? parsed;
     switch (parsed.intent) {
       case "help":
         return { text: msg.help() };
@@ -117,6 +119,14 @@ class TelegramService {
       default:
         return { text: msg.unknown() };
     }
+  }
+
+  /** At most TELEGRAM_AI_PER_HOUR AI readings per person per hour (counted in the database, shared by every instance). */
+  async aiAllowed(userId) {
+    if (!aiEnabled()) return false;
+    const now = Date.now();
+    const count = await RequestCounterDao.increment(`telegram-ai:${userId}`, new Date(now - (now % 3_600_000)));
+    return count <= TELEGRAM_AI_PER_HOUR;
   }
 
   async unplannedDraft(user, parsed, today) {

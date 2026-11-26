@@ -42,7 +42,7 @@ describe("sign-up", () => {
     // A link works once.
     expect((await post("/auth/verify-email", { token })).status).toBe(400);
     // The admin is told someone is waiting.
-    expect(MailService.outbox.some((m) => m.to === admin.email && /quer entrar no Routine/.test(m.subject))).toBe(true);
+    expect(MailService.outbox.some((m) => m.to === admin.email && /quer entrar no nuCorre/.test(m.subject))).toBe(true);
 
     const waiting = await login(person.email, person.password);
     expect(waiting.status).toBe(403);
@@ -108,7 +108,7 @@ describe("forgot password", () => {
     expect((await agent.get("/api/v1/auth/me")).status).toBe(401);
     expect((await login(credentials.email, credentials.password)).status).toBe(401);
     expect((await login(credentials.email, "nova-senha-bem-forte")).status).toBe(200);
-    expect(MailService.outbox.at(-1).subject).toMatch(/senha do Routine foi alterada/);
+    expect(MailService.outbox.at(-1).subject).toMatch(/senha do nuCorre foi alterada/);
     // Used once.
     expect((await post("/auth/reset-password", { token, password: "mais-uma-senha-forte" })).status).toBe(400);
   });

@@ -44,7 +44,7 @@ const schema = z
       .optional()
       .transform((v) => v?.replace(/\s+/g, "")),
     RESEND_API_KEY: z.string().optional(),
-    /** Sender shown in the e-mails. Default: "Routine <GMAIL_USER>" with Gmail. */
+    /** Sender shown in the e-mails. Default: "nuCorre <GMAIL_USER>" with Gmail. */
     MAIL_FROM: z.string().optional(),
     /** Telegram bot (stage 7), from @BotFather. Without both, the bot is off. */
     TELEGRAM_BOT_TOKEN: z.string().optional(),
@@ -93,7 +93,7 @@ if (!parsed.success) {
 export const env = Object.freeze({
   ...parsed.data,
   AUTH_SECRET: parsed.data.AUTH_SECRET ?? TEST_AUTH_SECRET,
-  MAIL_FROM: parsed.data.MAIL_FROM || (parsed.data.MAIL_PROVIDER === "gmail" ? `Routine <${parsed.data.GMAIL_USER}>` : "Routine <onboarding@resend.dev>"),
+  MAIL_FROM: parsed.data.MAIL_FROM || (parsed.data.MAIL_PROVIDER === "gmail" ? `nuCorre <${parsed.data.GMAIL_USER}>` : "nuCorre <onboarding@resend.dev>"),
   isProduction: parsed.data.NODE_ENV === "production",
   isTest: parsed.data.NODE_ENV === "test",
 });

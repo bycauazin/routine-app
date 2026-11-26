@@ -19,8 +19,8 @@ export const help = () =>
     "• <b>ajuda</b>: esta lista",
   ].join("\n");
 
-export const linked = (name) => `Pronto, ${esc(name)}! Seu Telegram está ligado ao Routine.\n\n${help()}`;
-export const notLinked = () => "Ainda não sei quem é você. Abra o Routine em <b>Configurações → Telegram</b> e toque em <b>Conectar</b>.";
+export const linked = (name) => `Pronto, ${esc(name)}! Seu Telegram está ligado ao nuCorre.\n\n${help()}`;
+export const notLinked = () => "Ainda não sei quem é você. Abra o nuCorre em <b>Configurações → Telegram</b> e toque em <b>Conectar</b>.";
 export const linkExpired = () => "Esse link expirou ou já foi usado. Gere outro em <b>Configurações → Telegram</b>.";
 export const unknown = () => `Não entendi.\n\n${help()}`;
 export const failed = () => "Algo deu errado aqui. Tente de novo em instantes.";

@@ -67,7 +67,7 @@ class TotpService {
   }
 
   /** Address the authenticator app reads from the QR code. */
-  otpauthUrl(key, accountName, issuer = "Routine") {
+  otpauthUrl(key, accountName, issuer = "nuCorre") {
     const label = encodeURIComponent(`${issuer}:${accountName}`);
     const params = new URLSearchParams({ secret: base32Encode(key), issuer, algorithm: "SHA1", digits: String(DIGITS), period: String(STEP_SECONDS) });
     return `otpauth://totp/${label}?${params}`;

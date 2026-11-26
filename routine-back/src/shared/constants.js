@@ -35,6 +35,8 @@ export const isDemoEmail = (email) => typeof email === "string" && email.endsWit
 
 /** Requests per client IP per minute across the whole API. */
 export const API_RATE_LIMIT_PER_MINUTE = 120;
+/** Messages per person per hour the Telegram bot may send to the AI (caps cost); past it, "não entendi". */
+export const TELEGRAM_AI_PER_HOUR = 30;
 
 /** Two-step verification. */
 export const TWO_FACTOR_LOGIN_TTL_MINUTES = 10;

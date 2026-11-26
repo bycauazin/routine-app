@@ -1,10 +1,10 @@
 # Bot do Telegram (etapa 7)
 
-Um bot só do Routine. A pessoa liga o Telegram em Configurações → Telegram (link t.me de uso único).
+Um bot só do nuCorre. A pessoa liga o Telegram em Configurações → Telegram (link t.me de uso único).
 
 - [TelegramService.js](TelegramService.js): começa aqui. Liga o chat, responde mensagens (`answer`) e botões (`callback`) e manda o resumo da manhã (`morning`). `answer` e `callback` devolvem `{ text, buttons }` sem chamar o Telegram, por isso dá para testar.
 - [parser.js](parser.js): regras. Água, resumo, ajuda, `anotar …` (tarefa com dia, período e hora), `fiz …` e imprevistos (`freelance sábado 14h às 21h`, `imprevisto …`).
-- [ai.js](ai.js): IA de reserva (7C), igual à do Finance. Só lê o que as regras não entenderam e recebe só a mensagem e a data de hoje. Tudo o que ela devolve é conferido em `toParsed`, e ela nunca salva sozinha. Usa Gemini com `GEMINI_API_KEY`, senão Claude com `ANTHROPIC_API_KEY`. Sem chave, fica desligada.
+- [ai.js](ai.js): IA de reserva (7C), igual à do Finance. Só lê o que as regras não entenderam e recebe só a mensagem e a data de hoje. Tudo o que ela devolve é conferido em `toParsed`, e ela nunca salva sozinha. Usa Gemini com `GEMINI_API_KEY`, senão Claude com `ANTHROPIC_API_KEY`. Sem chave, fica desligada. Cada pessoa tem no máximo `TELEGRAM_AI_PER_HOUR` (30) leituras por hora, contadas em `request_counters`. Passou disso, o bot responde "não entendi" sem chamar a IA. Teste em [../../../__tests__/integration/telegram-ai-limit.test.js](../../../__tests__/integration/telegram-ai-limit.test.js).
 - [messages.js](messages.js): textos (HTML do Telegram).
 - [telegramApi.js](telegramApi.js): as chamadas da API do Telegram. O token nunca vai para o log.
 

@@ -11,9 +11,9 @@ async function main() {
   const to = z.email().parse(process.argv[2] ?? "");
   await MailService.send({
     to,
-    subject: "Teste de e-mail do Routine",
-    text: "Se você recebeu este e-mail, o envio do Routine está funcionando.\n\n— Routine",
-    html: "<p>Se você recebeu este e-mail, o envio do Routine está funcionando.</p><p>— Routine</p>",
+    subject: "Teste de e-mail do nuCorre",
+    text: "Se você recebeu este e-mail, o envio do nuCorre está funcionando.\n\n— nuCorre",
+    html: "<p>Se você recebeu este e-mail, o envio do nuCorre está funcionando.</p><p>— nuCorre</p>",
   });
   console.log(env.MAIL_PROVIDER === "console" ? "\nMAIL_PROVIDER=console: o e-mail foi só mostrado acima, nada foi enviado." : `\n✔ E-mail enviado para ${to} (via ${env.MAIL_PROVIDER}). Confira a caixa de entrada e o spam.`);
 }

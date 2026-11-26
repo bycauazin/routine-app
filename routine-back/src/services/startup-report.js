@@ -30,7 +30,7 @@ export async function reportStartup() {
 
   const lines = [
     "",
-    `  ${styleText(["bold", "green"], "Routine API")} ${dim("rodando em desenvolvimento")}`,
+    `  ${styleText(["bold", "green"], "nuCorre API")} ${dim("rodando em desenvolvimento")}`,
     "",
     `  ${info} ${label("API")}${styleText("cyan", `http://localhost:${env.PORT}`)}`,
     `  ${info} ${label("Site")}${styleText("cyan", env.APP_ORIGIN)} ${dim("(abra este no navegador)")}`,
