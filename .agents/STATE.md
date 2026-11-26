@@ -2,7 +2,15 @@
 
 <!-- Fonte da verdade da tarefa em andamento. Atualize ao mudar de etapa; um agente continua daqui. -->
 
-## Tarefa atual (2026-11-26) · revisão antes de publicar + marca nuCorre
+## Publicado (2026-11-26) · https://nucorrebc.vercel.app
+
+- Repositório: github.com/bycauazin/routine-app (privado), branch main.
+- Vercel (projeto nucorrebc, preset Other, vercel.json) + Neon (projeto nucorre, host ep-young-…). Atenção: o host ep-wandering-mountain é o banco do **Cacau**; nunca usar no nuCorre.
+- Pendências do usuário: conferir db:copy e login, telegram:setup com o endereço novo, cron-job.org para /api/cron/morning, e apagar no banco do Cacau as linhas de `_prisma_migrations` com o nome 20261123000447_init (tentativa errada que ficou registrada lá).
+- Portfólio: [docs/PORTFOLIO.md](../docs/PORTFOLIO.md) tem tudo para a sessão da landing-page atualizar a entrada (hoje ainda é "Routine", em andamento).
+- Adiados: revisão visual da LandingPage com design-taste-frontend e differential-review.
+
+## Tarefa anterior (2026-11-26) · revisão antes de publicar + marca nuCorre
 
 Plano aprovado (prompt do usuário), uma etapa por vez, esperando o "ok":
 0. ✅ Ponto de restauração: commits 8611884 (back), c83c857 (front), 2bfb6ae (docs). Sem push.
