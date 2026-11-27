@@ -2,7 +2,7 @@ import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { ErrorState, Skeleton } from "@/components/ui/States";
-import { bandInset, layoutDay, periodBands } from "@/lib/agenda";
+import { bandInset, formatHours, gridRange, layoutDay, minCardMinutes, periodBands, weekHours } from "@/lib/agenda";
 import { CATEGORY_TINT } from "@/lib/categories";
 import { cn } from "@/lib/cn";
 import { formatWeekRange, shiftDate, today as todayDate, weekStart } from "@/lib/dates";
@@ -11,11 +11,13 @@ import { useApi } from "@/lib/use-api";
 import { WEEKDAY_SHORT } from "@/lib/weekdays";
 import { useNowMinute } from "@/lib/use-now-minute";
 import { SPECIAL } from "@/lib/special";
+import { useGridZoom } from "@/lib/use-grid-zoom";
 import { EditItemDialog } from "./ItemDialogs";
+import { CategoryHours } from "./CategoryHours";
 import { PeriodBand } from "./PeriodBand";
+import { ZoomControls } from "./ZoomControls";
 
-/** Height of one hour in the grid, in px, and the hour the grid opens at (scroll to see earlier). */
-const HOUR = 56;
+/** The hour the grid opens at (scroll to see earlier). The height of an hour is the zoom (useGridZoom). */
 const OPEN_AT_HOUR = 6;
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
 
@@ -23,22 +25,23 @@ const weekdayOf = (date) => new Date(`${date}T12:00:00Z`).getUTCDay();
 const statusClass = (status) => (status === "DONE" ? "opacity-60" : status === "SKIPPED" ? "opacity-45 line-through" : "");
 
 /** A card of the grid: from its start to its end, sharing the width with what happens at the same time. */
-function Card({ placed, inset = 0, onOpen }) {
+function Card({ placed, hour, inset = 0, onOpen }) {
   const { item, start, end, column, columns } = placed;
-  const tall = end - start >= 45;
+  const tall = ((end - start) / 60) * hour >= 40; // room for the time under the name
   return (
     <button
       type="button"
       onClick={onOpen}
       title={`${formatRange(item.startMinute, item.endMinute)} · ${item.name}${item.variant ? ` · ${item.variant}` : ""}`}
       className={cn(
-        "absolute z-[1] overflow-hidden rounded-[8px] border border-ink/10 px-2 py-1 text-left text-[13px] leading-snug text-ink transition-[filter] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-focus-ring",
+        "absolute z-[1] overflow-hidden rounded-[8px] border border-ink/10 px-2 text-left text-ink transition-[filter] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-focus-ring",
+        ((end - start) / 60) * hour < 34 ? "py-0 text-[12px] leading-[18px]" : "py-1 text-[13px] leading-snug",
         item.category ? CATEGORY_TINT[item.category.colorKey] : "bg-sunk",
         statusClass(item.status),
       )}
       style={{
-        top: (start / 60) * HOUR + 1,
-        height: ((end - start) / 60) * HOUR - 2,
+        top: (start / 60) * hour + 1,
+        height: ((end - start) / 60) * hour - 2,
         left: `calc(${inset}px + (100% - ${inset}px) * ${column / columns} + 2px)`,
         width: `calc((100% - ${inset}px) / ${columns} - 4px)`,
       }}
@@ -49,6 +52,33 @@ function Card({ placed, inset = 0, onOpen }) {
       </span>
       {tall && <span className="num block truncate text-[12.5px] text-ink/70">{formatRange(item.startMinute, item.endMinute)}</span>}
     </button>
+  );
+}
+
+/** Hours per category this week: planned (the whole bar) against done (filled). */
+function WeekHours({ days }) {
+  const hours = weekHours(days);
+  const categories = new Map(days.flatMap((d) => d.items).filter((i) => i.category).map((i) => [i.category.id, i.category]));
+  const keys = Object.keys(hours).sort((a, b) => hours[b].planned - hours[a].planned);
+  if (keys.length === 0) return null;
+  const planned = keys.reduce((sum, k) => sum + hours[k].planned, 0);
+  const done = keys.reduce((sum, k) => sum + hours[k].done, 0);
+  return (
+    <section className="sheet grid gap-3 px-4 py-4">
+      <h3 className="text-[15px] font-[660]">
+        Horas por categoria <span className="text-[12.5px] font-[450] text-muted">(nesta semana, só o que tem horário)</span>
+      </h3>
+      <CategoryHours
+        rows={keys.map((k) => {
+          const { planned: p, done: d } = hours[k];
+          const percent = p > 0 ? Math.round((d / p) * 100) : 0;
+          return { key: k, category: categories.get(k), hours: p, note: `feito ${formatHours(d)}`, badge: { text: `${percent}%`, strong: percent >= 100 }, solid: d, outline: p };
+        })}
+      />
+      <p className="text-[13px] text-muted">
+        Planejado: <span className="num font-[620] text-ink">{formatHours(planned)}</span> · feito: <span className="num font-[620] text-ink">{formatHours(done)}</span>
+      </p>
+    </section>
   );
 }
 
@@ -70,6 +100,8 @@ export function WeekView({ date, onWeek, onOpenDay }) {
   const now = useNowMinute();
   const scrollRef = useRef(null);
   const ready = Boolean(week);
+  const zoom = useGridZoom(scrollRef);
+  const HOUR = zoom.hour;
 
   // Opens at 06:00; earlier hours are a scroll away.
   useEffect(() => {
@@ -79,7 +111,7 @@ export function WeekView({ date, onWeek, onOpenDay }) {
     // On a phone three days fit: start at today (the first column sits right after the hours).
     const todayCol = box.querySelector("[data-today-col]");
     box.scrollLeft = todayCol ? todayCol.offsetLeft - box.querySelector("[data-day-col]").offsetLeft : 0;
-  }, [ready, from]);
+  }, [ready, from]); // eslint-disable-line react-hooks/exhaustive-deps -- only when the week opens, not on zoom
 
   return (
     <>
@@ -105,10 +137,15 @@ export function WeekView({ date, onWeek, onOpenDay }) {
       {loading && !week && <Skeleton className="h-[60dvh]" />}
 
       {week && (
+        <div className="-mb-1 flex justify-end">
+          <ZoomControls zoom={zoom} onFit={() => zoom.fit(gridRange(week.days.flatMap((d) => d.items)))} />
+        </div>
+      )}
+      {week && (
         <div ref={scrollRef} className="sheet week-scroll relative max-h-[calc(100dvh-15rem)] min-h-[24rem] overflow-auto md:max-h-[calc(100dvh-13rem)]">
           <div className="week-grid grid">
             {/* Day names, sticky on top; the count of items without a time under each name. */}
-            <div className="sticky left-0 top-0 z-30 border-b border-rule bg-paper" />
+            <div data-grid-head className="sticky left-0 top-0 z-30 border-b border-rule bg-paper" />
             {week.days.map((day) => {
               const isToday = day.date === realToday;
               return (
@@ -134,7 +171,7 @@ export function WeekView({ date, onWeek, onOpenDay }) {
 
             {/* Hours on the left, sticky. */}
             <div className="sticky left-0 z-10 bg-paper" style={{ height: 24 * HOUR }}>
-              {HOURS.map((h) => (
+              {HOURS.filter((h) => HOUR >= 24 || h % 2 === 0).map((h) => (
                 <span key={h} className="num absolute right-2 -translate-y-1/2 text-[13.5px] font-[600] text-muted" style={{ top: h * HOUR }}>
                   {h === 0 ? "" : formatMinute(h * 60)}
                 </span>
@@ -155,8 +192,8 @@ export function WeekView({ date, onWeek, onOpenDay }) {
                       {bands.map((band) => (
                         <PeriodBand key={band.item.id} band={band} hour={HOUR} onOpen={() => setEditing(band.item)} className={statusClass(band.item.status)} />
                       ))}
-                      {layoutDay(day.items).map((placed) => (
-                        <Card key={placed.item.id} placed={placed} inset={bandInset(bands, placed.start, placed.end)} onOpen={() => setEditing(placed.item)} />
+                      {layoutDay(day.items, minCardMinutes(HOUR)).map((placed) => (
+                        <Card key={placed.item.id} placed={placed} hour={HOUR} inset={bandInset(bands, placed.start, placed.end)} onOpen={() => setEditing(placed.item)} />
                       ))}
                     </>
                   );
@@ -172,6 +209,7 @@ export function WeekView({ date, onWeek, onOpenDay }) {
           </div>
         </div>
       )}
+      {week && <WeekHours days={week.days} />}
       {editing && (
         <EditItemDialog
           item={editing}

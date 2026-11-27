@@ -67,3 +67,49 @@ export function periodBands(items) {
 
 /** Left inset for a timed card: BAND_INSET when it happens during a band. */
 export const bandInset = (bands, start, end) => (bands.some((b) => start < b.end && end > b.start) ? BAND_INSET : 0);
+
+/**
+ * The hours a set of items uses on the grid (whole hours), for "Enquadrar":
+ * timed items from their start to their end (MIN_CARD_MINUTES when shorter or
+ * without an end), parts of the day their whole period. null when nothing has a time.
+ */
+export function gridRange(items) {
+  let start = Infinity;
+  let end = -Infinity;
+  for (const item of items) {
+    const period = item.period && PERIODS[item.period];
+    const from = item.startMinute ?? period?.start;
+    if (from === undefined || from === null) continue;
+    const to = item.startMinute !== null && item.startMinute !== undefined ? Math.max(item.endMinute ?? 0, from + MIN_CARD_MINUTES) : period.end;
+    start = Math.min(start, from);
+    end = Math.max(end, Math.min(1440, to));
+  }
+  if (start === Infinity) return null;
+  return { start: Math.floor(start / 60) * 60, end: Math.min(1440, Math.ceil(end / 60) * 60) };
+}
+
+/** "5,8 h" */
+export const formatHours = (hours) => `${new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 }).format(hours)} h`;
+
+/** Px a card needs for one line of text; at a small zoom short items get at least that (side by side, not on top). */
+const MIN_CARD_PX = 22;
+export const minCardMinutes = (hourPx) => Math.max(MIN_CARD_MINUTES, Math.ceil((MIN_CARD_PX / hourPx) * 60));
+
+/**
+ * Hours per category in a week of the Semana tab, timed items only:
+ * { [categoryId | "none"]: { planned, done } }. "Done" counts items marked done.
+ */
+export function weekHours(days) {
+  const out = {};
+  for (const day of days) {
+    for (const item of day.items) {
+      if (item.startMinute === null || item.startMinute === undefined || item.endMinute === null || item.endMinute === undefined) continue;
+      const hours = Math.max(0, item.endMinute - item.startMinute) / 60;
+      const key = item.category?.id ?? "none";
+      out[key] ??= { planned: 0, done: 0 };
+      out[key].planned += hours;
+      if (item.status === "DONE") out[key].done += hours;
+    }
+  }
+  return out;
+}

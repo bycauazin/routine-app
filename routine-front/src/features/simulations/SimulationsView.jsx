@@ -7,23 +7,25 @@ import { Menu } from "@/components/ui/Menu";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/States";
 import { useToast } from "@/components/ui/Toast";
 import { WeekdayPicker } from "@/features/settings/RoutineSettings";
+import { CategoryHours } from "@/features/today/CategoryHours";
 import { ChoiceCards } from "@/features/today/ItemDialogs";
 import { StepsEditor, fromEditorSteps, toEditorSteps } from "@/features/today/StepsEditor";
 import { PeriodBand } from "@/features/today/PeriodBand";
 import { TimeFields } from "@/features/today/TimeFields";
+import { ZoomControls } from "@/features/today/ZoomControls";
 import { api } from "@/lib/api";
-import { bandInset, layoutDay, periodBands } from "@/lib/agenda";
+import { bandInset, formatHours, gridRange, layoutDay, minCardMinutes, periodBands } from "@/lib/agenda";
 import { CATEGORY_TINT } from "@/lib/categories";
 import { cn } from "@/lib/cn";
 import { formatDate, shiftDate, today } from "@/lib/dates";
 import { formatMinute, formatRange, timeBody, timeValues } from "@/lib/minutes";
 import { hoursByCategory, moveBlock, newKey, overlaps, removeDay, snap } from "@/lib/simulation";
 import { useApi } from "@/lib/use-api";
+import { useGridZoom } from "@/lib/use-grid-zoom";
 import { WEEKDAY_SHORT } from "@/lib/weekdays";
 
-const HOUR = 56;
 const DAYS = [1, 2, 3, 4, 5, 6, 0];
-const fmtHours = (h) => `${new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 }).format(h)} h`;
+const fmtHours = formatHours;
 
 /** New simulation: a name and where it starts from. */
 function NewDialog({ simulations, onClose, onCreated }) {
@@ -124,23 +126,22 @@ function Compare({ blocks, current, categories }) {
   return (
     <section className="sheet grid gap-3 px-4 py-4">
       <h3 className="text-[15px] font-[660]">Comparar com a rotina atual <span className="text-[12.5px] font-[450] text-muted">(horas por semana)</span></h3>
-      <ul className="grid gap-1.5 sm:grid-cols-2">
-        {keys.map((k) => {
+      <CategoryHours
+        rows={keys.map((k) => {
           const a = now[k] ?? 0;
           const b = sim[k] ?? 0;
           const diff = b - a;
-          const cat = names.get(k);
-          return (
-            <li key={k} className="flex items-center gap-2 text-[13.5px]">
-              <span className={cn("size-3 shrink-0 rounded-full", cat ? CATEGORY_TINT[cat.colorKey] : "bg-sunk")} aria-hidden />
-              <span className="min-w-0 flex-1 truncate">{cat?.name ?? "Sem categoria"}</span>
-              <span className="num text-muted">{fmtHours(a)} →</span>
-              <span className="num font-[650]">{fmtHours(b)}</span>
-              {Math.abs(diff) >= 0.05 && <span className={cn("num w-14 text-right text-[12.5px] font-[600]", diff > 0 ? "text-accent-text" : "text-muted")}>{diff > 0 ? "+" : "−"}{fmtHours(Math.abs(diff))}</span>}
-            </li>
-          );
+          return {
+            key: k,
+            category: names.get(k),
+            hours: b,
+            note: `antes ${fmtHours(a)}`,
+            badge: Math.abs(diff) >= 0.05 ? { text: `${diff > 0 ? "+" : "−"}${fmtHours(Math.abs(diff))}`, strong: diff > 0 } : { text: "igual", strong: false },
+            solid: b,
+            outline: a,
+          };
         })}
-      </ul>
+      />
       <p className="text-[13px] text-muted">Livre na semana (das 24 h × 7): <span className="num font-[620] text-ink">{fmtHours(168 - used)}</span></p>
       {clashes.length > 0 && (
         <div className="grid gap-1 rounded-md bg-sunk px-3 py-2 text-[13px]">
@@ -171,6 +172,8 @@ export function SimulationsView() {
   const scrollRef = useRef(null);
   const saveTimer = useRef(null);
   const drag = useRef(null);
+  const zoom = useGridZoom(scrollRef);
+  const HOUR = zoom.hour;
 
   const selected = simulations?.find((s) => s.id === selectedId) ?? simulations?.[0] ?? null;
   useEffect(() => {
@@ -178,7 +181,7 @@ export function SimulationsView() {
   }, [selected?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 6 * HOUR;
-  }, [selected?.id]);
+  }, [selected?.id]); // eslint-disable-line react-hooks/exhaustive-deps -- only when another simulation opens, not on zoom
 
   /** Local change now, saved to the server a moment later (one request per burst of edits). */
   function change(next) {
@@ -328,13 +331,16 @@ export function SimulationsView() {
               <span className="hidden pointer-coarse:inline">Toque em “Novo bloco” ou num bloco para escrever o nome, os dias e o horário. Deslize para ver os outros dias.</span>
               {" "}Salva sozinho.
             </p>
+            <div className="flex flex-wrap items-center gap-2">
+            <ZoomControls zoom={zoom} onFit={() => zoom.fit(gridRange(blocks))} />
             <Button size="sm" onClick={() => setDialog({ type: "block", block: { weekdays: [new Date().getDay()], startMinute: 8 * 60, endMinute: 9 * 60, period: null }, day: new Date().getDay() })}>
               <Plus className="size-4" aria-hidden /> Novo bloco
             </Button>
+            </div>
           </div>
           <div ref={scrollRef} className="sheet week-scroll relative max-h-[calc(100dvh-16rem)] min-h-[24rem] overflow-auto">
             <div className="week-grid grid">
-              <div className="sticky left-0 top-0 z-30 border-b border-rule bg-paper" />
+              <div data-grid-head className="sticky left-0 top-0 z-30 border-b border-rule bg-paper" />
               {DAYS.map((d) => (
                 <div key={d} className="sticky top-0 z-20 flex flex-col gap-1 border-b border-l border-rule bg-paper px-2 py-2.5">
                   <span className="text-[13px] font-[600] uppercase tracking-[0.04em] text-muted">{WEEKDAY_SHORT[d]}</span>
@@ -346,7 +352,7 @@ export function SimulationsView() {
                 </div>
               ))}
               <div className="sticky left-0 z-10 bg-paper" style={{ height: 24 * HOUR }}>
-                {Array.from({ length: 24 }, (_, h) => (
+                {Array.from({ length: 24 }, (_, h) => h).filter((h) => HOUR >= 24 || h % 2 === 0).map((h) => (
                   <span key={h} className="num absolute right-2 -translate-y-1/2 text-[13.5px] font-[600] text-muted" style={{ top: h * HOUR }}>{h === 0 ? "" : formatMinute(h * 60)}</span>
                 ))}
               </div>
@@ -366,7 +372,7 @@ export function SimulationsView() {
                   {bandsByDay.get(d).map((band) => (
                     <PeriodBand key={band.item.id} band={band} hour={HOUR} onOpen={() => setDialog({ type: "block", block: band.item, day: d })} />
                   ))}
-                  {layoutDay(byDay.get(d)).map(({ item, start, end, column, columns }) => {
+                  {layoutDay(byDay.get(d), minCardMinutes(HOUR)).map(({ item, start, end, column, columns }) => {
                     const inset = bandInset(bandsByDay.get(d), start, end);
                     return (
                     <div
@@ -379,11 +385,11 @@ export function SimulationsView() {
                       onPointerCancel={() => { drag.current = null; }}
                       onKeyDown={(e) => e.key === "Enter" && setDialog({ type: "block", block: item, day: d })}
                       title={`${formatRange(item.startMinute, item.endMinute)} · ${item.name}`}
-                      className={cn("absolute z-[1] cursor-pointer select-none pointer-fine:cursor-grab pointer-fine:touch-none pointer-fine:active:cursor-grabbing overflow-hidden rounded-[8px] border border-ink/10 px-2 py-1 text-[13px] leading-snug text-ink", item.category ? CATEGORY_TINT[item.category.colorKey] : "bg-sunk")}
+                      className={cn(((end - start) / 60) * HOUR < 34 ? "py-0 text-[12px] leading-[18px]" : "py-1 text-[13px] leading-snug", "absolute z-[1] cursor-pointer select-none pointer-fine:cursor-grab pointer-fine:touch-none pointer-fine:active:cursor-grabbing overflow-hidden rounded-[8px] border border-ink/10 px-2 text-ink", item.category ? CATEGORY_TINT[item.category.colorKey] : "bg-sunk")}
                       style={{ top: (start / 60) * HOUR + 1, height: ((end - start) / 60) * HOUR - 2, left: `calc(${inset}px + (100% - ${inset}px) * ${column / columns} + 2px)`, width: `calc((100% - ${inset}px) / ${columns} - 4px)` }}
                     >
                       <span className="block truncate font-[620]">{item.name}</span>
-                      {end - start >= 45 && <span className="num block truncate text-[12.5px] text-ink/70">{formatRange(item.startMinute, item.endMinute)}</span>}
+                      {((end - start) / 60) * HOUR >= 40 && <span className="num block truncate text-[12.5px] text-ink/70">{formatRange(item.startMinute, item.endMinute)}</span>}
                     </div>
                     );
                   })}
