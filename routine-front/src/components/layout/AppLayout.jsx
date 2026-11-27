@@ -4,8 +4,10 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { Menu } from "@/components/ui/Menu";
+import { SnapCursor } from "@/pages/landing/snap-cursor";
 import { SectionRail } from "@/components/ui/SectionRail";
 import { cn } from "@/lib/cn";
+import { withGridTransition } from "@/lib/grid-transition";
 import { useTheme } from "@/lib/theme";
 import { Brand } from "./Brand";
 import { NAV_ITEMS } from "./navigation";
@@ -22,6 +24,23 @@ function useLeaveDemo() {
 }
 
 /** Shown on every screen of the demo account. */
+/**
+ * Clicking a main section (Hoje, Água, Relatórios, Configurações) changes the
+ * screen behind the tile transition. Inside the same section (Dia/Semana tabs,
+ * the settings pages) and Ctrl/middle clicks it is a normal link.
+ */
+function useSectionClick() {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const section = (path) => path.split("/")[1];
+  return (to) => (e) => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (section(to) === section(pathname)) return;
+    e.preventDefault();
+    withGridTransition(() => navigate(to));
+  };
+}
+
 function DemoBanner() {
   const leave = useLeaveDemo();
   return (
@@ -108,6 +127,7 @@ function UserMenuButton({ items, initials, name }) {
 /** Desktop sections with a pill that slides to the active one. */
 function DesktopNav() {
   const { pathname } = useLocation();
+  const sectionClick = useSectionClick();
   const listRef = useRef(null);
   const [pill, setPill] = useState(null);
 
@@ -140,6 +160,7 @@ function DesktopNav() {
           <li key={item.to} className="relative">
             <NavLink
               to={item.to}
+              onClick={sectionClick(item.to)}
               className={({ isActive }) =>
                 cn(
                   "group flex items-center gap-2 rounded-[8px] px-3 py-1.5 text-[13.5px] font-[520] transition-colors duration-200",
@@ -167,9 +188,11 @@ export function AppLayout() {
   // Only a new section replays the entrance cascade.
   const section = pathname.split("/").slice(0, pathname.startsWith("/configuracoes") ? 3 : 2).join("/");
   const { user } = useAuth();
+  const sectionClick = useSectionClick();
   const mainRef = useRef(null);
   return (
     <div className="min-h-dvh">
+      <SnapCursor />
       {user?.demo && <DemoBanner />}
       <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-ink focus:px-3 focus:py-2 focus:text-paper">
         Pular para o conteúdo
@@ -177,7 +200,7 @@ export function AppLayout() {
 
       <header className="sticky top-0 z-30 border-b border-rule bg-bg">
         <div className="mx-auto flex h-14 max-w-[1080px] items-center gap-6 px-4 sm:px-6 md:h-16">
-          <NavLink to="/hoje" aria-label="nuCorre — hoje">
+          <NavLink to="/hoje" onClick={sectionClick("/hoje")} aria-label="nuCorre — hoje">
             <Brand />
           </NavLink>
 
@@ -204,6 +227,7 @@ export function AppLayout() {
             <li key={item.to}>
               <NavLink
                 to={item.to}
+                onClick={sectionClick(item.to)}
                 className={({ isActive }) =>
                   cn("relative flex h-[60px] flex-col items-center justify-center gap-1 text-[11.5px] font-[520] transition-colors active:bg-sunk", isActive ? "font-[620] text-ink" : "text-muted")
                 }

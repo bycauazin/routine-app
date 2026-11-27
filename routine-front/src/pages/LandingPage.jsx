@@ -242,15 +242,15 @@ const KINDS = [
 
 function Kinds() {
   return (
-    <section id="recursos" data-rail="Recursos" data-rail-icon="features" className="lazy-section bg-ink text-bg">
+    <section id="recursos" data-rail="Recursos" data-rail-icon="features" className="lazy-section border-y border-rule">
       <div className="mx-auto max-w-[1180px] px-5 py-16 sm:px-8 md:py-24">
         <h2 className={H2}>O que dá para cadastrar</h2>
-        <dl className="mt-10 border-t border-bg/20">
+        <dl className="mt-10 border-t border-rule">
           {KINDS.map(([kind, text, example], i) => (
-            <div key={kind} data-reveal style={{ "--reveal-delay": `${(i % 3) * 60}ms` }} className="grid gap-2 border-b border-bg/20 py-5 md:grid-cols-[200px_minmax(0,1fr)_auto] md:items-center md:gap-8">
+            <div key={kind} data-reveal style={{ "--reveal-delay": `${(i % 3) * 60}ms` }} className="grid gap-2 border-b border-rule py-5 md:grid-cols-[200px_minmax(0,1fr)_auto] md:items-center md:gap-8">
               <dt className="text-[17px] font-[650]">{kind}</dt>
-              <dd className="m-0 text-[14.5px] leading-relaxed text-bg/75">{text}</dd>
-              <dd className="m-0 w-fit rounded-[8px] bg-bg/10 px-3 py-1.5 text-[13px] font-[560] tabular-nums">{example}</dd>
+              <dd className="m-0 text-[14.5px] leading-relaxed text-muted">{text}</dd>
+              <dd className="m-0 w-fit rounded-[8px] bg-sunk px-3 py-1.5 text-[13px] font-[560] tabular-nums">{example}</dd>
             </div>
           ))}
         </dl>

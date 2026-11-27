@@ -36,33 +36,40 @@
       })();
     </script>
     <style>
-      /* Loading screen: the logo and a sliding bar while the bundle loads. It lives inside #root,
-         so React replaces it on the first render. Page colors, or navy when the opening follows. */
-      .boot { position: fixed; inset: 0; display: grid; place-items: center; align-content: center; gap: 26px; background: #faf3e8; }
-      .boot img { height: 96px; width: auto; animation: boot-breathe 1.6s ease-in-out infinite; }
-      .boot .dark { display: none; }
-      .boot-bar { position: relative; width: 120px; height: 3px; overflow: hidden; border-radius: 3px; background: rgb(37 59 87 / 0.12); }
-      .boot-bar::after { position: absolute; inset: 0; width: 40%; content: ""; border-radius: 3px; background: #f4a6c1; animation: boot-slide 1.1s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
-      html[data-theme="dark"] .boot { background: #16253a; }
-      html[data-theme="dark"] .boot .light, html[data-intro="on"] .boot .light { display: none; }
-      html[data-theme="dark"] .boot .dark, html[data-intro="on"] .boot .dark { display: block; }
-      html[data-theme="dark"] .boot-bar, html[data-intro="on"] .boot-bar { background: rgb(250 243 232 / 0.14); }
-      @keyframes boot-breathe { 50% { transform: scale(0.94); opacity: 0.8; } }
-      @keyframes boot-slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
-      @media (prefers-reduced-motion: reduce) { .boot img, .boot-bar::after { animation: none; } }
-      /* While the opening plays, its navy is already on screen (no flash of the page). */
-      html[data-intro="on"], html[data-intro="on"] body, html[data-intro="on"] .boot { background: #253b57; overflow: hidden; }
-      html[data-intro="on"] #root > :not(.intro):not(.boot) { visibility: hidden; }
+      /* Loading screen: the "Grade da semana" tiles (src/lib/grid-transition.js) already covering
+         the screen. #boot sits outside #root so React does not wipe it; finishBoot() clears the
+         tiles in the same diagonal wave, at least 0.5 s after the page opened. */
+      #boot { position: fixed; inset: 0; z-index: 200; display: grid; background: #faf3e8; }
+      #boot > span { transform: scale(1.08); }
+      html[data-theme="dark"] #boot { background: #16253a; }
+      /* While the opening plays, its navy is already on screen (no flash of the page or the tiles). */
+      html[data-intro="on"], html[data-intro="on"] body { background: #253b57; overflow: hidden; }
+      html[data-intro="on"] #root > :not(.intro) { visibility: hidden; }
+      html[data-intro] #boot { display: none; }
     </style>
   </head>
   <body>
-    <div id="root">
-      <div class="boot" role="status" aria-label="Carregando o nuCorre">
-        <img class="light" src="/logo-sticker-light.svg?v=1" alt="" width="45" height="96" />
-        <img class="dark" src="/logo-sticker.svg?v=1" alt="" width="45" height="96" />
-        <span class="boot-bar"></span>
-      </div>
-    </div>
+    <div id="root"></div>
+    <div id="boot" role="status" aria-label="Carregando o nuCorre"></div>
+    <script>
+      // Fill #boot with the tiles: same size, colors and diagonal stripes as grid-transition.js.
+      (function () {
+        var boot = document.getElementById("boot");
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        var dark = document.documentElement.dataset.theme === "dark";
+        var colors = dark
+          ? ["#f4a6c1", "#faf3e8", "#22405e", "#2b3a68", "#3d3159", "#2c3a4e"]
+          : ["#f4a6c1", "#253b57", "#dcebf7", "#d8e1f6", "#ecdff6", "#e6e2db"];
+        var cols = Math.ceil(innerWidth / 88), rows = Math.ceil(innerHeight / 88), html = "";
+        for (var r = 0; r < rows; r++)
+          for (var c = 0; c < cols; c++)
+            html += '<span style="background:' + colors[(((c - r) % 6) + 6) % 6] + '"></span>';
+        boot.style.gridTemplateColumns = "repeat(" + cols + ", 1fr)";
+        boot.style.gridTemplateRows = "repeat(" + rows + ", 1fr)";
+        boot.dataset.cols = cols;
+        boot.innerHTML = html;
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -219,12 +219,12 @@ export function DayView({ date, onDate }) {
                     key={option.key}
                     type="button"
                     onClick={() => setDialog({ type: option.key })}
-                    className="sheet flex items-center gap-3 px-3.5 py-3 text-left transition-colors hover:bg-sunk focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+                    className="sheet flex min-w-0 flex-col items-center gap-1.5 px-2 py-3 text-center transition-colors sm:flex-row sm:gap-3 sm:px-3.5 sm:text-left hover:bg-sunk focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
                   >
                     <span className="grid size-8 shrink-0 place-items-center rounded-full bg-selected text-accent-text">
                       <Icon className="size-4" aria-hidden />
                     </span>
-                    <span className="block text-[14px] font-[620]">{option.label}</span>
+                    <span className="block max-w-full truncate text-[14px] font-[620]">{option.label}</span>
                   </button>
                 );
               })}

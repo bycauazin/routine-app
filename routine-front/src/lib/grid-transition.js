@@ -74,3 +74,38 @@ export async function withGridTransition(change) {
   }
   return undefined;
 }
+
+/** Shortest time the loading tiles stay on screen, counted from when the page started opening. */
+const BOOT_MIN_MS = 500;
+
+/**
+ * Clears the loading screen (#boot in index.html: the same tiles, already
+ * covering the screen) in the diagonal wave, once the first page is ready and
+ * at least BOOT_MIN_MS after the page started opening. With the opening
+ * animation playing or reduced motion it just goes away.
+ */
+export async function finishBoot() {
+  const boot = document.getElementById("boot");
+  if (!boot) return;
+  if (document.documentElement.hasAttribute("data-intro") || reduced() || !boot.children.length) {
+    boot.remove();
+    return;
+  }
+  const wait = BOOT_MIN_MS - performance.now();
+  if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+  await nextPaint();
+  const tiles = [...boot.children];
+  const cols = Number(boot.dataset.cols) || 1;
+  const rows = Math.ceil(tiles.length / cols);
+  tiles.forEach((tile, i) => {
+    const c = i % cols;
+    tile.dataset.delay = String(((c + (i - c) / cols) / Math.max(1, cols + rows - 2)) * WAVE);
+  });
+  boot.style.background = "transparent";
+  boot.style.pointerEvents = "none";
+  try {
+    await wave(tiles, "scale(1.08)", "scale(0)", OUT, "ease-in");
+  } finally {
+    boot.remove();
+  }
+}

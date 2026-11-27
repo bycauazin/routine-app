@@ -13,7 +13,9 @@ A [página inicial](src/pages/README.md) oferece **Entrar** e **Ver demonstraç�
 - Logo: modelo adesivo oficial do bycauazin, gerado por `../../landing-page/brand/make-logo.mjs` (contorno `#faf3e8`, fita `#253b57`, interior `#f4a6c1`; na página clara contorno e fita trocam). Arquivos: `public/logo-sticker.svg`, `public/logo-sticker-light.svg` e `public/logo.svg`/`favicon.svg` (logo num quadrado azul-marinho). Ao trocar os SVGs, suba o `?v=` deles.
 - Componentes em [src/components/layout/Brand.jsx](src/components/layout/Brand.jsx): `BrandMark`, `BrandWord` (nuCorre em Inter 800) e `BrandSignature` (`<bycauazin/>` em Major Mono Display).
 - Abertura: [SiteIntro.jsx](src/components/layout/SiteIntro.jsx), igual à do portfólio e do Cacau. Toca em todo carregamento de `/` e uma vez por sessão nas outras páginas. Nunca toca com movimento reduzido. `?intro` força.
-- Tela de carregamento: em [index.html](index.html), dentro de `#root` (logo e barra deslizando). O React a substitui no primeiro render.
+- Tela de carregamento: os quadrados da transição "Grade da semana" já cobrindo a tela (`#boot` em [index.html](index.html), fora do `#root`). `finishBoot()` em [src/lib/grid-transition.js](src/lib/grid-transition.js) os desfaz na diagonal quando a primeira tela está pronta, no mínimo 0,5 s depois da abertura da página. Com a abertura animada tocando ou movimento reduzido, só some.
+- Transição "Grade da semana": da página pública para login/cadastro/app (`GridLink`) e entre as seções do menu do app (Hoje, Água, Relatórios, Configurações). Abas dentro da mesma seção (Dia/Semana/Simular, páginas de Configurações) trocam sem transição.
+- Cursor "Encaixe" ([snap-cursor.jsx](src/pages/landing/snap-cursor.jsx) + `snap-cursor.css`): nas páginas públicas e dentro do app (inclusive na demonstração). Só com mouse.
 
 ## PWA (app instalável)
 

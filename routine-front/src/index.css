@@ -374,6 +374,28 @@ dialog[open]::backdrop {
   animation: backdrop-in 220ms ease both;
 }
 
+/* Week grids (Semana and Simular): hours + 7 days. On a phone exactly three days
+   fit the box and a swipe stops on a whole day; from md up all seven share 50rem+. */
+.week-grid {
+  grid-template-columns: 3.75rem repeat(7, minmax(0, 1fr));
+  min-width: calc(3.75rem + (100% - 3.75rem) * 7 / 3);
+}
+.week-scroll {
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 3.75rem;
+}
+.week-grid > [data-day-col] {
+  scroll-snap-align: start;
+}
+@media (min-width: 48rem) {
+  .week-grid {
+    min-width: 50rem;
+  }
+  .week-scroll {
+    scroll-snap-type: none;
+  }
+}
+
 @layer utilities {
   .select-chevron {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b95a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");

@@ -9,13 +9,14 @@ import { useToast } from "@/components/ui/Toast";
 import { WeekdayPicker } from "@/features/settings/RoutineSettings";
 import { ChoiceCards } from "@/features/today/ItemDialogs";
 import { StepsEditor, fromEditorSteps, toEditorSteps } from "@/features/today/StepsEditor";
+import { PeriodBand } from "@/features/today/PeriodBand";
 import { TimeFields } from "@/features/today/TimeFields";
 import { api } from "@/lib/api";
-import { layoutDay } from "@/lib/agenda";
+import { bandInset, layoutDay, periodBands } from "@/lib/agenda";
 import { CATEGORY_TINT } from "@/lib/categories";
 import { cn } from "@/lib/cn";
 import { formatDate, shiftDate, today } from "@/lib/dates";
-import { PERIODS, formatMinute, formatRange, timeBody, timeValues } from "@/lib/minutes";
+import { formatMinute, formatRange, timeBody, timeValues } from "@/lib/minutes";
 import { hoursByCategory, moveBlock, newKey, overlaps, removeDay, snap } from "@/lib/simulation";
 import { useApi } from "@/lib/use-api";
 import { WEEKDAY_SHORT } from "@/lib/weekdays";
@@ -198,20 +199,28 @@ export function SimulationsView() {
     for (const b of blocks ?? []) for (const d of b.weekdays) map.get(d)?.push({ ...b, id: `${b.key}:${d}`, category: categories?.find((c) => c.id === b.categoryId) ?? null });
     return map;
   }, [blocks, categories]);
+  const bandsByDay = useMemo(() => new Map(DAYS.map((d) => [d, periodBands(byDay.get(d))])), [byDay]);
 
   function minuteAt(column, clientY) {
     const rect = column.getBoundingClientRect();
     return snap(((clientY - rect.top) / HOUR) * 60);
   }
 
+  // Dragging is for the mouse only. A finger is not precise enough and has to
+  // scroll the grid, so on touch a card just opens for editing (time typed in).
   function onCardDown(e, block, day) {
     e.stopPropagation();
-    e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = { key: block.key, day, x: e.clientX, y: e.clientY, offset: e.clientY - e.currentTarget.getBoundingClientRect().top, moved: false };
+    const touch = e.pointerType !== "mouse";
+    if (!touch) e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { key: block.key, day, x: e.clientX, y: e.clientY, offset: e.clientY - e.currentTarget.getBoundingClientRect().top, moved: false, touch };
   }
   function onCardMove(e) {
     const d = drag.current;
     if (!d) return;
+    if (d.touch) {
+      if (Math.abs(e.clientX - d.x) + Math.abs(e.clientY - d.y) > 10) drag.current = null;
+      return;
+    }
     if (Math.abs(e.clientX - d.x) + Math.abs(e.clientY - d.y) > 6) d.moved = true;
     if (d.moved) e.currentTarget.style.transform = `translate(${e.clientX - d.x}px, ${e.clientY - d.y}px)`;
   }
@@ -220,7 +229,7 @@ export function SimulationsView() {
     drag.current = null;
     e.currentTarget.style.transform = "";
     if (!d) return;
-    if (!d.moved) return setDialog({ type: "block", block, day });
+    if (!d.moved || d.touch) return setDialog({ type: "block", block, day });
     e.currentTarget.style.visibility = "hidden";
     const target = document.elementFromPoint(e.clientX, e.clientY)?.closest("[data-sim-day]");
     e.currentTarget.style.visibility = "";
@@ -270,7 +279,8 @@ export function SimulationsView() {
   if (error && !simulations) return <ErrorState error={error} onRetry={reload} />;
   if (loading && !simulations) return <Skeleton className="h-[60dvh]" />;
 
-  const untimed = (blocks ?? []).filter((b) => b.startMinute === null);
+  // Parts of the day are bands in the grid; only blocks with no time at all sit under the day name.
+  const untimed = (blocks ?? []).filter((b) => b.startMinute === null && !b.period);
 
   return (
     <div className="flex flex-col gap-4">
@@ -280,7 +290,8 @@ export function SimulationsView() {
             {simulations.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </Select>
         )}
-        <Button variant="secondary" onClick={() => setDialog({ type: "new" })}><Plus className="size-4" aria-hidden /> Nova simulação</Button>
+        <div className="flex items-center gap-2">
+        <Button variant="secondary" onClick={() => setDialog({ type: "new" })}><Plus className="size-4" aria-hidden /> Nova<span className="hidden sm:inline"> simulação</span></Button>
         {selected && (
           <>
             <Button onClick={() => setDialog({ type: "apply" })}><CalendarCheck2 className="size-4" aria-hidden /> Usar esta rotina</Button>
@@ -297,6 +308,7 @@ export function SimulationsView() {
             />
           </>
         )}
+        </div>
       </header>
 
       {!selected && (
@@ -310,16 +322,25 @@ export function SimulationsView() {
 
       {selected && blocks && (
         <>
-          <p className="text-[13px] text-muted">Toque num horário vazio para criar um bloco, toque num bloco para editar, arraste para mudar a hora ou o dia. Salva sozinho.</p>
-          <div ref={scrollRef} className="sheet relative max-h-[calc(100dvh-16rem)] min-h-[24rem] overflow-auto">
-            <div className="grid min-w-[50rem]" style={{ gridTemplateColumns: "3.75rem repeat(7, minmax(6.5rem, 1fr))" }}>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="min-w-0 flex-1 text-[13px] text-muted">
+              <span className="pointer-coarse:hidden">Clique num horário vazio para criar um bloco, clique num bloco para editar, arraste para mudar a hora ou o dia.</span>
+              <span className="hidden pointer-coarse:inline">Toque em “Novo bloco” ou num bloco para escrever o nome, os dias e o horário. Deslize para ver os outros dias.</span>
+              {" "}Salva sozinho.
+            </p>
+            <Button size="sm" onClick={() => setDialog({ type: "block", block: { weekdays: [new Date().getDay()], startMinute: 8 * 60, endMinute: 9 * 60, period: null }, day: new Date().getDay() })}>
+              <Plus className="size-4" aria-hidden /> Novo bloco
+            </Button>
+          </div>
+          <div ref={scrollRef} className="sheet week-scroll relative max-h-[calc(100dvh-16rem)] min-h-[24rem] overflow-auto">
+            <div className="week-grid grid">
               <div className="sticky left-0 top-0 z-30 border-b border-rule bg-paper" />
               {DAYS.map((d) => (
                 <div key={d} className="sticky top-0 z-20 flex flex-col gap-1 border-b border-l border-rule bg-paper px-2 py-2.5">
                   <span className="text-[13px] font-[600] uppercase tracking-[0.04em] text-muted">{WEEKDAY_SHORT[d]}</span>
                   {untimed.filter((b) => b.weekdays.includes(d)).map((b) => (
                     <button key={b.key} type="button" onClick={() => setDialog({ type: "block", block: b, day: d })} className="truncate rounded-[6px] bg-sunk px-1.5 py-0.5 text-left text-[12px] font-[560]">
-                      {b.period ? `${PERIODS[b.period].label} · ` : ""}{b.name}
+                      {b.name}
                     </button>
                   ))}
                 </div>
@@ -333,6 +354,7 @@ export function SimulationsView() {
                 <div
                   key={d}
                   data-sim-day={d}
+                  data-day-col
                   className="relative cursor-copy border-l border-rule"
                   style={{ height: 24 * HOUR, backgroundImage: "linear-gradient(to bottom, var(--rule) 1px, transparent 1px)", backgroundSize: `100% ${HOUR}px` }}
                   onClick={(e) => {
@@ -341,7 +363,12 @@ export function SimulationsView() {
                     setDialog({ type: "block", block: { weekdays: [d], startMinute: start, endMinute: Math.min(1440, start + 60), period: null }, day: d });
                   }}
                 >
-                  {layoutDay(byDay.get(d)).map(({ item, start, end, column, columns }) => (
+                  {bandsByDay.get(d).map((band) => (
+                    <PeriodBand key={band.item.id} band={band} hour={HOUR} onOpen={() => setDialog({ type: "block", block: band.item, day: d })} />
+                  ))}
+                  {layoutDay(byDay.get(d)).map(({ item, start, end, column, columns }) => {
+                    const inset = bandInset(bandsByDay.get(d), start, end);
+                    return (
                     <div
                       key={item.id}
                       role="button"
@@ -349,15 +376,17 @@ export function SimulationsView() {
                       onPointerDown={(e) => onCardDown(e, item, d)}
                       onPointerMove={onCardMove}
                       onPointerUp={(e) => onCardUp(e, item, d)}
+                      onPointerCancel={() => { drag.current = null; }}
                       onKeyDown={(e) => e.key === "Enter" && setDialog({ type: "block", block: item, day: d })}
                       title={`${formatRange(item.startMinute, item.endMinute)} · ${item.name}`}
-                      className={cn("absolute z-10 cursor-grab touch-none select-none overflow-hidden rounded-[8px] border border-ink/10 px-2 py-1 text-[13px] leading-snug text-ink active:cursor-grabbing", item.category ? CATEGORY_TINT[item.category.colorKey] : "bg-sunk")}
-                      style={{ top: (start / 60) * HOUR + 1, height: ((end - start) / 60) * HOUR - 2, left: `calc(${(column / columns) * 100}% + 2px)`, width: `calc(${100 / columns}% - 4px)` }}
+                      className={cn("absolute z-[1] cursor-pointer select-none pointer-fine:cursor-grab pointer-fine:touch-none pointer-fine:active:cursor-grabbing overflow-hidden rounded-[8px] border border-ink/10 px-2 py-1 text-[13px] leading-snug text-ink", item.category ? CATEGORY_TINT[item.category.colorKey] : "bg-sunk")}
+                      style={{ top: (start / 60) * HOUR + 1, height: ((end - start) / 60) * HOUR - 2, left: `calc(${inset}px + (100% - ${inset}px) * ${column / columns} + 2px)`, width: `calc((100% - ${inset}px) / ${columns} - 4px)` }}
                     >
                       <span className="block truncate font-[620]">{item.name}</span>
                       {end - start >= 45 && <span className="num block truncate text-[12.5px] text-ink/70">{formatRange(item.startMinute, item.endMinute)}</span>}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ))}
             </div>

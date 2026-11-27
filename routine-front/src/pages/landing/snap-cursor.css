@@ -1,0 +1,48 @@
+/* ───── "Encaixe" cursor (see snap-cursor.jsx): only on with a real mouse ───── */
+.snap-cursor,
+.snap-cursor * {
+  cursor: none !important;
+}
+.snap-cursor :is(input, textarea, [contenteditable]) {
+  cursor: text !important;
+}
+.snap-cursor select {
+  cursor: default !important;
+}
+.snap-ring,
+.snap-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 150;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  will-change: transform;
+}
+.snap-ring[data-shown="true"],
+.snap-dot[data-shown="true"] {
+  opacity: 1;
+}
+.snap-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--ink);
+  /* a thin outline in the page color: the dot stays visible over the navy band too */
+  box-shadow: 0 0 0 1.5px var(--bg);
+}
+.snap-ring {
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--accent-text);
+  border-radius: 999px;
+  transition:
+    opacity 200ms ease,
+    border-radius 250ms var(--ease-out-soft),
+    border-color 200ms ease;
+}
+.snap-ring[data-snapped="true"] {
+  border-color: var(--accent-text);
+}
+

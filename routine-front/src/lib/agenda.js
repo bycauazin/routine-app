@@ -1,3 +1,5 @@
+import { PERIODS } from "./minutes";
+
 /**
  * Places the timed items of one day of the week grid like a calendar: each
  * card from its start to its end, and items at the same time side by side
@@ -42,3 +44,26 @@ export function layoutDay(items, minLength = MIN_CARD_MINUTES) {
   if (group.length) close();
   return placed;
 }
+
+/** px the timed cards step in from the left over a band, so its edge stays in sight. */
+export const BAND_INSET = 12;
+
+/**
+ * Items for a part of the day ("de manhã") as bands on the week grid: the
+ * whole period tall (Manhã 06–12, Tarde 12–18, Noite 18–24). Two items in the
+ * same period share its width.
+ */
+export function periodBands(items) {
+  const byPeriod = new Map();
+  for (const item of items) {
+    if (!item.period || !PERIODS[item.period]) continue;
+    if (!byPeriod.has(item.period)) byPeriod.set(item.period, []);
+    byPeriod.get(item.period).push(item);
+  }
+  return [...byPeriod].flatMap(([period, list]) =>
+    list.map((item, index) => ({ item, start: PERIODS[period].start, end: PERIODS[period].end, index, count: list.length })),
+  );
+}
+
+/** Left inset for a timed card: BAND_INSET when it happens during a band. */
+export const bandInset = (bands, start, end) => (bands.some((b) => start < b.end && end > b.start) ? BAND_INSET : 0);

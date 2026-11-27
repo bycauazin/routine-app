@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
 import { AuthProvider } from "@/auth/AuthProvider";
 import { RequireAuth } from "@/auth/RequireAuth";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Spinner } from "@/components/ui/States";
 import { ToastProvider } from "@/components/ui/Toast";
+import { finishBoot } from "@/lib/grid-transition";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 
 /** Loads a route's component on demand (one chunk per screen). */
@@ -54,7 +56,25 @@ const router = createBrowserRouter([
   },
 ]);
 
+/** Clears the loading tiles once the first screen (its lazy chunk included) is ready. */
+function useFinishBoot() {
+  useEffect(() => {
+    const ready = (state) => state.initialized && state.navigation.state === "idle";
+    if (ready(router.state)) {
+      finishBoot();
+      return undefined;
+    }
+    const unsubscribe = router.subscribe((state) => {
+      if (!ready(state)) return;
+      unsubscribe();
+      finishBoot();
+    });
+    return unsubscribe;
+  }, []);
+}
+
 export function App() {
+  useFinishBoot();
   return (
     <ToastProvider>
       <AuthProvider>

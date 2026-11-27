@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import "./snap-cursor.css";
 
 /** What the ring snaps to. Text fields keep the normal text cursor. */
 const TARGETS = 'a, button, [role="button"], label[for], summary, [data-cursor]';
